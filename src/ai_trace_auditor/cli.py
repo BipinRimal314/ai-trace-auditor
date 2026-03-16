@@ -581,6 +581,64 @@ def _export_summary_json(projects: list, output: Path) -> None:
 
 
 @app.command()
+def workflow(
+    path: Annotated[
+        Optional[Path],
+        typer.Argument(help="Path to a project traces directory"),
+    ] = None,
+    project: Annotated[
+        Optional[str],
+        typer.Option("--project", "-p", help="Filter by project name"),
+    ] = None,
+) -> None:
+    """Analyze conversation efficiency, prompt patterns, and file churn.
+
+    Shows token efficiency, edit convergence, correction rates, optimal
+    session length, and files with the highest iteration count.
+    """
+    from ai_trace_auditor.insights.projects import discover_projects, get_strip_prefix
+    from ai_trace_auditor.insights.renderer import render_workflow
+    from ai_trace_auditor.insights.workflow import analyze_workflow
+
+    if path is not None:
+        if not path.exists() or not path.is_dir():
+            console.print(f"[red]Error:[/red] {path} is not a valid directory")
+            raise typer.Exit(code=2)
+        try:
+            report = analyze_workflow(path)
+            render_workflow(report, console)
+        except ValueError as e:
+            console.print(f"[red]Error:[/red] {e}")
+            raise typer.Exit(code=2) from e
+        return
+
+    # Auto-discover
+    projects = discover_projects()
+    if not projects:
+        console.print("[red]Error:[/red] No Claude Code traces found")
+        raise typer.Exit(code=2)
+
+    if project:
+        query = project.lower()
+        projects = [p for p in projects if query in p.display_name.lower()]
+        if not projects:
+            console.print(f"[yellow]No projects matching '{project}'[/yellow]")
+            raise typer.Exit(code=0)
+    else:
+        # Default to largest project
+        projects = projects[:1]
+        console.print(f"[dim]Analyzing largest project: {projects[0].display_name} (use -p to select)[/dim]")
+
+    for proj in projects:
+        console.print(f"\n[bold magenta]Project:[/bold magenta] {proj.display_name}")
+        try:
+            report = analyze_workflow(proj.dir_path)
+            render_workflow(report, console)
+        except ValueError as e:
+            console.print(f"  [dim]{e}[/dim]")
+
+
+@app.command()
 def health(
     session_id: Annotated[
         Optional[str],

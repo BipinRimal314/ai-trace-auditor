@@ -10,6 +10,7 @@ from rich.text import Text
 
 from ai_trace_auditor.insights.analyzer import InsightsReport
 from ai_trace_auditor.insights.health import SessionHealth
+from ai_trace_auditor.insights.workflow import WorkflowReport
 
 
 def render_insights(
@@ -278,4 +279,128 @@ def render_health_summary(
                     break
             if len(seen) >= 5:
                 break
+    console.print()
+
+
+def render_workflow(report: WorkflowReport, console: Console | None = None) -> None:
+    """Render workflow optimization report."""
+    if console is None:
+        console = Console()
+
+    console.print()
+    console.print(Panel(
+        f"[bold]Workflow Optimization Report[/bold]\n"
+        f"{len(report.sessions)} sessions analyzed",
+        border_style="magenta",
+    ))
+
+    # Efficiency overview
+    table = Table(title="Efficiency Metrics", border_style="dim")
+    table.add_column("Metric", style="bold")
+    table.add_column("Value", justify="right")
+    table.add_column("Assessment")
+
+    tr = report.avg_token_ratio
+    tr_color = "green" if tr > 0.003 else "yellow" if tr > 0.001 else "red"
+    table.add_row(
+        "Token efficiency",
+        f"{tr:.4f}",
+        f"[{tr_color}]{'Good' if tr > 0.003 else 'Low' if tr > 0.001 else 'Very low'}[/{tr_color}] (output/input ratio)",
+    )
+
+    ts = report.avg_tool_success
+    ts_color = "green" if ts > 0.95 else "yellow" if ts > 0.85 else "red"
+    table.add_row(
+        "Tool success rate",
+        f"{ts:.1%}",
+        f"[{ts_color}]{'Excellent' if ts > 0.95 else 'Good' if ts > 0.85 else 'Needs attention'}[/{ts_color}]",
+    )
+
+    ae = report.avg_edits_per_file
+    ae_color = "green" if ae < 3 else "yellow" if ae < 6 else "red"
+    table.add_row(
+        "Avg edits/file",
+        f"{ae:.1f}",
+        f"[{ae_color}]{'Focused' if ae < 3 else 'Iterative' if ae < 6 else 'High churn'}[/{ae_color}]",
+    )
+
+    console.print(table)
+    console.print()
+
+    # Prompt patterns
+    ps = report.prompt_stats
+    if ps.total_prompts > 0:
+        table = Table(title="Prompt Patterns", border_style="dim")
+        table.add_column("Metric", style="bold")
+        table.add_column("Value", justify="right")
+
+        table.add_row("Total prompts", f"{ps.total_prompts:,}")
+        table.add_row("Avg length", f"{ps.avg_length_chars:.0f} chars")
+        table.add_row("Short (< 50 chars)", f"{ps.short_prompts} ({ps.short_prompts/ps.total_prompts*100:.0f}%)")
+        table.add_row("Medium (50-200)", f"{ps.medium_prompts} ({ps.medium_prompts/ps.total_prompts*100:.0f}%)")
+        table.add_row("Long (200+)", f"{ps.long_prompts} ({ps.long_prompts/ps.total_prompts*100:.0f}%)")
+        table.add_row("Questions (?)", f"{ps.question_count} ({ps.question_ratio:.0%})")
+        table.add_row("Commands", f"{ps.command_count}")
+        cr_color = "green" if ps.correction_ratio < 0.05 else "yellow" if ps.correction_ratio < 0.1 else "red"
+        table.add_row("Corrections", f"[{cr_color}]{ps.correction_count} ({ps.correction_ratio:.1%})[/{cr_color}]")
+
+        console.print(table)
+        console.print()
+
+    # Session length analysis
+    if report.length_buckets:
+        table = Table(title="Performance by Session Length", border_style="dim")
+        table.add_column("Duration")
+        table.add_column("Sessions", justify="right")
+        table.add_column("Token Eff.", justify="right")
+        table.add_column("Tool Success", justify="right")
+        table.add_column("Edits/File", justify="right")
+        table.add_column("Corrections", justify="right")
+
+        for b in report.length_buckets:
+            is_optimal = b.label == report.optimal_length
+            prefix = "[bold green]" if is_optimal else ""
+            suffix = " ★[/bold green]" if is_optimal else ""
+            table.add_row(
+                f"{prefix}{b.label}{suffix}",
+                str(b.session_count),
+                f"{b.avg_token_ratio:.4f}",
+                f"{b.avg_tool_success:.1%}",
+                f"{b.avg_edits_per_file:.1f}",
+                f"{b.avg_corrections:.1f}",
+            )
+
+        console.print(table)
+        console.print()
+
+    # File churn
+    if report.high_churn_files:
+        table = Table(title="High-Churn Files", border_style="dim")
+        table.add_column("File", max_width=50)
+        table.add_column("Edits", justify="right")
+        table.add_column("Sessions", justify="right")
+        table.add_column("Avg/Session", justify="right")
+        table.add_column("Max", justify="right")
+        table.add_column("Reads", justify="right")
+
+        for f in report.high_churn_files[:10]:
+            path = f.path
+            if len(path) > 50:
+                path = "..." + path[-47:]
+            table.add_row(
+                path, str(f.total_edits), str(f.session_count),
+                f"{f.avg_edits_per_session:.1f}", str(f.max_edits_in_session),
+                str(f.total_reads),
+            )
+
+        console.print(table)
+        console.print()
+
+    # Recommendations
+    if report.recommendations:
+        console.print("[bold]Recommendations[/bold]")
+        console.print()
+        for i, rec in enumerate(report.recommendations, 1):
+            console.print(Panel(rec, title=f"[bold]#{i}[/bold]", border_style="magenta", width=80))
+
     console.print()
