@@ -290,6 +290,109 @@ def list_requirements(
 
 
 @app.command()
+def insights(
+    path: Annotated[
+        Optional[Path],
+        typer.Argument(help="Path to Claude Code traces directory"),
+    ] = None,
+    top_sessions: Annotated[
+        int, typer.Option("--top", help="Number of top sessions to show")
+    ] = 10,
+    json_output: Annotated[
+        Optional[Path], typer.Option("--json", help="Export insights as JSON")
+    ] = None,
+) -> None:
+    """Analyze Claude Code usage patterns and workflow insights.
+
+    Defaults to ~/.claude/projects/ if no path is given. Discovers all
+    project directories and analyzes their session traces.
+    """
+    from ai_trace_auditor.insights.analyzer import analyze_claude_code_dir
+    from ai_trace_auditor.insights.renderer import render_insights
+
+    if path is None:
+        # Auto-discover Claude Code projects
+        claude_dir = Path.home() / ".claude" / "projects"
+        if not claude_dir.exists():
+            console.print("[red]Error:[/red] ~/.claude/projects/ not found. Provide a path.")
+            raise typer.Exit(code=2)
+
+        # Find all project directories with .jsonl files
+        project_dirs = [
+            d for d in claude_dir.iterdir()
+            if d.is_dir() and list(d.glob("*.jsonl"))
+        ]
+        if not project_dirs:
+            console.print("[yellow]No Claude Code traces found in ~/.claude/projects/[/yellow]")
+            raise typer.Exit(code=0)
+
+        # Analyze each project directory
+        for proj_dir in sorted(project_dirs):
+            # Extract readable project name from directory name
+            proj_name = proj_dir.name.replace("-Users-", "/Users/").replace("-", "/")
+            console.print(f"\n[bold blue]Project:[/bold blue] {proj_name}")
+
+            try:
+                strip_prefix = ""
+                # Try to reconstruct the original path for stripping
+                parts = proj_dir.name.split("-")
+                if parts[0] == "" and len(parts) > 1:
+                    strip_prefix = "/" + "/".join(parts[1:]).replace("-", "/") + "/"
+                    # This is approximate; the actual path uses - as separator
+
+                report = analyze_claude_code_dir(proj_dir, strip_prefix="")
+                render_insights(report, console)
+
+                if json_output:
+                    _export_insights_json(report, json_output, proj_dir.name)
+
+            except ValueError as e:
+                console.print(f"  [dim]{e}[/dim]")
+    else:
+        if not path.exists():
+            console.print(f"[red]Error:[/red] {path} does not exist")
+            raise typer.Exit(code=2)
+
+        if not path.is_dir():
+            console.print("[red]Error:[/red] insights requires a directory of .jsonl files")
+            raise typer.Exit(code=2)
+
+        try:
+            report = analyze_claude_code_dir(path)
+            render_insights(report, console)
+            if json_output:
+                _export_insights_json(report, json_output, path.name)
+        except ValueError as e:
+            console.print(f"[red]Error:[/red] {e}")
+            raise typer.Exit(code=2) from e
+
+
+def _export_insights_json(report: "InsightsReport", output: Path, project: str) -> None:
+    """Export insights report as JSON."""
+    import json as json_mod
+    from dataclasses import asdict
+
+    data = {
+        "project": project,
+        "generated_at": report.generated_at.isoformat(),
+        "total_sessions": report.total_sessions,
+        "total_ai_calls": report.total_ai_calls,
+        "total_input_tokens": report.total_input_tokens,
+        "total_output_tokens": report.total_output_tokens,
+        "date_range": list(report.date_range),
+        "cost": asdict(report.cost),
+        "models": report.models,
+        "tool_usage": [asdict(t) for t in report.tool_usage],
+        "sessions": [asdict(s) for s in report.sessions[:20]],
+        "hourly_activity": [asdict(h) for h in report.hourly_activity],
+        "workflow_patterns": [asdict(p) for p in report.workflow_patterns],
+        "bash_commands": report.bash_commands,
+    }
+    output.write_text(json_mod.dumps(data, indent=2), encoding="utf-8")
+    console.print(f"JSON insights written to [bold]{output}[/bold]")
+
+
+@app.command()
 def version() -> None:
     """Print version information."""
     console.print(f"ai-trace-auditor v{ai_trace_auditor.__version__}")
