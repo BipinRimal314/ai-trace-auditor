@@ -11,7 +11,11 @@ from rich.text import Text
 from ai_trace_auditor.insights.analyzer import InsightsReport
 
 
-def render_insights(report: InsightsReport, console: Console | None = None) -> None:
+def render_insights(
+    report: InsightsReport,
+    console: Console | None = None,
+    tz_label: str = "UTC",
+) -> None:
     """Render an InsightsReport to the terminal with Rich formatting."""
     if console is None:
         console = Console()
@@ -21,7 +25,7 @@ def render_insights(report: InsightsReport, console: Console | None = None) -> N
     _render_sessions(report, console)
     _render_tools(report, console)
     _render_files(report, console)
-    _render_activity(report, console)
+    _render_activity(report, console, tz_label)
     _render_bash(report, console)
     _render_patterns(report, console)
 
@@ -121,8 +125,8 @@ def _render_files(report: InsightsReport, console: Console) -> None:
     console.print()
 
 
-def _render_activity(report: InsightsReport, console: Console) -> None:
-    console.print("[bold]Hourly Activity (UTC)[/bold]")
+def _render_activity(report: InsightsReport, console: Console, tz_label: str = "UTC") -> None:
+    console.print(f"[bold]Hourly Activity ({tz_label})[/bold]")
 
     max_count = max(b.count for b in report.hourly_activity) if report.hourly_activity else 1
     for b in report.hourly_activity:

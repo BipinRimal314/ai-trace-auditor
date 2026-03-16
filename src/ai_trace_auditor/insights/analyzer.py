@@ -112,8 +112,19 @@ PRICE_CACHE_CREATE_PER_M = 18.75  # 25% premium
 def analyze_claude_code_dir(
     directory: Path,
     strip_prefix: str = "",
+    since: datetime | None = None,
+    until: datetime | None = None,
+    tz_offset_hours: float = 0.0,
 ) -> InsightsReport:
-    """Analyze all Claude Code .jsonl files in a directory."""
+    """Analyze all Claude Code .jsonl files in a directory.
+
+    Args:
+        directory: Path to a project's trace directory.
+        strip_prefix: Path prefix to strip from file paths in reports.
+        since: Only include sessions with activity on or after this date.
+        until: Only include sessions with activity before this date.
+        tz_offset_hours: Offset from UTC for hourly activity display.
+    """
     files = sorted(directory.glob("*.jsonl"))
     if not files:
         raise ValueError(f"No .jsonl files found in {directory}")
@@ -139,14 +150,27 @@ def analyze_claude_code_dir(
             fpath, strip_prefix, models_counter, tool_counter,
             stop_counter, hourly, read_files, edit_files,
             write_files, bash_cmds, all_dates,
+            tz_offset_hours=tz_offset_hours,
         )
-        if session:
-            all_sessions.append(session)
-            total_calls += session.ai_calls
-            total_input += session.input_tokens
-            total_output += session.output_tokens
-            total_cache_read += session.cache_read_tokens
-            total_cache_create += session.cache_create_tokens
+        if session is None:
+            continue
+
+        # Apply date filter
+        if since and session.date != "?":
+            session_date = datetime.strptime(session.date, "%Y-%m-%d")
+            if session_date < since.replace(tzinfo=None):
+                continue
+        if until and session.date != "?":
+            session_date = datetime.strptime(session.date, "%Y-%m-%d")
+            if session_date >= until.replace(tzinfo=None):
+                continue
+
+        all_sessions.append(session)
+        total_calls += session.ai_calls
+        total_input += session.input_tokens
+        total_output += session.output_tokens
+        total_cache_read += session.cache_read_tokens
+        total_cache_create += session.cache_create_tokens
 
     if not all_sessions:
         raise ValueError(f"No AI calls found in {directory}")
@@ -260,6 +284,7 @@ def _analyze_session(
     write_files: Counter[str],
     bash_cmds: Counter[str],
     all_dates: list[datetime],
+    tz_offset_hours: float = 0.0,
 ) -> SessionSummary | None:
     """Analyze a single session file."""
     calls = 0
@@ -273,6 +298,8 @@ def _analyze_session(
     last_ts: datetime | None = None
     session_id = fpath.stem
 
+    detected_prefix = ""
+
     try:
         with open(fpath, encoding="utf-8") as f:
             for line in f:
@@ -281,6 +308,14 @@ def _analyze_session(
                     continue
                 obj = json.loads(line)
 
+                # Auto-detect strip prefix from session cwd
+                if not strip_prefix and not detected_prefix:
+                    cwd = obj.get("cwd")
+                    if cwd:
+                        detected_prefix = cwd if cwd.endswith("/") else cwd + "/"
+
+                effective_prefix = strip_prefix or detected_prefix
+
                 ts = _parse_ts(obj.get("timestamp"))
                 if ts:
                     all_dates.append(ts)
@@ -288,7 +323,8 @@ def _analyze_session(
                         first_ts = ts
                     if last_ts is None or ts > last_ts:
                         last_ts = ts
-                    hourly[ts.hour] += 1
+                    adjusted = ts + timedelta(hours=tz_offset_hours)
+                    hourly[adjusted.hour] += 1
 
                 if obj.get("type") != "assistant":
                     continue
@@ -328,8 +364,8 @@ def _analyze_session(
                             continue
 
                         fp = tool_input.get("file_path", "")
-                        if fp and strip_prefix:
-                            fp = fp.replace(strip_prefix, "")
+                        if fp and effective_prefix:
+                            fp = fp.replace(effective_prefix, "")
 
                         if name == "Read" and fp:
                             read_files[fp] += 1

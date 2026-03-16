@@ -293,87 +293,249 @@ def list_requirements(
 def insights(
     path: Annotated[
         Optional[Path],
-        typer.Argument(help="Path to Claude Code traces directory"),
+        typer.Argument(help="Path to a specific project traces directory"),
     ] = None,
-    top_sessions: Annotated[
-        int, typer.Option("--top", help="Number of top sessions to show")
-    ] = 10,
+    project: Annotated[
+        Optional[str],
+        typer.Option("--project", "-p", help="Filter to a project by name (partial match)"),
+    ] = None,
+    since: Annotated[
+        Optional[str],
+        typer.Option("--since", help="Only include sessions after this date (YYYY-MM-DD)"),
+    ] = None,
+    last: Annotated[
+        Optional[str],
+        typer.Option("--last", help="Time window: 7d, 30d, 90d"),
+    ] = None,
+    timezone: Annotated[
+        Optional[str],
+        typer.Option("--timezone", "--tz", help="Timezone offset (e.g., +5:45, -8, Asia/Kathmandu)"),
+    ] = None,
     json_output: Annotated[
         Optional[Path], typer.Option("--json", help="Export insights as JSON")
     ] = None,
+    summary_only: Annotated[
+        bool, typer.Option("--summary", help="Show cross-project summary table only")
+    ] = False,
 ) -> None:
     """Analyze Claude Code usage patterns and workflow insights.
 
-    Defaults to ~/.claude/projects/ if no path is given. Discovers all
-    project directories and analyzes their session traces.
+    With no arguments, shows a cross-project summary of all discovered projects.
+    Use --project to drill into a specific project, or provide a path directly.
     """
     from ai_trace_auditor.insights.analyzer import analyze_claude_code_dir
+    from ai_trace_auditor.insights.projects import (
+        discover_projects,
+        get_strip_prefix,
+    )
     from ai_trace_auditor.insights.renderer import render_insights
 
-    if path is None:
-        # Auto-discover Claude Code projects
-        claude_dir = Path.home() / ".claude" / "projects"
-        if not claude_dir.exists():
-            console.print("[red]Error:[/red] ~/.claude/projects/ not found. Provide a path.")
-            raise typer.Exit(code=2)
+    # Parse date filters
+    since_dt, until_dt = _parse_date_filters(since, last)
 
-        # Find all project directories with .jsonl files
-        project_dirs = [
-            d for d in claude_dir.iterdir()
-            if d.is_dir() and list(d.glob("*.jsonl"))
-        ]
-        if not project_dirs:
-            console.print("[yellow]No Claude Code traces found in ~/.claude/projects/[/yellow]")
-            raise typer.Exit(code=0)
+    # Parse timezone
+    tz_offset = _parse_timezone(timezone)
+    tz_label = timezone or "UTC"
+    if tz_offset == 0.0 and timezone is None:
+        tz_label = "UTC"
 
-        # Analyze each project directory
-        for proj_dir in sorted(project_dirs):
-            # Extract readable project name from directory name
-            proj_name = proj_dir.name.replace("-Users-", "/Users/").replace("-", "/")
-            console.print(f"\n[bold blue]Project:[/bold blue] {proj_name}")
-
-            try:
-                strip_prefix = ""
-                # Try to reconstruct the original path for stripping
-                parts = proj_dir.name.split("-")
-                if parts[0] == "" and len(parts) > 1:
-                    strip_prefix = "/" + "/".join(parts[1:]).replace("-", "/") + "/"
-                    # This is approximate; the actual path uses - as separator
-
-                report = analyze_claude_code_dir(proj_dir, strip_prefix="")
-                render_insights(report, console)
-
-                if json_output:
-                    _export_insights_json(report, json_output, proj_dir.name)
-
-            except ValueError as e:
-                console.print(f"  [dim]{e}[/dim]")
-    else:
-        if not path.exists():
-            console.print(f"[red]Error:[/red] {path} does not exist")
-            raise typer.Exit(code=2)
-
-        if not path.is_dir():
-            console.print("[red]Error:[/red] insights requires a directory of .jsonl files")
+    if path is not None:
+        # Direct path mode
+        if not path.exists() or not path.is_dir():
+            console.print(f"[red]Error:[/red] {path} is not a valid directory")
             raise typer.Exit(code=2)
 
         try:
-            report = analyze_claude_code_dir(path)
-            render_insights(report, console)
+            report = analyze_claude_code_dir(
+                path, since=since_dt, until=until_dt, tz_offset_hours=tz_offset,
+            )
+            render_insights(report, console, tz_label=tz_label)
             if json_output:
                 _export_insights_json(report, json_output, path.name)
         except ValueError as e:
             console.print(f"[red]Error:[/red] {e}")
             raise typer.Exit(code=2) from e
+        return
+
+    # Auto-discover projects
+    projects = discover_projects()
+    if not projects:
+        console.print("[red]Error:[/red] No Claude Code traces found in ~/.claude/projects/")
+        raise typer.Exit(code=2)
+
+    # Filter by project name if specified
+    if project:
+        query = project.lower()
+        projects = [p for p in projects if query in p.display_name.lower()]
+        if not projects:
+            console.print(f"[yellow]No projects matching '{project}'[/yellow]")
+            # Show available projects
+            all_projects = discover_projects()
+            console.print("\nAvailable projects:")
+            for p in all_projects[:20]:
+                console.print(f"  {p.display_name} ({p.session_count} sessions)")
+            raise typer.Exit(code=0)
+
+    # If summary only, or multiple projects without filter, show summary table
+    if summary_only or (len(projects) > 1 and project is None):
+        _render_project_summary(projects, console)
+
+        if len(projects) > 1 and project is None:
+            console.print(
+                "\n[dim]Use --project <name> to drill into a specific project, "
+                "or --summary for just this table.[/dim]"
+            )
+        if json_output and summary_only:
+            _export_summary_json(projects, json_output)
+        return
+
+    # Single project (filtered) — show full insights
+    for proj in projects:
+        console.print(f"\n[bold blue]Project:[/bold blue] {proj.display_name}")
+        console.print(f"[dim]{proj.cwd}[/dim]")
+
+        try:
+            strip = get_strip_prefix(proj)
+            report = analyze_claude_code_dir(
+                proj.dir_path,
+                strip_prefix=strip,
+                since=since_dt,
+                until=until_dt,
+                tz_offset_hours=tz_offset,
+            )
+            render_insights(report, console, tz_label=tz_label)
+
+            if json_output:
+                _export_insights_json(report, json_output, proj.display_name)
+
+        except ValueError as e:
+            console.print(f"  [dim]{e}[/dim]")
 
 
-def _export_insights_json(report: "InsightsReport", output: Path, project: str) -> None:
+def _parse_date_filters(
+    since: str | None, last: str | None
+) -> tuple[datetime | None, datetime | None]:
+    """Parse --since and --last into datetime bounds."""
+    from datetime import datetime, timedelta, timezone
+
+    since_dt = None
+    until_dt = None
+
+    if last:
+        last = last.lower().strip()
+        now = datetime.now(timezone.utc)
+        if last.endswith("d"):
+            days = int(last[:-1])
+            since_dt = now - timedelta(days=days)
+        elif last.endswith("w"):
+            weeks = int(last[:-1])
+            since_dt = now - timedelta(weeks=weeks)
+        elif last.endswith("m"):
+            months = int(last[:-1])
+            since_dt = now - timedelta(days=months * 30)
+    elif since:
+        try:
+            since_dt = datetime.strptime(since, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+        except ValueError:
+            pass
+
+    return since_dt, until_dt
+
+
+def _parse_timezone(tz_str: str | None) -> float:
+    """Parse timezone string to UTC offset in hours."""
+    if tz_str is None:
+        return 0.0
+
+    # Common named timezones
+    named = {
+        "Asia/Kathmandu": 5.75,
+        "Asia/Kolkata": 5.5,
+        "US/Pacific": -8,
+        "US/Eastern": -5,
+        "US/Central": -6,
+        "US/Mountain": -7,
+        "Europe/London": 0,
+        "Europe/Berlin": 1,
+        "Europe/Paris": 1,
+        "Asia/Tokyo": 9,
+        "Asia/Shanghai": 8,
+        "Australia/Sydney": 11,
+        "UTC": 0,
+    }
+
+    if tz_str in named:
+        return named[tz_str]
+
+    # Parse offset format: +5:45, -8, +9
+    try:
+        tz_str = tz_str.strip()
+        if ":" in tz_str:
+            parts = tz_str.split(":")
+            hours = int(parts[0])
+            minutes = int(parts[1])
+            sign = -1 if hours < 0 else 1
+            return hours + sign * minutes / 60
+        return float(tz_str)
+    except (ValueError, IndexError):
+        return 0.0
+
+
+def _render_project_summary(projects: list, console: Console) -> None:
+    """Render a cross-project summary table."""
+    from ai_trace_auditor.insights.analyzer import analyze_claude_code_dir
+
+    table = Table(title="Claude Code Projects", border_style="dim")
+    table.add_column("Project", max_width=30)
+    table.add_column("Sessions", justify="right")
+    table.add_column("AI Calls", justify="right")
+    table.add_column("Input", justify="right")
+    table.add_column("Output", justify="right")
+    table.add_column("Est. Cost", justify="right")
+    table.add_column("Active")
+
+    total_calls = 0
+    total_cost = 0.0
+
+    for proj in projects:
+        try:
+            report = analyze_claude_code_dir(proj.dir_path)
+            calls = report.total_ai_calls
+            inp_m = report.total_input_tokens / 1e6
+            out_k = report.total_output_tokens / 1000
+            cost = report.cost.est_cost_with_cache
+            dates = f"{report.date_range[0]} → {report.date_range[1]}"
+
+            total_calls += calls
+            total_cost += cost
+
+            table.add_row(
+                proj.display_name,
+                str(report.total_sessions),
+                f"{calls:,}",
+                f"{inp_m:.1f}M",
+                f"{out_k:.0f}K",
+                f"${cost:,.0f}",
+                dates,
+            )
+        except ValueError:
+            table.add_row(
+                proj.display_name,
+                str(proj.session_count),
+                "-", "-", "-", "-", "-",
+            )
+
+    console.print(table)
+    console.print(f"\n[bold]Total:[/bold] {len(projects)} projects, {total_calls:,} AI calls, ${total_cost:,.0f} estimated cost")
+
+
+def _export_insights_json(report: "InsightsReport", output: Path, project_name: str) -> None:
     """Export insights report as JSON."""
     import json as json_mod
     from dataclasses import asdict
 
     data = {
-        "project": project,
+        "project": project_name,
         "generated_at": report.generated_at.isoformat(),
         "total_sessions": report.total_sessions,
         "total_ai_calls": report.total_ai_calls,
@@ -390,6 +552,32 @@ def _export_insights_json(report: "InsightsReport", output: Path, project: str) 
     }
     output.write_text(json_mod.dumps(data, indent=2), encoding="utf-8")
     console.print(f"JSON insights written to [bold]{output}[/bold]")
+
+
+def _export_summary_json(projects: list, output: Path) -> None:
+    """Export cross-project summary as JSON."""
+    import json as json_mod
+    from ai_trace_auditor.insights.analyzer import analyze_claude_code_dir
+
+    data = []
+    for proj in projects:
+        try:
+            report = analyze_claude_code_dir(proj.dir_path)
+            data.append({
+                "project": proj.display_name,
+                "cwd": proj.cwd,
+                "sessions": report.total_sessions,
+                "ai_calls": report.total_ai_calls,
+                "input_tokens": report.total_input_tokens,
+                "output_tokens": report.total_output_tokens,
+                "est_cost": round(report.cost.est_cost_with_cache, 2),
+                "date_range": list(report.date_range),
+            })
+        except ValueError:
+            data.append({"project": proj.display_name, "sessions": proj.session_count})
+
+    output.write_text(json_mod.dumps(data, indent=2), encoding="utf-8")
+    console.print(f"Summary JSON written to [bold]{output}[/bold]")
 
 
 @app.command()
