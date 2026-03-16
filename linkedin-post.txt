@@ -1,0 +1,34 @@
+My CTO dropped a rule I hadn't heard before: "Never build a solution that AI companies will ship themselves in the next six months."
+
+We were talking about traceability. Every team building with Claude or GPT hits this wall eventually: something goes wrong in production, and you can't trace why. The agent called the wrong tool. The cost spiked. The output was wrong. Your logs show what happened but not whether you're actually compliant with the regulations kicking in next year.
+
+So instead of building immediately, we researched. Mapped the entire LLM observability landscape: 20+ tools, $600M+ in recent funding, two regulatory frameworks, three major providers.
+
+The findings:
+
+Don't build: usage dashboards (providers already ship them), single-provider trace visualization (OpenAI has this, Anthropic will follow), simple prompt logging (commodity feature), token billing (direct provider revenue, they'll build it).
+
+Worth building: the translation layer between "we have traces" and "we can satisfy a regulator."
+
+Observability tools show engineers what happened. They don't produce documents a regulator can read.
+
+GRC platforms manage policies. They don't ingest AI-specific trace data.
+
+AI providers ship usage APIs. They don't interpret their own data against regulatory requirements.
+
+That gap is currently filled by consultants and spreadsheets.
+
+We built a CLI that fills it with one command:
+
+aitrace audit traces.json -r "EU AI Act" -o report.md
+
+It reads your LLM traces (OTel, Langfuse, or raw API logs), maps them against 18 regulatory requirements from EU AI Act Article 12 and NIST AI RMF, and generates a compliance gap report with per-requirement scores and actionable fix recommendations.
+
+Open source, Apache 2.0.
+
+Full landscape analysis + build story: https://bipinrimal.com.np/blog/020-the-6-month-rule
+GitHub: https://github.com/BipinRimal314/ai-trace-auditor
+
+The 6-month rule worked. We didn't build another dashboard. We built the thing that turns machine output into regulatory evidence.
+
+#AICompliance #EUAIAct #LLMObservability #OpenSource #AIGovernance

@@ -1,0 +1,117 @@
+name: "AI Trace Auditor"
+description: "Audit LLM traces against EU AI Act and NIST AI RMF compliance requirements"
+author: "Bipin Rimal"
+
+branding:
+  icon: "shield"
+  color: "blue"
+
+inputs:
+  path:
+    description: "Path to trace file or directory"
+    required: true
+  regulation:
+    description: "Filter to specific regulation (e.g., 'EU AI Act', 'NIST AI RMF')"
+    required: false
+    default: ""
+  risk-level:
+    description: "Risk classification (high_risk, all)"
+    required: false
+    default: "high_risk"
+  format:
+    description: "Input format (auto, otel, langfuse, claude_code, raw)"
+    required: false
+    default: "auto"
+  output:
+    description: "Output file path for the report"
+    required: false
+    default: "compliance-report.md"
+  report-format:
+    description: "Output format (markdown, json, both)"
+    required: false
+    default: "markdown"
+  fail-on-gaps:
+    description: "Fail the action if compliance gaps are found"
+    required: false
+    default: "true"
+
+outputs:
+  score:
+    description: "Overall compliance score (0-100)"
+  satisfied:
+    description: "Number of satisfied requirements"
+  partial:
+    description: "Number of partially satisfied requirements"
+  missing:
+    description: "Number of missing requirements"
+  report-path:
+    description: "Path to the generated report"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+
+    - name: Install AI Trace Auditor
+      shell: bash
+      run: pip install ai-trace-auditor
+
+    - name: Run audit
+      id: audit
+      shell: bash
+      run: |
+        ARGS="${{ inputs.path }}"
+        if [ -n "${{ inputs.regulation }}" ]; then
+          ARGS="$ARGS -r '${{ inputs.regulation }}'"
+        fi
+        ARGS="$ARGS --risk-level ${{ inputs.risk-level }}"
+        ARGS="$ARGS --format ${{ inputs.format }}"
+        ARGS="$ARGS --report-format ${{ inputs.report-format }}"
+        ARGS="$ARGS -o ${{ inputs.output }}"
+
+        set +e
+        eval aitrace audit $ARGS 2> audit-stderr.txt
+        EXIT_CODE=$?
+        set -e
+
+        # Parse summary from stderr (Rich output goes to stderr)
+        cat audit-stderr.txt >&2
+
+        echo "report-path=${{ inputs.output }}" >> $GITHUB_OUTPUT
+
+        # Extract scores using a quick Python script
+        python3 -c "
+        import json, sys
+        from pathlib import Path
+        try:
+            report_path = '${{ inputs.output }}'.replace('.md', '.json')
+            if not Path(report_path).exists():
+                report_path = '${{ inputs.output }}'
+            # Try to get JSON report for structured output
+            from ai_trace_auditor.ingest import ingest_file
+            from ai_trace_auditor.analysis.engine import ComplianceAnalyzer
+            from ai_trace_auditor.regulations.registry import RequirementRegistry
+            p = Path('${{ inputs.path }}')
+            traces = ingest_file(p) if p.is_file() else []
+            registry = RequirementRegistry()
+            registry.load()
+            regulation = '${{ inputs.regulation }}' or None
+            regs = [regulation] if regulation else None
+            analyzer = ComplianceAnalyzer(registry)
+            report = analyzer.analyze(traces=traces, regulations=regs, trace_source=str(p))
+            with open('$GITHUB_OUTPUT', 'a') as f:
+                f.write(f'score={round(report.overall_score * 100, 1)}\n')
+                f.write(f'satisfied={report.summary.satisfied}\n')
+                f.write(f'partial={report.summary.partial}\n')
+                f.write(f'missing={report.summary.missing}\n')
+        except Exception as e:
+            print(f'Warning: could not extract structured output: {e}', file=sys.stderr)
+        "
+
+        if [ "${{ inputs.fail-on-gaps }}" = "true" ] && [ $EXIT_CODE -ne 0 ]; then
+          echo "::error::Compliance gaps detected. See report at ${{ inputs.output }}"
+          exit 1
+        fi

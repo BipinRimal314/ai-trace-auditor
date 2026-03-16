@@ -1,3 +1,3 @@
 """AI Trace Auditor: Audit LLM traces against regulatory compliance requirements."""
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
