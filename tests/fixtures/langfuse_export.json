@@ -1,0 +1,60 @@
+[
+  {
+    "id": "trace-001",
+    "name": "customer-support-bot",
+    "userId": "user-42",
+    "sessionId": "session-abc",
+    "tags": ["production", "support"],
+    "version": "2.1.0",
+    "observations": [
+      {
+        "id": "obs-001",
+        "traceId": "trace-001",
+        "type": "GENERATION",
+        "name": "initial-response",
+        "startTime": "2026-03-15T10:00:00Z",
+        "endTime": "2026-03-15T10:00:02Z",
+        "providedModelName": "claude-sonnet-4-20250514",
+        "internalModel": "claude-sonnet-4-20250514",
+        "inputTokens": 200,
+        "outputTokens": 350,
+        "totalTokens": 550,
+        "inputCost": 0.0006,
+        "outputCost": 0.00525,
+        "totalCost": 0.00585,
+        "latency": 2.0,
+        "level": "DEFAULT",
+        "input": {"role": "user", "content": "How do I reset my password?"},
+        "output": {"role": "assistant", "content": "To reset your password, go to Settings > Security..."},
+        "scores": [
+          {"name": "helpfulness", "value": 0.9, "comment": "Direct and actionable answer"}
+        ]
+      },
+      {
+        "id": "obs-002",
+        "traceId": "trace-001",
+        "parentObservationId": "obs-001",
+        "type": "SPAN",
+        "name": "knowledge-base-retrieval",
+        "startTime": "2026-03-15T10:00:00.5Z",
+        "endTime": "2026-03-15T10:00:01Z"
+      },
+      {
+        "id": "obs-003",
+        "traceId": "trace-001",
+        "type": "GENERATION",
+        "name": "followup-response",
+        "startTime": "2026-03-15T10:00:05Z",
+        "endTime": "2026-03-15T10:00:06.5Z",
+        "providedModelName": "claude-sonnet-4-20250514",
+        "inputTokens": 400,
+        "outputTokens": 150,
+        "totalTokens": 550,
+        "latency": 1.5,
+        "level": "DEFAULT",
+        "input": {"role": "user", "content": "What if I forgot my email too?"},
+        "output": {"role": "assistant", "content": "Contact support at help@example.com with your account ID."}
+      }
+    ]
+  }
+]

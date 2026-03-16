@@ -1,0 +1,93 @@
+"""Requirement registry: loads YAML requirement definitions and provides queries."""
+
+from __future__ import annotations
+
+from pathlib import Path
+
+import yaml
+
+from ai_trace_auditor.models.requirement import EvidenceField, Requirement
+
+
+def _get_bundled_requirements_dir() -> Path:
+    """Return the path to the bundled requirements YAML files."""
+    # Walk up from this file to find the project root requirements/ dir
+    current = Path(__file__).resolve()
+    # src/ai_trace_auditor/regulations/registry.py -> project root
+    project_root = current.parent.parent.parent.parent
+    return project_root / "requirements"
+
+
+class RequirementRegistry:
+    """Loads and queries regulatory requirement definitions from YAML files."""
+
+    def __init__(self) -> None:
+        self._requirements: list[Requirement] = []
+
+    def load(self, requirements_dir: Path | None = None) -> None:
+        """Load all YAML requirement files from a directory tree."""
+        if requirements_dir is None:
+            requirements_dir = _get_bundled_requirements_dir()
+
+        self._requirements = []
+        for yaml_path in sorted(requirements_dir.rglob("*.yaml")):
+            self._load_file(yaml_path)
+
+    def _load_file(self, path: Path) -> None:
+        """Load requirements from a single YAML file."""
+        with open(path, encoding="utf-8") as f:
+            data = yaml.safe_load(f)
+
+        if not data or "requirements" not in data:
+            return
+
+        regulation = data.get("regulation", "Unknown")
+        article = data.get("article", "Unknown")
+
+        for req_data in data["requirements"]:
+            evidence_fields = [
+                EvidenceField(**ef) for ef in req_data.get("evidence_fields", [])
+            ]
+            self._requirements.append(
+                Requirement(
+                    id=req_data["id"],
+                    regulation=regulation,
+                    article=req_data.get("article", article),
+                    title=req_data["title"],
+                    description=req_data["description"],
+                    evidence_fields=evidence_fields,
+                    severity=req_data.get("severity", "mandatory"),
+                    applies_to=req_data.get("applies_to"),
+                )
+            )
+
+    def get_all(self) -> list[Requirement]:
+        return list(self._requirements)
+
+    def get_by_regulation(self, regulation: str) -> list[Requirement]:
+        return [r for r in self._requirements if r.regulation == regulation]
+
+    def get_by_id(self, req_id: str) -> Requirement | None:
+        for r in self._requirements:
+            if r.id == req_id:
+                return r
+        return None
+
+    def get_by_severity(self, severity: str) -> list[Requirement]:
+        return [r for r in self._requirements if r.severity == severity]
+
+    def get_applicable(self, risk_level: str = "high_risk") -> list[Requirement]:
+        """Filter requirements that apply to the given risk level."""
+        return [
+            r
+            for r in self._requirements
+            if r.applies_to is None or risk_level in r.applies_to or "all" in r.applies_to
+        ]
+
+    @property
+    def regulations(self) -> list[str]:
+        return sorted({r.regulation for r in self._requirements})
+
+    @property
+    def count(self) -> int:
+        return len(self._requirements)

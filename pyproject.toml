@@ -1,0 +1,59 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ai-trace-auditor"
+version = "0.1.0"
+description = "Audit LLM traces against regulatory compliance requirements (EU AI Act, NIST AI RMF)"
+readme = "README.md"
+license = "Apache-2.0"
+requires-python = ">=3.11"
+authors = [
+    { name = "Bipin Rimal", email = "bipinrimal314@gmail.com" },
+]
+keywords = ["ai", "compliance", "traceability", "eu-ai-act", "nist", "llm", "observability", "audit"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Quality Assurance",
+]
+dependencies = [
+    "pydantic>=2.0",
+    "typer>=0.12",
+    "rich>=13.0",
+    "jinja2>=3.1",
+    "pyyaml>=6.0",
+]
+
+[project.scripts]
+aitrace = "ai_trace_auditor.cli:app"
+
+[project.urls]
+Homepage = "https://github.com/BipinRimal314/ai-trace-auditor"
+Repository = "https://github.com/BipinRimal314/ai-trace-auditor"
+Issues = "https://github.com/BipinRimal314/ai-trace-auditor/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ai_trace_auditor"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

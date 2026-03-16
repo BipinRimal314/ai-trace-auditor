@@ -1,0 +1,170 @@
+---
+title: "The 6-Month Rule: Finding What's Worth Building in AI Traceability"
+publishedAt: "2026-03-16"
+summary: "Most AI observability tools will be obsolete in 18 months. We found the one gap that won't close, built a CLI to fill it, and learned something about where value actually lives in the AI stack."
+tag: "Technical"
+---
+
+# The 6-Month Rule: Finding What's Worth Building in AI Traceability
+
+My CTO said something recently that stuck: "There's a rule in AI projects. Never build a solution that the AI companies will ship themselves in the next six months."
+
+He was talking about traceability. The problem that every team building with Claude, GPT, or Gemini hits at some point: you have an AI system in production, something goes wrong, and you can't trace why. The response was wrong. The agent called the wrong tool. The cost spiked. And your logs tell you what happened, but not whether you're actually compliant with the regulations that are about to kick in.
+
+The obvious response is to build something. We're engineers; that's what we do. But the 6-month rule says: don't build what Anthropic or OpenAI will ship for free next quarter. So we spent a week figuring out what's actually worth building, what isn't, and what the difference looks like.
+
+This is what we found.
+
+## The landscape, honestly
+
+The AI observability space right now is crowded and consolidating fast.
+
+In January 2026, ClickHouse acquired Langfuse (the leading open-source LLM observability tool, 20K+ GitHub stars) as part of a $400M Series D at a $15B valuation. In February, Helicone was acquired by Mintlify. Braintrust raised $80M. Portkey raised $15M. Arize had already raised $70M the year before.
+
+The signal is clear: generic LLM observability is being absorbed into the data infrastructure layer. If you're building "a better dashboard for LLM traces," you're competing with companies that have hundreds of millions in funding and established distribution.
+
+So we asked a more specific question: what are these tools actually doing, and where are the gaps?
+
+## What providers will ship themselves
+
+This is the "don't bother" list. These features are either already live or clearly on the roadmap:
+
+**Basic usage and cost dashboards.** Anthropic's Usage and Cost API already groups by model, workspace, API key, and service tier with 5-minute data freshness. OpenAI has similar. Google has similar. Done.
+
+**Single-provider trace visualization.** OpenAI shipped a Traces dashboard that captures LLM generations, tool calls, handoffs, and guardrail checks in hierarchical span trees. Anthropic will follow. When the provider can see all the data natively, they'll build the UI.
+
+**Simple prompt logging.** Every observability tool does this. It's table stakes, not a product.
+
+**Token-level billing.** Direct revenue impact for providers. They'll build granular attribution because it makes customers spend more confidently.
+
+Building any of these is building on quicksand. The ground will move under you within two quarters.
+
+## What providers will never build
+
+This is where it gets interesting. There are structural reasons certain problems will remain unsolved by AI providers:
+
+**Cross-provider observability.** Anthropic will never build a dashboard that compares Claude's performance against GPT-4o. OpenAI will never show you that Claude is cheaper for your use case. This is why Portkey and Helicone exist, and why they'll continue to exist.
+
+**Independent quality scoring.** A provider grading the quality of their own model's outputs is a conflict of interest. When Braintrust tells you that your Claude pipeline's quality dropped 12% after a model update, that assessment is credible precisely because Braintrust doesn't sell the model. Anthropic saying "our model is great" is marketing.
+
+**Cross-framework agent debugging.** LangChain, CrewAI, AutoGen, Anthropic's agent SDK, OpenAI's Agents SDK: the ecosystem is fragmenting. No provider will build tooling that works across all frameworks because it would legitimize the competition.
+
+These are genuine, durable gaps. But they're also where well-funded startups already operate.
+
+## The gap nobody's filling
+
+Here's what we actually found when we mapped the landscape against regulatory requirements.
+
+The EU AI Act, Article 12, requires "automatic recording of events (logs) over the lifetime of the system" for high-risk AI systems. The hard deadline for full compliance is August 2, 2026. Not theoretical; the prohibitions on unacceptable-risk AI practices already took effect in February 2025. GPAI model obligations hit in August 2025. The high-risk system requirements are next.
+
+NIST AI RMF mandates model provenance, data integrity documentation, and third-party assessment records.
+
+Companies building with LLMs typically have observability in place. They're using Langfuse, or Arize, or raw OTel exports. They have traces. They have logs. They have dashboards.
+
+What they don't have: any automated way to answer the question "do our traces satisfy the regulatory requirements?"
+
+This is a specific, measurable gap:
+
+- **Observability tools** show engineers what happened. They do not produce documents a regulator can read.
+- **GRC platforms** (OneTrust, Vanta) manage policies and risk registers. They do not ingest AI-specific trace data.
+- **AI providers** ship usage APIs and audit logs. They do not interpret their own data against regulatory requirements.
+
+The translation layer between "we have traces" and "we can satisfy an auditor" doesn't exist as an automated tool. It exists as consulting engagements and spreadsheets.
+
+## So we built it
+
+AI Trace Auditor is a Python CLI that takes LLM traces from any observability tool, checks them against regulatory requirements, and generates a compliance gap report.
+
+```
+aitrace audit traces.json -r "EU AI Act" -o report.md
+```
+
+That's the whole interface. One command. It reads your traces, maps them against 18 regulatory requirements (11 from EU AI Act Articles 12 and 19, 7 from NIST AI RMF), and produces a Markdown report with per-requirement coverage scores, evidence samples, and actionable recommendations for every gap.
+
+### What it actually checks
+
+Take EU AI Act Article 12, Section 2(b). The regulation says logging must "facilitate post-market monitoring." In practice, that means you need to track which model version actually produced each output, not just which model you requested, because model behavior changes across versions and you need to correlate behavior changes with updates.
+
+We encode this as a structured requirement:
+
+```yaml
+- id: "EU-AIA-12.2b"
+  title: "Model version tracking"
+  evidence_fields:
+    - field_path: "spans[].model_used"
+      description: "Actual model version used (from API response)"
+      required: true
+    - field_path: "spans[].model_requested"
+      description: "Model version requested (from API request)"
+      required: false
+```
+
+The tool resolves `spans[].model_used` against your actual trace data. If 100% of your spans have this field populated, the requirement is satisfied. If 60% do, it's partial. If none do, it's missing. The report tells you exactly which fields are absent and what to add to your instrumentation.
+
+Here's a real output against a set of OpenTelemetry traces:
+
+```
+Overall Compliance Score: 81.2%
+
+| Status    | Count |
+|-----------|-------|
+| Satisfied |     5 |
+| Partial   |     6 |
+
+Top gaps:
+  1. Incomplete: Output responses generated by the AI model (33.3% coverage)
+  2. Incomplete: Input prompts/messages (33.3% coverage)
+  3. Incomplete: Temperature parameter (66.7% coverage)
+```
+
+Each gap comes with a specific recommendation:
+
+> **Not logging: Error classification when operations fail**
+> Impact: EU AI Act Article 12 requires this data. Your traces contain zero values for `spans[].error_type`.
+> Recommendation: Log error types when API calls fail. OTel: set error.type on the span and mark span status as ERROR.
+
+### Three formats, auto-detected
+
+The tool ingests traces from three sources without configuration:
+
+1. **OpenTelemetry OTLP JSON** (the standard). Parses the full `gen_ai.*` attribute namespace from the OTel GenAI Semantic Conventions.
+2. **Langfuse exports**. Maps observations, generations, and scores to the normalized model.
+3. **Raw API logs** (JSONL). Request/response pairs from any provider.
+
+Format detection is automatic. Every format normalizes to a single internal trace model, so the compliance engine doesn't know or care where the data came from. One model, one analysis path, one report.
+
+### CI-friendly
+
+Exit code 0 means all requirements are satisfied. Exit code 1 means gaps exist. This makes it a compliance gate in your pipeline:
+
+```bash
+aitrace audit exported-traces.json -r "EU AI Act" || echo "Compliance gaps found"
+```
+
+## Why this specific shape survives
+
+The 6-month rule, applied to this tool:
+
+**Providers won't build it** because interpreting their own trace data against external regulations creates liability and is outside their core product. Anthropic ships a Usage API; they will never ship a "here's your EU AI Act Article 12 compliance score" feature.
+
+**Observability tools won't build it** because their buyer is the engineering team, not the legal/compliance team. Adding regulatory interpretation changes the sales motion, the support burden, and the liability profile.
+
+**GRC platforms might eventually build it**, but they start from the policy side and work toward data, not the other way around. OneTrust and Vanta manage controls and evidence collection for SOC 2, GDPR, HIPAA. Adding AI-specific trace ingestion requires understanding OTel GenAI conventions, Langfuse schemas, and the gap between what LLMs log and what regulators need. That's a different expertise.
+
+**The regulatory mapping is the moat.** Adding a new requirement means adding a YAML file, not writing code. When the EU AI Act gets amended, or when ISO 42001 requirements crystallize, or when individual US states pass AI disclosure laws, each one is a new YAML definition. The tool gets more valuable with every regulation, and the interpretation work (mapping regulatory text to trace fields) requires expertise that's hard to automate.
+
+## What we learned
+
+Three things stood out from this exercise:
+
+**The detection-to-action gap is real.** A 2025 enterprise survey found that 67% of AI teams discovered significant quality regressions only after user complaints, despite having tracing infrastructure. The problem isn't data collection. It's interpretation. Having traces doesn't mean you know what the traces should contain.
+
+**Regulatory deadlines create purchasing urgency that technical elegance doesn't.** Nobody buys a compliance tool because it's architecturally beautiful. They buy it because August 2026 is coming and the fines for non-compliance with the EU AI Act are up to 35 million euros or 7% of global annual turnover. That's the kind of motivation that makes budget appear.
+
+**The most defensible position in the AI stack isn't a model, a framework, or an observability dashboard. It's the translation layer between technical artifacts and human requirements.** Models will improve. Frameworks will consolidate. Dashboards will be commoditized. But the gap between "what the system logged" and "what the regulation requires" is a fundamentally human problem that grows with every new regulation, framework, and model version.
+
+The 6-month rule worked. We didn't build another dashboard. We didn't build another gateway. We built the thing that turns machine output into regulatory evidence, and that's a gap that closes slowly, if ever.
+
+---
+
+AI Trace Auditor is open source under Apache 2.0. The repository, installation instructions, and sample traces are at github.com/BipinRimal314/ai-trace-auditor.

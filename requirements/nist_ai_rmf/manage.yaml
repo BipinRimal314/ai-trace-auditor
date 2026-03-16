@@ -1,0 +1,48 @@
+regulation: "NIST AI RMF"
+article: "MANAGE"
+title: "Risk Management"
+
+requirements:
+  - id: "NIST-MANAGE-4.1"
+    title: "Post-deployment monitoring"
+    description: >
+      Post-deployment AI system monitoring plans are implemented, including
+      mechanisms for capturing and evaluating system performance, user
+      feedback, and potential incidents.
+    severity: "mandatory"
+    applies_to: ["all"]
+    evidence_fields:
+      - field_path: "spans[].start_time"
+        description: "Timestamped operations for monitoring continuity verification"
+        required: true
+        check_type: "non_null"
+      - field_path: "spans[].model_used"
+        description: "Model tracking for correlating performance with model changes"
+        required: true
+        check_type: "non_null"
+      - field_path: "spans[].duration_ms"
+        description: "Latency data for performance monitoring"
+        required: false
+        check_type: "non_null"
+
+  - id: "NIST-MANAGE-4.3"
+    title: "Incident communication"
+    description: >
+      AI system incidents and errors are communicated to relevant AI actors,
+      including upstream providers. Error logging must capture sufficient
+      detail for incident reports.
+    severity: "recommended"
+    applies_to: ["all"]
+    evidence_fields:
+      - field_path: "spans[].error_type"
+        description: "Error classification for incident categorization"
+        required: true
+        check_type: "present"
+      - field_path: "spans[].error_message"
+        description: "Error details for incident reports"
+        required: true
+        check_type: "present"
+      - field_path: "spans[].provider"
+        description: "Provider identification for upstream communication"
+        required: true
+        check_type: "non_null"
