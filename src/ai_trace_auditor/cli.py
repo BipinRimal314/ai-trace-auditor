@@ -639,6 +639,22 @@ def workflow(
 
 
 @app.command()
+def agents(
+) -> None:
+    """Analyze multi-agent delegation, plans, and teams.
+
+    Reconstructs agent delegation patterns, analyzes implementation plans,
+    and summarizes team configurations and inbox activity.
+    """
+    from ai_trace_auditor.insights.agents import build_agent_report
+    from ai_trace_auditor.insights.renderer import render_agents
+
+    console.print("Scanning agent traces, plans, and teams...")
+    report = build_agent_report()
+    render_agents(report, console)
+
+
+@app.command()
 def health(
     session_id: Annotated[
         Optional[str],

@@ -8,6 +8,7 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 
+from ai_trace_auditor.insights.agents import AgentReport
 from ai_trace_auditor.insights.analyzer import InsightsReport
 from ai_trace_auditor.insights.health import SessionHealth
 from ai_trace_auditor.insights.workflow import WorkflowReport
@@ -402,5 +403,108 @@ def render_workflow(report: WorkflowReport, console: Console | None = None) -> N
         console.print()
         for i, rec in enumerate(report.recommendations, 1):
             console.print(Panel(rec, title=f"[bold]#{i}[/bold]", border_style="magenta", width=80))
+
+    console.print()
+
+
+def render_agents(report: AgentReport, console: Console | None = None) -> None:
+    """Render multi-agent intelligence report."""
+    if console is None:
+        console = Console()
+
+    a = report.agent_stats
+    console.print()
+    console.print(Panel(
+        f"[bold]Multi-Agent Intelligence Report[/bold]\n"
+        f"{a.total_calls} agent delegations across {a.total_sessions} sessions  ·  "
+        f"{a.sessions_using_agents} sessions used agents ({a.agent_adoption_rate:.0%})",
+        border_style="blue",
+    ))
+
+    # Agent type breakdown
+    if a.by_type:
+        table = Table(title="Agent Types", border_style="dim")
+        table.add_column("Type")
+        table.add_column("Calls", justify="right")
+        table.add_column("%", justify="right")
+        table.add_column("", width=25)
+
+        max_count = a.by_type[0][1] if a.by_type else 1
+        for t, count in a.by_type:
+            pct = count / a.total_calls * 100 if a.total_calls > 0 else 0
+            bar = "█" * int(count / max_count * 20)
+            table.add_row(t or "(default)", f"{count}", f"{pct:.0f}", f"[blue]{bar}[/blue]")
+
+        console.print(table)
+
+    # Agent usage patterns
+    console.print()
+    table = Table(title="Delegation Patterns", border_style="dim")
+    table.add_column("Metric", style="bold")
+    table.add_column("Value", justify="right")
+
+    table.add_row("Foreground agents", str(a.foreground_count))
+    table.add_row("Background agents", str(a.background_count))
+    bg_pct = a.background_count / a.total_calls * 100 if a.total_calls > 0 else 0
+    table.add_row("Background rate", f"{bg_pct:.0f}%")
+    table.add_row("Avg prompt length", f"{a.avg_prompt_length:.0f} chars")
+    table.add_row("Longest prompt", f"{a.longest_prompt:,} chars")
+
+    console.print(table)
+
+    # Plans
+    p = report.plan_stats
+    if p.total_plans > 0:
+        console.print()
+        table = Table(title=f"Implementation Plans ({p.total_plans})", border_style="dim")
+        table.add_column("Plan")
+        table.add_column("Steps", justify="right")
+        table.add_column("Complexity")
+
+        for plan in p.plans:
+            c_color = "green" if plan.estimated_complexity == "simple" else "yellow" if plan.estimated_complexity == "moderate" else "red"
+            table.add_row(
+                plan.title[:50],
+                str(plan.step_count),
+                f"[{c_color}]{plan.estimated_complexity}[/{c_color}]",
+            )
+
+        console.print(table)
+
+        # Plan summary
+        console.print()
+        dist = p.complexity_distribution
+        parts = []
+        for level in ("simple", "moderate", "complex"):
+            c = dist.get(level, 0)
+            if c > 0:
+                color = "green" if level == "simple" else "yellow" if level == "moderate" else "red"
+                parts.append(f"[{color}]{level}: {c}[/{color}]")
+        console.print(f"  Complexity: {'  '.join(parts)}  ·  Avg steps: {p.avg_steps:.1f}")
+
+    # Teams
+    if report.teams:
+        console.print()
+        for team in report.teams:
+            console.print(Panel(
+                f"[dim]{team.description}[/dim]\n\n"
+                f"Members: {', '.join(m.name for m in team.members)}  ·  "
+                f"Messages: {team.total_messages}",
+                title=f"[bold]Team: {team.name}[/bold]",
+                border_style="cyan",
+                width=80,
+            ))
+
+            if team.inboxes:
+                table = Table(border_style="dim")
+                table.add_column("Agent")
+                table.add_column("Messages", justify="right")
+                table.add_column("From")
+
+                for inbox in team.inboxes:
+                    senders = ", ".join(f"{s} ({c})" for s, c in inbox.senders.items())
+                    table.add_row(inbox.agent_name, str(inbox.message_count), senders or "-")
+
+                console.print(table)
 
     console.print()
