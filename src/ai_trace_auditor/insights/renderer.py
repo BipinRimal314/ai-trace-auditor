@@ -9,6 +9,7 @@ from rich.table import Table
 from rich.text import Text
 
 from ai_trace_auditor.insights.analyzer import InsightsReport
+from ai_trace_auditor.insights.health import SessionHealth
 
 
 def render_insights(
@@ -172,4 +173,109 @@ def _render_patterns(report: InsightsReport, console: Console) -> None:
             body += f"\n[dim italic]→ {p.recommendation}[/dim italic]"
         console.print(Panel(body, title=title, border_style="cyan", width=80))
 
+
+def render_health_summary(
+    healths: list[SessionHealth],
+    aggregate: dict,
+    console: Console | None = None,
+) -> None:
+    """Render session health scores."""
+    if console is None:
+        console = Console()
+
+    if not healths:
+        console.print("[yellow]No session health data available[/yellow]")
+        return
+
+    avg = aggregate.get("average_score", 0)
+    color = "green" if avg >= 75 else "yellow" if avg >= 50 else "red"
+    console.print()
+    console.print(Panel(
+        f"[bold]Session Health Report[/bold]\n"
+        f"{aggregate['sessions_analyzed']} sessions analyzed  ·  "
+        f"Average score: [{color}]{avg:.0f}/100[/{color}]",
+        border_style=color,
+    ))
+
+    grades = aggregate.get("grade_distribution", {})
+    if grades:
+        parts = []
+        for g in ("A", "B", "C", "D", "F"):
+            c = grades.get(g, 0)
+            if c == 0:
+                continue
+            gc = "green" if g == "A" else "cyan" if g == "B" else "yellow" if g == "C" else "red"
+            parts.append(f"[{gc}]{g}: {c}[/{gc}]")
+        console.print(f"  Grades: {'  '.join(parts)}")
+        console.print()
+
+    # Per-session table (worst first)
+    table = Table(title="Session Health Scores", border_style="dim")
+    table.add_column("Session ID", max_width=14)
+    table.add_column("Score", justify="right")
+    table.add_column("Grade")
+    table.add_column("Tools", justify="right")
+    table.add_column("Stream", justify="right")
+    table.add_column("API", justify="right")
+    table.add_column("Boot", justify="right")
+    table.add_column("MCP", justify="right")
+    table.add_column("Issues")
+
+    for h in sorted(healths, key=lambda x: x.score)[:15]:
+        sc = "green" if h.score >= 75 else "yellow" if h.score >= 50 else "red"
+        issues = []
+        if h.tool_error_count:
+            issues.append(f"{h.tool_error_count} tool err")
+        if h.stall_count:
+            issues.append(f"{h.stall_count} stalls")
+        if h.api_error_count:
+            issues.append(f"{h.api_error_count} API err")
+        table.add_row(
+            h.session_id[:12], f"[{sc}]{h.score}[/{sc}]", h.grade,
+            str(h.tool_reliability), str(h.streaming_stability),
+            str(h.api_reliability), str(h.startup_speed), str(h.mcp_health),
+            ", ".join(issues) if issues else "[green]clean[/green]",
+        )
+    console.print(table)
+
+    # Friction totals
+    friction = aggregate.get("friction_totals", {})
+    if friction:
+        console.print()
+        console.print("[bold]Friction Points (all sessions)[/bold]")
+        ft = Table(border_style="dim")
+        ft.add_column("Category")
+        ft.add_column("Total", justify="right")
+        labels = {
+            "tool_error": "Tool failures",
+            "streaming_stall": "Streaming stalls",
+            "api_error": "API errors",
+            "mcp_failure": "MCP connection failures",
+            "startup": "Slow startups",
+        }
+        for cat, count in sorted(friction.items(), key=lambda x: -x[1]):
+            ft.add_row(labels.get(cat, cat), str(count))
+        console.print(ft)
+
+    # Top issues from worst sessions
+    worst = sorted(healths, key=lambda x: x.score)[:3]
+    if worst and worst[0].friction_points:
+        console.print()
+        console.print("[bold]Top Issues (from worst sessions)[/bold]")
+        seen: set[str] = set()
+        for h in worst:
+            for fp in h.friction_points[:3]:
+                if fp.description in seen:
+                    continue
+                seen.add(fp.description)
+                sc = "red" if fp.severity == "high" else "yellow" if fp.severity == "medium" else "dim"
+                console.print(Panel(
+                    f"{fp.description}\n[dim italic]→ {fp.recommendation}[/dim italic]",
+                    title=f"[{sc}]{fp.severity.upper()}[/{sc}]",
+                    border_style=sc, width=80,
+                ))
+                if len(seen) >= 5:
+                    break
+            if len(seen) >= 5:
+                break
     console.print()

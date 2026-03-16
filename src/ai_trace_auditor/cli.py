@@ -581,6 +581,50 @@ def _export_summary_json(projects: list, output: Path) -> None:
 
 
 @app.command()
+def health(
+    session_id: Annotated[
+        Optional[str],
+        typer.Argument(help="Specific session ID to analyze"),
+    ] = None,
+) -> None:
+    """Analyze session health from debug logs.
+
+    Scores each session on tool reliability, streaming stability,
+    API reliability, startup speed, and MCP connection health.
+    Identifies friction points with actionable recommendations.
+    """
+    from ai_trace_auditor.insights.debug_parser import parse_all_debug_logs, parse_debug_log
+    from ai_trace_auditor.insights.health import aggregate_health, score_session
+    from ai_trace_auditor.insights.renderer import render_health_summary
+
+    debug_dir = Path.home() / ".claude" / "debug"
+    if not debug_dir.exists():
+        console.print("[red]Error:[/red] ~/.claude/debug/ not found")
+        raise typer.Exit(code=2)
+
+    if session_id:
+        # Single session
+        path = debug_dir / f"{session_id}.txt"
+        if not path.exists():
+            console.print(f"[red]Error:[/red] No debug log for session {session_id}")
+            raise typer.Exit(code=2)
+        from ai_trace_auditor.insights.debug_parser import parse_debug_log
+        debug = parse_debug_log(path)
+        h = score_session(None, debug)
+        agg = aggregate_health([h])
+        render_health_summary([h], agg, console)
+    else:
+        # All sessions
+        console.print("Parsing debug logs...")
+        all_debug = parse_all_debug_logs(debug_dir)
+        console.print(f"Found {len(all_debug)} debug logs")
+
+        healths = [score_session(None, d) for d in all_debug.values()]
+        agg = aggregate_health(healths)
+        render_health_summary(healths, agg, console)
+
+
+@app.command()
 def version() -> None:
     """Print version information."""
     console.print(f"ai-trace-auditor v{ai_trace_auditor.__version__}")
