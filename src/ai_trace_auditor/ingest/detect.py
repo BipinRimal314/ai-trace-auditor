@@ -6,12 +6,13 @@ import json
 from pathlib import Path
 from typing import Any
 
+from ai_trace_auditor.ingest.claude_code import ClaudeCodeIngestor
 from ai_trace_auditor.ingest.langfuse import LangfuseIngestor
 from ai_trace_auditor.ingest.otel import OTelIngestor
 from ai_trace_auditor.ingest.raw_api import RawAPIIngestor
 from ai_trace_auditor.models.trace import NormalizedTrace
 
-INGESTORS = [OTelIngestor(), LangfuseIngestor(), RawAPIIngestor()]
+INGESTORS = [OTelIngestor(), LangfuseIngestor(), ClaudeCodeIngestor(), RawAPIIngestor()]
 
 
 def detect_format(data: dict[str, Any] | list[Any]) -> str:
@@ -27,7 +28,12 @@ def parse_data(
 ) -> list[NormalizedTrace]:
     """Parse trace data using the specified or auto-detected format."""
     if format_hint != "auto":
-        format_map = {"otel": OTelIngestor, "langfuse": LangfuseIngestor, "raw": RawAPIIngestor}
+        format_map = {
+            "otel": OTelIngestor,
+            "langfuse": LangfuseIngestor,
+            "claude_code": ClaudeCodeIngestor,
+            "raw": RawAPIIngestor,
+        }
         ingestor_cls = format_map.get(format_hint)
         if ingestor_cls is None:
             raise ValueError(f"Unknown format: {format_hint}. Use: {', '.join(format_map)}")
@@ -38,7 +44,7 @@ def parse_data(
             return ingestor.parse(data)
 
     raise ValueError(
-        "Could not detect trace format. Supported: OTel OTLP JSON, Langfuse export, raw API JSONL. "
+        "Could not detect trace format. Supported: OTel OTLP JSON, Langfuse export, Claude Code, raw API JSONL. "
         "Use --format to specify explicitly."
     )
 
