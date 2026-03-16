@@ -11,6 +11,7 @@ from rich.text import Text
 from ai_trace_auditor.insights.agents import AgentReport
 from ai_trace_auditor.insights.analyzer import InsightsReport
 from ai_trace_auditor.insights.health import SessionHealth
+from ai_trace_auditor.insights.predict import PredictiveReport
 from ai_trace_auditor.insights.workflow import WorkflowReport
 
 
@@ -506,5 +507,164 @@ def render_agents(report: AgentReport, console: Console | None = None) -> None:
                     table.add_row(inbox.agent_name, str(inbox.message_count), senders or "-")
 
                 console.print(table)
+
+    console.print()
+
+
+def render_predictions(report: PredictiveReport, console: Console | None = None) -> None:
+    """Render predictive analysis report."""
+    if console is None:
+        console = Console()
+
+    console.print()
+    console.print(Panel(
+        "[bold]Predictive Analysis Report[/bold]\n"
+        "Cost forecasts, context pressure, CLAUDE.md effectiveness, permission health",
+        border_style="green",
+    ))
+
+    # Cost forecast
+    cf = report.cost_forecast
+    if cf.daily_usage:
+        trend_icon = "↑" if cf.trend_direction == "increasing" else "↓" if cf.trend_direction == "decreasing" else "→"
+        trend_color = "red" if cf.trend_direction == "increasing" else "green" if cf.trend_direction == "decreasing" else "yellow"
+
+        table = Table(title="Cost Forecast", border_style="dim")
+        table.add_column("Metric", style="bold")
+        table.add_column("Value", justify="right")
+
+        table.add_row("Period", f"{cf.daily_usage[0].date} → {cf.daily_usage[-1].date}")
+        table.add_row("Active days / Total days", f"{cf.active_days} / {cf.total_days}")
+        table.add_row("Avg cost per active day", f"${cf.avg_active_day_cost:.0f}")
+        table.add_row("Trend", f"[{trend_color}]{trend_icon} {cf.trend_direction} ({cf.trend_pct:+.0f}%)[/{trend_color}]")
+        table.add_row("", "")
+        table.add_row("[bold]Forecast (next 7 days)[/bold]", f"[bold]${cf.forecast_7d:.0f}[/bold]")
+        table.add_row("[bold]Forecast (next 30 days)[/bold]", f"[bold]${cf.forecast_30d:.0f}[/bold]")
+
+        if cf.busiest_day:
+            table.add_row("", "")
+            table.add_row("Busiest day", f"{cf.busiest_day.date} (${cf.busiest_day.est_cost:.0f}, {cf.busiest_day.calls:,} calls)")
+        if cf.quietest_day:
+            table.add_row("Quietest day", f"{cf.quietest_day.date} (${cf.quietest_day.est_cost:.0f}, {cf.quietest_day.calls:,} calls)")
+
+        console.print(table)
+
+        # Daily cost sparkline (last 14 days)
+        recent = cf.daily_usage[-14:]
+        if len(recent) >= 3:
+            console.print()
+            console.print("[bold]Daily Cost (last 14 days)[/bold]")
+            max_cost = max(u.est_cost for u in recent) or 1
+            for u in recent:
+                bar_len = int(u.est_cost / max_cost * 30)
+                bar = "█" * bar_len
+                color = "red" if u.est_cost > cf.avg_active_day_cost * 2 else "blue"
+                console.print(f"  {u.date}  ${u.est_cost:>6.0f}  [{color}]{bar}[/{color}]")
+
+    # Context pressure
+    cp = report.context_pressure
+    if cp.sessions_analyzed > 0:
+        console.print()
+        table = Table(title="Context Window Pressure", border_style="dim")
+        table.add_column("Metric", style="bold")
+        table.add_column("Value", justify="right")
+
+        table.add_row("Sessions analyzed", str(cp.sessions_analyzed))
+        cr_color = "green" if cp.compression_rate < 0.1 else "yellow" if cp.compression_rate < 0.3 else "red"
+        table.add_row("Likely compressed", f"[{cr_color}]{cp.sessions_likely_compressed} ({cp.compression_rate:.0%})[/{cr_color}]")
+        table.add_row("Avg cumulative input", f"{cp.avg_cumulative_input/1e6:.0f}M tokens")
+        table.add_row("Max cumulative input", f"{cp.max_cumulative_input/1e6:.0f}M tokens")
+
+        console.print(table)
+
+        # Show highest-pressure sessions
+        compressed = [s for s in cp.sessions if s.likely_compressed]
+        if compressed:
+            console.print()
+            console.print("[bold]Sessions with likely context compression:[/bold]")
+            ct = Table(border_style="dim")
+            ct.add_column("Session")
+            ct.add_column("Date")
+            ct.add_column("Calls", justify="right")
+            ct.add_column("Cumulative", justify="right")
+            ct.add_column("Growth Rate", justify="right")
+
+            for s in compressed[:8]:
+                ct.add_row(
+                    s.session_id, s.date, str(s.total_calls),
+                    f"{s.cumulative_input/1e6:.0f}M",
+                    f"{s.input_growth_rate:+.1%}",
+                )
+            console.print(ct)
+
+    # CLAUDE.md effectiveness
+    cm = report.claude_md
+    if cm.insights:
+        console.print()
+        console.print("[bold]CLAUDE.md Effectiveness[/bold]")
+        console.print(f"  Projects with CLAUDE.md reads: {cm.projects_with_claude_md}  ·  Without: {cm.projects_without}")
+        console.print()
+
+        table = Table(border_style="dim")
+        table.add_column("Metric")
+        table.add_column("With CLAUDE.md", justify="right")
+        table.add_column("Without", justify="right")
+        table.add_column("Delta", justify="right")
+
+        for ins in cm.insights:
+            delta_color = "green" if ins.delta_pct < 0 and "correction" in ins.metric.lower() else "green" if ins.delta_pct > 0 and "efficiency" in ins.metric.lower() else "yellow"
+            # Format values based on metric type
+            if "rate" in ins.metric.lower():
+                w = f"{ins.with_reads:.1%}"
+                wo = f"{ins.without_reads:.1%}"
+            elif "efficiency" in ins.metric.lower():
+                w = f"{ins.with_reads:.4f}"
+                wo = f"{ins.without_reads:.4f}"
+            else:
+                w = f"{ins.with_reads:.1f}"
+                wo = f"{ins.without_reads:.1f}"
+
+            table.add_row(
+                ins.metric, w, wo,
+                f"[{delta_color}]{ins.delta_pct:+.0f}%[/{delta_color}]",
+            )
+
+        console.print(table)
+
+    # CLAUDE.md suggestions
+    if cm.suggested_additions:
+        console.print()
+        console.print("[bold]Suggested CLAUDE.md Additions[/bold]")
+        console.print("[dim]Files read repeatedly that could be documented to reduce re-discovery:[/dim]")
+        console.print()
+
+        table = Table(border_style="dim")
+        table.add_column("File", max_width=55)
+        table.add_column("Reads", justify="right")
+        table.add_column("Sessions", justify="right")
+        table.add_column("Avg/Session", justify="right")
+
+        for f in cm.suggested_additions[:8]:
+            path = f.path
+            if len(path) > 55:
+                path = "..." + path[-52:]
+            table.add_row(
+                path, str(f.total_reads), str(f.session_count),
+                f"{f.avg_reads_per_session:.1f}",
+            )
+        console.print(table)
+
+    # Permission optimization
+    perm = report.permissions
+    if perm:
+        console.print()
+        console.print(Panel(
+            f"Total allow rules: {perm.total_rules}\n"
+            f"Sources: {', '.join(f'{k}: {v}' for k, v in perm.rules_by_source.items())}\n\n"
+            f"{perm.unused_estimate}\n"
+            f"[dim italic]→ {perm.recommendation}[/dim italic]",
+            title="[bold]Permission Health[/bold]",
+            border_style="green", width=80,
+        ))
 
     console.print()

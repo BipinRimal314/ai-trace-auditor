@@ -639,6 +639,23 @@ def workflow(
 
 
 @app.command()
+def predict(
+) -> None:
+    """Cost forecasting, context pressure, CLAUDE.md effectiveness, permissions.
+
+    Analyzes usage trends to forecast costs, detects sessions that hit
+    context window limits, measures CLAUDE.md impact on efficiency, and
+    audits permission rules.
+    """
+    from ai_trace_auditor.insights.predict import build_predictive_report
+    from ai_trace_auditor.insights.renderer import render_predictions
+
+    console.print("Analyzing usage trends...")
+    report = build_predictive_report()
+    render_predictions(report, console)
+
+
+@app.command()
 def agents(
 ) -> None:
     """Analyze multi-agent delegation, plans, and teams.
