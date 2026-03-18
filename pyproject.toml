@@ -4,15 +4,15 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ai-trace-auditor"
-version = "0.8.0"
-description = "Audit LLM traces against regulatory compliance requirements (EU AI Act, NIST AI RMF)"
+version = "0.10.0"
+description = "EU AI Act compliance suite: Articles 11, 12, 13 + GDPR Article 30 from code and traces. One command, three articles."
 readme = "README.md"
 license = "Apache-2.0"
 requires-python = ">=3.11"
 authors = [
     { name = "Bipin Rimal", email = "bipinrimal314@gmail.com" },
 ]
-keywords = ["ai", "compliance", "traceability", "eu-ai-act", "nist", "llm", "observability", "audit"]
+keywords = ["ai", "compliance", "traceability", "eu-ai-act", "nist", "llm", "observability", "audit", "gdpr", "annex-iv", "data-flow", "mermaid"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",

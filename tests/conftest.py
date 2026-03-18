@@ -25,3 +25,8 @@ def raw_api_path() -> Path:
 @pytest.fixture
 def requirements_dir() -> Path:
     return Path(__file__).parent.parent / "requirements"
+
+
+@pytest.fixture
+def sample_codebase_dir() -> Path:
+    return FIXTURES_DIR / "sample_codebase"

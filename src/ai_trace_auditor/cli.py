@@ -716,6 +716,415 @@ def health(
 
 
 @app.command()
+def docs(
+    path: Annotated[
+        Path, typer.Argument(help="Codebase directory to scan")
+    ] = Path("."),
+    output: Annotated[
+        Optional[Path], typer.Option("--output", "-o", help="Output file path")
+    ] = None,
+    trace_path: Annotated[
+        Optional[Path],
+        typer.Option("--traces", "-t", help="Trace file/directory for enrichment"),
+    ] = None,
+    trace_format: Annotated[
+        str,
+        typer.Option("--trace-format", help="Trace format: auto, otel, langfuse, raw"),
+    ] = "auto",
+    risk_level: Annotated[
+        str, typer.Option("--risk-level", help="Risk classification")
+    ] = "high_risk",
+) -> None:
+    """Generate EU AI Act Article 11 / Annex IV technical documentation.
+
+    Scans a codebase for AI framework usage (SDKs, models, vector DBs,
+    training data, evaluation scripts, deployment configs, API endpoints)
+    and generates a structured Markdown document following Annex IV.
+
+    Optionally enrich with trace data from `aitrace audit` for sections
+    on monitoring, lifecycle, and post-market monitoring.
+    """
+    if not path.exists() or not path.is_dir():
+        console.print(f"[red]Error:[/red] {path} is not a valid directory")
+        raise typer.Exit(code=2)
+
+    # Scan codebase
+    from ai_trace_auditor.scanner import scan_codebase
+
+    console.print(f"Scanning [bold]{path}[/bold] for AI framework usage...")
+    scan_result = scan_codebase(path)
+    _print_scan_summary(scan_result)
+
+    # Optional trace enrichment
+    gap_report = None
+    if trace_path is not None:
+        if not trace_path.exists():
+            console.print(f"[red]Error:[/red] {trace_path} does not exist")
+            raise typer.Exit(code=2)
+
+        console.print(f"Loading traces from [bold]{trace_path}[/bold]...")
+        try:
+            traces = _load_traces(trace_path, trace_format)
+        except ValueError as e:
+            console.print(f"[red]Error:[/red] {e}")
+            raise typer.Exit(code=2) from e
+
+        if traces:
+            registry = RequirementRegistry()
+            registry.load()
+            analyzer = ComplianceAnalyzer(registry)
+            gap_report = analyzer.analyze(
+                traces=traces,
+                risk_level=risk_level,
+                trace_source=str(trace_path),
+            )
+            console.print(
+                f"Trace enrichment: [bold]{gap_report.overall_score * 100:.1f}%[/bold] compliance"
+            )
+
+    # Generate Annex IV document
+    from ai_trace_auditor.docs import generate_annex_iv
+    from ai_trace_auditor.reports.docs_report import DocsReporter
+
+    console.print("Generating Annex IV documentation...")
+    doc = generate_annex_iv(scan_result, gap_report)
+    reporter = DocsReporter()
+
+    if output:
+        reporter.write(doc, output)
+        console.print(f"Documentation written to [bold]{output}[/bold]")
+    else:
+        stdout_console.print(reporter.render(doc))
+
+    # Print completion summary
+    _print_docs_summary(doc)
+
+
+def _print_scan_summary(scan: "CodeScanResult") -> None:
+    """Print a Rich summary of codebase scan results."""
+    table = Table(title="Codebase Scan Results")
+    table.add_column("Category")
+    table.add_column("Count", justify="right")
+    table.add_column("Details")
+
+    table.add_row(
+        "Files scanned", str(scan.file_count), f"in {scan.scan_duration_ms}ms",
+    )
+    table.add_row(
+        "AI SDK imports",
+        str(len(scan.ai_imports)),
+        ", ".join(scan.providers) or "-",
+    )
+    table.add_row(
+        "Model identifiers",
+        str(len(scan.model_references)),
+        ", ".join(scan.models[:5]) or "-",
+    )
+    table.add_row(
+        "Vector databases",
+        str(len(scan.vector_dbs)),
+        ", ".join(sorted({v.db_name for v in scan.vector_dbs})) or "-",
+    )
+    table.add_row(
+        "Training data refs",
+        str(len(scan.training_data_refs)),
+        "",
+    )
+    table.add_row(
+        "Eval scripts",
+        str(len(scan.eval_scripts)),
+        "",
+    )
+    table.add_row(
+        "Deployment configs",
+        str(len(scan.deployment_configs)),
+        ", ".join(sorted({d.config_type for d in scan.deployment_configs})) or "-",
+    )
+    table.add_row(
+        "AI endpoints",
+        str(len(scan.ai_endpoints)),
+        "",
+    )
+    console.print(table)
+
+
+def _print_docs_summary(doc: "AnnexIVDocument") -> None:
+    """Print completion summary for generated Annex IV document."""
+    from ai_trace_auditor.models.docs import AnnexIVDocument
+
+    auto_count = sum(1 for s in doc.sections if s.auto_populated)
+    manual_count = len(doc.sections) - auto_count
+
+    console.print()
+    console.print(
+        f"[bold]Documentation:[/bold] {auto_count}/9 sections auto-populated, "
+        f"{manual_count} require manual input"
+    )
+    if not doc.trace_enriched:
+        console.print(
+            "[dim]Tip: Use --traces to enrich sections 3, 6, and 9 with compliance data[/dim]"
+        )
+
+
+@app.command()
+def flow(
+    path: Annotated[
+        Path, typer.Argument(help="Codebase directory to scan")
+    ] = Path("."),
+    output: Annotated[
+        Optional[Path], typer.Option("--output", "-o", help="Output file path")
+    ] = None,
+    mermaid_only: Annotated[
+        bool, typer.Option("--mermaid", help="Output only the Mermaid diagram")
+    ] = False,
+) -> None:
+    """Map AI data flows for EU AI Act Article 13 and GDPR Article 30.
+
+    Scans a codebase for external service connections (AI providers,
+    vector DBs, databases, HTTP clients, cloud SDKs), generates a
+    Mermaid data flow diagram, and produces a GDPR Article 30 Record
+    of Processing Activities template.
+    """
+    from datetime import datetime, timezone
+
+    from ai_trace_auditor.flow import detect_flows, generate_mermaid, generate_ropa
+    from ai_trace_auditor.models.flow import FlowDiagram
+    from ai_trace_auditor.reports.flow_report import FlowReporter
+    from ai_trace_auditor.scanner import scan_codebase
+
+    if not path.exists() or not path.is_dir():
+        console.print(f"[red]Error:[/red] {path} is not a valid directory")
+        raise typer.Exit(code=2)
+
+    # First run the code scanner (needed for AI provider/vector DB detection)
+    console.print(f"Scanning [bold]{path}[/bold] for data flows...")
+    code_scan = scan_codebase(path)
+
+    # Then detect flows
+    flow_result = detect_flows(path, code_scan)
+    _print_flow_summary(flow_result)
+
+    if not flow_result.external_services and not flow_result.data_flows:
+        console.print("[yellow]No external data flows detected.[/yellow]")
+        raise typer.Exit(code=0)
+
+    # Generate Mermaid diagram
+    mermaid_src = generate_mermaid(flow_result)
+
+    if mermaid_only:
+        if output:
+            output.write_text(mermaid_src, encoding="utf-8")
+            console.print(f"Mermaid diagram written to [bold]{output}[/bold]")
+        else:
+            stdout_console.print(mermaid_src)
+        raise typer.Exit(code=0)
+
+    # Generate full report with RoPA
+    ropa = generate_ropa(flow_result)
+    diagram = FlowDiagram(
+        mermaid=mermaid_src,
+        services=flow_result.external_services,
+        flows=flow_result.data_flows,
+        generated_at=datetime.now(timezone.utc),
+        source_dir=str(path),
+    )
+
+    reporter = FlowReporter()
+    if output:
+        reporter.write(diagram, ropa, output)
+        console.print(f"Flow report written to [bold]{output}[/bold]")
+    else:
+        stdout_console.print(reporter.render(diagram, ropa))
+
+    console.print(
+        f"\n[bold]Flows:[/bold] {len(flow_result.data_flows)} data flows to "
+        f"{len(flow_result.external_services)} external services"
+    )
+
+
+def _print_flow_summary(flow_result: "FlowScanResult") -> None:
+    """Print a Rich summary of flow scan results."""
+    from ai_trace_auditor.models.flow import FlowScanResult
+
+    table = Table(title="Data Flow Scan Results")
+    table.add_column("Category")
+    table.add_column("Count", justify="right")
+    table.add_column("Details")
+
+    table.add_row(
+        "External services",
+        str(len(flow_result.external_services)),
+        ", ".join(flow_result.service_names[:5]) or "-",
+    )
+    table.add_row(
+        "Data flows",
+        str(len(flow_result.data_flows)),
+        "",
+    )
+    table.add_row(
+        "HTTP clients",
+        str(len(flow_result.http_clients)),
+        ", ".join(sorted({h.library for h in flow_result.http_clients})) or "-",
+    )
+    table.add_row(
+        "Databases",
+        str(len(flow_result.databases)),
+        ", ".join(sorted({d.db_type for d in flow_result.databases})) or "-",
+    )
+    table.add_row(
+        "Cloud services",
+        str(len(flow_result.cloud_services)),
+        ", ".join(sorted({f"{c.provider}/{c.service}" for c in flow_result.cloud_services})) or "-",
+    )
+    table.add_row(
+        "File I/O ops",
+        str(len(flow_result.file_io)),
+        "",
+    )
+    console.print(table)
+
+
+@app.command()
+def comply(
+    path: Annotated[
+        Path, typer.Argument(help="Codebase directory to scan")
+    ] = Path("."),
+    output: Annotated[
+        Optional[Path],
+        typer.Option("--output", "-o", help="Output file or directory"),
+    ] = None,
+    trace_path: Annotated[
+        Optional[Path],
+        typer.Option("--traces", "-t", help="Trace file/directory for Article 12 audit"),
+    ] = None,
+    trace_format: Annotated[
+        str,
+        typer.Option("--trace-format", help="Trace format: auto, otel, langfuse, raw"),
+    ] = "auto",
+    risk_level: Annotated[
+        str, typer.Option("--risk-level", help="Risk classification")
+    ] = "high_risk",
+    split: Annotated[
+        bool,
+        typer.Option("--split", help="Write individual report files to a directory"),
+    ] = False,
+) -> None:
+    """Run the full EU AI Act compliance suite in one command.
+
+    Scans your codebase and generates a complete compliance package
+    covering Articles 11 (technical documentation), 12 (record-keeping,
+    if traces provided), and 13 (data flow transparency), plus a
+    GDPR Article 30 Record of Processing Activities.
+
+    One codebase. One command. Three articles.
+    """
+    from ai_trace_auditor.comply.runner import run_full_compliance
+    from ai_trace_auditor.reports.comply_report import ComplyReporter
+
+    if not path.exists() or not path.is_dir():
+        console.print(f"[red]Error:[/red] {path} is not a valid directory")
+        raise typer.Exit(code=2)
+
+    if trace_path and not trace_path.exists():
+        console.print(f"[red]Error:[/red] {trace_path} does not exist")
+        raise typer.Exit(code=2)
+
+    console.print(f"[bold]EU AI Act Compliance Suite[/bold]")
+    console.print(f"Scanning [bold]{path}[/bold]...\n")
+
+    pkg = run_full_compliance(
+        codebase_dir=path,
+        trace_path=trace_path,
+        trace_format=trace_format,
+        risk_level=risk_level,
+    )
+
+    # Print summary
+    _print_comply_summary(pkg)
+
+    # Output
+    reporter = ComplyReporter()
+
+    if split and output:
+        created = reporter.write_split(pkg, output)
+        console.print(f"\n[bold]Compliance package written to {output}/[/bold]")
+        for f in created:
+            console.print(f"  {f.name}")
+    elif output:
+        reporter.write(pkg, output)
+        console.print(f"\nCompliance package written to [bold]{output}[/bold]")
+    else:
+        stdout_console.print(reporter.render(pkg))
+
+    # Warnings
+    for warning in pkg.warnings:
+        console.print(f"[yellow]Warning:[/yellow] {warning}")
+
+    # Exit code
+    has_gaps = (
+        pkg.gap_report is not None
+        and (pkg.gap_report.summary.missing > 0 or pkg.gap_report.summary.partial > 0)
+    )
+    raise typer.Exit(code=1 if has_gaps else 0)
+
+
+def _print_comply_summary(pkg: "CompliancePackage") -> None:
+    """Print the unified compliance summary."""
+    from ai_trace_auditor.comply.runner import CompliancePackage
+
+    table = Table(title="EU AI Act Compliance Package", border_style="bold green")
+    table.add_column("Article", style="bold")
+    table.add_column("Status")
+    table.add_column("Key Metric", justify="right")
+
+    # Article 12
+    if pkg.gap_report:
+        score = pkg.gap_report.overall_score * 100
+        color = "green" if score >= 90 else "yellow" if score >= 50 else "red"
+        table.add_row(
+            "Art. 12 — Record-Keeping",
+            "[green]Audited[/green]",
+            f"[{color}]{score:.1f}%[/{color}] compliance",
+        )
+    else:
+        table.add_row(
+            "Art. 12 — Record-Keeping",
+            "[dim]No traces[/dim]",
+            "[dim]Use --traces[/dim]",
+        )
+
+    # Article 11
+    pct = pkg.docs_completion_pct
+    table.add_row(
+        "Art. 11 — Tech Docs (Annex IV)",
+        "[green]Generated[/green]",
+        f"{pct:.0f}% auto-populated",
+    )
+
+    # Article 13
+    table.add_row(
+        "Art. 13 — Transparency",
+        "[green]Mapped[/green]",
+        f"{pkg.service_count} services, {pkg.flow_count} flows",
+    )
+
+    # GDPR
+    ropa_count = len(pkg.ropa.entries) if pkg.ropa else 0
+    table.add_row(
+        "GDPR Art. 30 — RoPA",
+        "[green]Generated[/green]",
+        f"{ropa_count} activities",
+    )
+
+    console.print(table)
+
+    # Quick stats
+    console.print(f"\n[dim]Files scanned: {pkg.code_scan.file_count} | "
+                  f"AI providers: {', '.join(pkg.code_scan.providers) or 'none'} | "
+                  f"Models: {', '.join(pkg.code_scan.models[:3]) or 'none'}[/dim]")
+
+
+@app.command()
 def version() -> None:
     """Print version information."""
     console.print(f"ai-trace-auditor v{ai_trace_auditor.__version__}")
