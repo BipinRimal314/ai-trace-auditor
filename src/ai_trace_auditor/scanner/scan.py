@@ -8,7 +8,15 @@ from pathlib import Path
 from ai_trace_auditor.models.docs import CodeScanResult
 from ai_trace_auditor.scanner.deployment_scanner import scan_deployment
 from ai_trace_auditor.scanner.js_scanner import scan_js_file
-from ai_trace_auditor.scanner.patterns import JS_EXTENSIONS, PYTHON_EXTENSIONS, SKIP_DIRS
+from ai_trace_auditor.scanner.patterns import (
+    CONFIG_FILE_NAMES,
+    JS_EXTENSIONS,
+    PYTHON_EXTENSIONS,
+    SKIP_DIRS,
+    TEST_DIR_NAMES,
+    TEST_FILE_PREFIXES,
+    TEST_FILE_SUFFIXES,
+)
 from ai_trace_auditor.scanner.python_scanner import scan_python_file
 
 
@@ -39,9 +47,20 @@ def scan_codebase(root_dir: Path) -> CodeScanResult:
         else:
             continue
 
+        is_test = _is_test_file(file_path, root_dir)
+        is_config = _is_config_file(file_path)
+
+        # Always collect imports (test files legitimately import SDKs)
         ai_imports.extend(scan["ai_imports"])
-        model_refs.extend(scan["model_refs"])
         vector_dbs.extend(scan["vector_dbs"])
+
+        # Model refs from test/config files are reference data, not usage.
+        # Files with >10 model refs are likely mapping tables, not usage.
+        file_model_refs = scan["model_refs"]
+        if not is_test and not is_config and len(file_model_refs) <= 10:
+            model_refs.extend(file_model_refs)
+
+        # Training data and eval metrics: keep from all files
         training_data.extend(scan["training_data"])
         eval_metrics.extend(scan["eval_metrics"])
         endpoints.extend(scan["endpoints"])
@@ -110,12 +129,53 @@ def _dedupe_imports(imports: list) -> list:
 
 
 def _dedupe_model_refs(refs: list) -> list:
-    """Remove duplicate model references (same model + file)."""
-    seen: set[tuple[str, str]] = set()
+    """Remove duplicate model references.
+
+    Keeps the first occurrence of each model ID globally (not per-file).
+    Normalizes IDs by stripping trailing punctuation.
+    This prevents gateway/proxy codebases from listing hundreds of models
+    that appear in routing tables.
+    """
+    seen: set[str] = set()
     unique = []
     for ref in refs:
-        key = (ref.model_id, ref.file_path)
-        if key not in seen:
-            seen.add(key)
-            unique.append(ref)
+        # Normalize: strip trailing dots, dashes, underscores
+        clean_id = ref.model_id.rstrip(".-_")
+        if not clean_id or clean_id in seen:
+            continue
+        # Skip obvious non-model strings that slipped through regex
+        if any(ext in clean_id for ext in (".py", ".js", ".ts", ".html", ".ipynb", ".mjs")):
+            continue
+        seen.add(clean_id)
+        # Update the ref with cleaned ID
+        ref_copy = ref.model_copy(update={"model_id": clean_id})
+        unique.append(ref_copy)
     return unique
+
+
+def _is_test_file(file_path: Path, root_dir: Path) -> bool:
+    """Check if a file is a test file (model refs are test data, not usage)."""
+    name = file_path.name.lower()
+
+    # Check filename patterns
+    if name.startswith(TEST_FILE_PREFIXES):
+        return True
+    for suffix in TEST_FILE_SUFFIXES:
+        if name.endswith(suffix):
+            return True
+
+    # Check if any parent directory is a test directory
+    try:
+        rel = file_path.relative_to(root_dir)
+    except ValueError:
+        return False
+    for part in rel.parts[:-1]:
+        if part.lower() in TEST_DIR_NAMES:
+            return True
+
+    return False
+
+
+def _is_config_file(file_path: Path) -> bool:
+    """Check if a file is a config/mapping file (model names are reference data)."""
+    return file_path.name.lower() in CONFIG_FILE_NAMES
