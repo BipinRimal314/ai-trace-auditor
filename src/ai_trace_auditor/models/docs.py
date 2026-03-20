@@ -14,6 +14,7 @@ class AIImport(BaseModel):
     module_path: str  # "anthropic.Anthropic", "openai"
     file_path: str
     line_number: int
+    usage_type: str = "uses"  # "uses" (direct usage) or "supports" (optional/plugin/example)
 
 
 class ModelReference(BaseModel):
@@ -83,8 +84,18 @@ class CodeScanResult(BaseModel):
 
     @property
     def providers(self) -> list[str]:
-        """Unique AI providers/libraries detected."""
+        """Unique AI providers/libraries detected (all, both uses and supports)."""
         return sorted({imp.library for imp in self.ai_imports})
+
+    @property
+    def providers_used(self) -> list[str]:
+        """Providers directly used in core code (not optional integrations)."""
+        return sorted({imp.library for imp in self.ai_imports if imp.usage_type == "uses"})
+
+    @property
+    def providers_supported(self) -> list[str]:
+        """Providers supported via optional integrations/plugins."""
+        return sorted({imp.library for imp in self.ai_imports if imp.usage_type == "supports"})
 
     @property
     def models(self) -> list[str]:

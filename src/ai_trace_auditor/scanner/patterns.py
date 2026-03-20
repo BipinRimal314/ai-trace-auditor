@@ -193,3 +193,16 @@ CONFIG_FILE_NAMES: frozenset[str] = frozenset({
     "model_prices.py", "model_map.py", "model_config.py",
     "model_list.py", "supported_models.py", "cost_map.py",
 })
+
+# ---------------------------------------------------------------------------
+# "Supports" directories — imports here are optional integrations, not usage
+# ---------------------------------------------------------------------------
+SUPPORTS_DIR_NAMES: frozenset[str] = frozenset({
+    "integrations", "integration", "plugins", "plugin",
+    "extensions", "extension", "contrib", "contrib_modules",
+    "connectors", "connector", "providers", "provider",
+    "adapters", "adapter", "backends", "backend",
+    "examples", "example", "samples", "sample",
+    "cookbook", "cookbooks", "recipes", "demo", "demos",
+    "optional", "extras", "third_party",
+})

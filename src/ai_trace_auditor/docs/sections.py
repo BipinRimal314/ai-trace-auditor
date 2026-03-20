@@ -81,13 +81,22 @@ def build_section_1(
     confidence = "manual"
     auto = False
 
-    if scan.providers:
+    if scan.providers_used:
         auto = True
         confidence = "medium"
-        parts.append("### AI Providers and SDKs Detected\n")
-        for provider in scan.providers:
-            count = sum(1 for imp in scan.ai_imports if imp.library == provider)
+        parts.append("### AI Providers Used (Direct Dependencies)\n")
+        for provider in scan.providers_used:
+            count = sum(1 for imp in scan.ai_imports if imp.library == provider and imp.usage_type == "uses")
             parts.append(f"- **{provider}** ({count} import{'s' if count > 1 else ''})")
+        parts.append("")
+
+    if scan.providers_supported:
+        auto = True
+        parts.append("### AI Providers Supported (Optional Integrations)\n")
+        parts.append("*These are available via plugins or integration modules but may not be active in your deployment.*\n")
+        for provider in scan.providers_supported:
+            if provider not in scan.providers_used:
+                parts.append(f"- {provider}")
         parts.append("")
 
     if scan.models:
