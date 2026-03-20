@@ -42,13 +42,19 @@ def build_scope_check(scan: CodeScanResult) -> AnnexIVSection:
     parts.append("- **Essential public services** — evaluating eligibility for benefits, housing, emergency services")
     parts.append("")
     parts.append(
-        "If your system does not fall into these categories, the high-risk "
-        "obligations in this document do not apply. You may still have obligations under:\n"
+        "If your system does not obviously fall into these categories, the "
+        "high-risk obligations (Articles 9-15) are less likely to apply. However, "
+        "risk classification is context-dependent and can change as your system "
+        "evolves. **Do not self-classify without legal review.** You may still "
+        "have obligations under:\n"
     )
     parts.append("- **Article 50** — transparency for chatbots and systems interacting directly with users")
     parts.append("- **GDPR** — if processing personal data through AI providers")
     parts.append("")
-    parts.append("If you are unsure, consult a qualified legal professional.\n")
+    parts.append(
+        "Consult a qualified legal professional to confirm your system's "
+        "classification before relying on this assessment.\n"
+    )
 
     if scan.has_ai_usage:
         parts.append("### Detected AI Components\n")
