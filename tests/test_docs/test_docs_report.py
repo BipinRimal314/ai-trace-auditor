@@ -97,5 +97,5 @@ class TestDocsReporter:
         )
         doc = generate_annex_iv(scan, gap_report)
         md = DocsReporter().render(doc)
-        assert "85.0%" in md
         assert "error classification" in md
+        assert "Requirements satisfied" in md

@@ -1,10 +1,11 @@
-"""Assemble all 9 Annex IV sections into a complete document."""
+"""Assemble all Annex IV sections into a complete document."""
 
 from __future__ import annotations
 
 from datetime import datetime, timezone
 
 from ai_trace_auditor.docs.sections import (
+    build_scope_check,
     build_section_1,
     build_section_2,
     build_section_3,
@@ -37,14 +38,17 @@ def generate_annex_iv(
 ) -> AnnexIVDocument:
     """Generate a complete Annex IV technical documentation package.
 
+    Includes a scope check (Section 0) followed by the 9 Annex IV sections.
+
     Args:
         scan: Results from scanning the codebase.
         gap_report: Optional trace compliance report to enrich sections 3, 6, 9.
 
     Returns:
-        An AnnexIVDocument with all 9 sections.
+        An AnnexIVDocument with scope check + 9 sections.
     """
-    sections = [builder(scan, gap_report) for builder in _BUILDERS]
+    sections = [build_scope_check(scan)]
+    sections.extend(builder(scan, gap_report) for builder in _BUILDERS)
 
     return AnnexIVDocument(
         sections=sections,

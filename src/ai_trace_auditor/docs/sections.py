@@ -2,6 +2,13 @@
 
 Each function takes a CodeScanResult and optional GapReport,
 returns an AnnexIVSection with auto-populated content where possible.
+
+Fixes applied (v0.10.1):
+- Bug 1: GDPR roles reference organizations, not software
+- Bug 2: Article 13 (provider→deployer) vs Article 50 (deployer→user) separated
+- Bug 3: No percentage claims for per-article coverage
+- Bug 4: Retention distinguishes Article 18 (10yr) from Article 26(6) (6mo)
+- Bug 5: Scope check / risk classification included
 """
 
 from __future__ import annotations
@@ -10,6 +17,54 @@ from ai_trace_auditor.models.docs import AnnexIVSection, CodeScanResult
 from ai_trace_auditor.models.gap import GapReport
 
 MANUAL = "[MANUAL INPUT REQUIRED]"
+
+
+def build_scope_check(scan: CodeScanResult) -> AnnexIVSection:
+    """Section 0: Risk classification and scope check.
+
+    This is prepended to the document to help deployers determine
+    if Articles 9-15 even apply to their system.
+    """
+    parts: list[str] = []
+
+    parts.append("### Is your system in scope?\n")
+    parts.append(
+        "Articles 9-15 of the EU AI Act (including the technical documentation "
+        "requirement in Article 11) apply only to **high-risk AI systems** as "
+        "defined in Annex III. Before proceeding with compliance documentation, "
+        "determine whether your system falls into one of these categories:\n"
+    )
+    parts.append("- **Recruitment and HR** — screening CVs, evaluating candidates, allocating tasks")
+    parts.append("- **Credit scoring and insurance** — assessing creditworthiness or setting premiums")
+    parts.append("- **Law enforcement** — profiling, criminal risk assessment, border control")
+    parts.append("- **Critical infrastructure** — managing energy, water, transport, or telecommunications")
+    parts.append("- **Education assessment** — grading students, determining admissions")
+    parts.append("- **Essential public services** — evaluating eligibility for benefits, housing, emergency services")
+    parts.append("")
+    parts.append(
+        "If your system does not fall into these categories, the high-risk "
+        "obligations in this document do not apply. You may still have obligations under:\n"
+    )
+    parts.append("- **Article 50** — transparency for chatbots and systems interacting directly with users")
+    parts.append("- **GDPR** — if processing personal data through AI providers")
+    parts.append("")
+    parts.append("If you are unsure, consult a qualified legal professional.\n")
+
+    if scan.has_ai_usage:
+        parts.append("### Detected AI Components\n")
+        parts.append(f"- **AI providers:** {', '.join(scan.providers) or 'none detected'}")
+        parts.append(f"- **Models:** {', '.join(scan.models[:10]) or 'none detected'}")
+        if len(scan.models) > 10:
+            parts.append(f"  *(and {len(scan.models) - 10} more)*")
+        parts.append("")
+
+    return AnnexIVSection(
+        section_number=0,
+        title="Risk Classification and Scope",
+        content="\n".join(parts),
+        auto_populated=scan.has_ai_usage,
+        confidence="medium" if scan.has_ai_usage else "manual",
+    )
 
 
 def build_section_1(
@@ -138,9 +193,7 @@ def build_section_3(
     if gap_report is not None:
         auto = True
         confidence = "high" if gap_report.overall_score >= 0.8 else "medium"
-        score_pct = gap_report.overall_score * 100
-        parts.append("### Trace Compliance Status (from `aitrace audit`)\n")
-        parts.append(f"- **Overall compliance score:** {score_pct:.1f}%")
+        parts.append("### Trace Compliance Status\n")
         parts.append(f"- **Requirements satisfied:** {gap_report.summary.satisfied}")
         parts.append(f"- **Partial coverage:** {gap_report.summary.partial}")
         parts.append(f"- **Missing:** {gap_report.summary.missing}")
@@ -165,9 +218,8 @@ def build_section_3(
     parts.append("*Describe human-in-the-loop mechanisms, override capabilities, and escalation procedures.*\n")
 
     parts.append("### Logging and Monitoring\n")
-    if gap_report is None:
-        parts.append(f"{MANUAL}\n")
-        parts.append("*Tip: Run `aitrace audit` on your trace data to auto-populate this section.*\n")
+    parts.append(f"{MANUAL}\n")
+    parts.append("*Document what events are logged, where logs are stored, and monitoring alerts.*\n")
 
     return AnnexIVSection(
         section_number=3,
@@ -358,12 +410,20 @@ def build_section_9(
     if gap_report is not None:
         auto = True
         confidence = "medium"
-        score_pct = gap_report.overall_score * 100
         parts.append("### Current Monitoring Coverage (from trace data)\n")
-        parts.append(f"- Compliance score: {score_pct:.1f}%")
         parts.append(f"- Requirements satisfied: {gap_report.summary.satisfied}")
         parts.append(f"- Gaps found: {gap_report.summary.missing + gap_report.summary.partial}")
         parts.append("")
+
+    parts.append("### Data Retention\n")
+    parts.append(
+        "The required retention period depends on your role under the Act. "
+        "**Article 18** requires providers of high-risk systems to retain logs "
+        "and technical documentation for **10 years** after market placement. "
+        "**Article 26(6)** requires deployers to retain logs for at least "
+        "**6 months**, or longer if appropriate to the intended purpose. "
+        "Confirm the applicable period with legal counsel.\n"
+    )
 
     parts.append("### Monitoring Plan\n")
     parts.append(f"{MANUAL}\n")

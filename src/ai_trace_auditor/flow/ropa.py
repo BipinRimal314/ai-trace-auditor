@@ -76,5 +76,8 @@ def _data_categories(flow: DataFlow) -> str:
 def _transfer_description(flow: DataFlow) -> str:
     """Describe data transfer characteristics."""
     if flow.gdpr_role == "controller":
-        return "Internal processing (no third-party transfer)"
-    return f"Transfer to {flow.destination} as {flow.gdpr_role}"
+        return "Internal processing (no third-party transfer); your organization is the controller"
+    return (
+        f"Transfer to {flow.destination}; the operating organization typically "
+        f"acts as {flow.gdpr_role} (verify per provider's DPA/terms)"
+    )

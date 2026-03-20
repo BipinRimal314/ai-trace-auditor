@@ -17,7 +17,7 @@ _SHAPES: dict[str, tuple[str, str]] = {
     "storage": ("[(", ")]"),
 }
 
-# Style classes by GDPR role
+# Style classes by GDPR role (roles apply to the operating organization, not the software)
 _STYLE_CLASSES = """
     classDef controller fill:#4ade80,stroke:#166534,color:#000
     classDef processor fill:#60a5fa,stroke:#1e40af,color:#000
@@ -26,6 +26,15 @@ _STYLE_CLASSES = """
     classDef app fill:#a78bfa,stroke:#5b21b6,color:#000
     classDef user fill:#f472b6,stroke:#be185d,color:#000
 """
+
+# Legend text clarifying GDPR roles apply to organizations
+GDPR_LEGEND = (
+    "**GDPR role legend** (roles apply to the *operating organization*, not the software):\n"
+    "- Green = your organization typically acts as controller\n"
+    "- Blue = the service operator typically acts as processor (verify per provider's DPA)\n"
+    "- Yellow = sub-processor\n"
+    "- Gray = role not determined"
+)
 
 
 def generate_mermaid(flow_result: FlowScanResult) -> str:

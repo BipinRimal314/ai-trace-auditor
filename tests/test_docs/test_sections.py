@@ -135,12 +135,12 @@ class TestSection2:
 class TestSection3:
     def test_without_traces_is_manual(self):
         section = build_section_3(_rich_scan())
-        assert "aitrace audit" in section.content
+        assert "Human Oversight" in section.content
 
     def test_with_traces_shows_compliance(self):
         section = build_section_3(_rich_scan(), _mock_gap_report())
         assert section.auto_populated is True
-        assert "82.0%" in section.content
+        assert "Requirements satisfied" in section.content
         assert "Temperature" in section.content
 
     def test_shows_deployment_configs(self):
@@ -215,4 +215,10 @@ class TestSection9:
     def test_with_traces_shows_monitoring(self):
         section = build_section_9(_rich_scan(), _mock_gap_report())
         assert section.auto_populated is True
-        assert "82.0%" in section.content
+        assert "Requirements satisfied" in section.content
+
+    def test_retention_guidance(self):
+        section = build_section_9(_rich_scan())
+        assert "10 years" in section.content
+        assert "Article 18" in section.content
+        assert "Article 26(6)" in section.content

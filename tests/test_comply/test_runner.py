@@ -33,7 +33,7 @@ class TestRunFullCompliance:
     def test_annex_iv_generated(self):
         pkg = run_full_compliance(SAMPLE_CODEBASE)
         assert pkg.annex_iv is not None
-        assert len(pkg.annex_iv.sections) == 9
+        assert len(pkg.annex_iv.sections) == 10  # scope check + 9 sections
 
     def test_flow_scan_populated(self):
         pkg = run_full_compliance(SAMPLE_CODEBASE)

@@ -20,7 +20,7 @@
 | {{ s.section_number }} | {{ s.title }} | {{ '✅ Auto' if s.auto_populated else '📝 Manual' }} | {{ s.confidence }} |
 {% endfor %}
 
-**Auto-populated:** {{ doc.sections | selectattr('auto_populated') | list | length }} / {{ doc.sections | length }} sections ({{ '%.0f' | format(doc.completion_pct) }}%)
+**Auto-populated:** {{ doc.sections | selectattr('auto_populated') | list | length }} / {{ doc.sections | length }} sections
 
 ---
 
