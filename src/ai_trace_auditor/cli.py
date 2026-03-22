@@ -734,6 +734,10 @@ def docs(
     risk_level: Annotated[
         str, typer.Option("--risk-level", help="Risk classification")
     ] = "high_risk",
+    agent_friendly: Annotated[
+        bool,
+        typer.Option("--agent-friendly", help="Run agent-friendly documentation checks on output"),
+    ] = False,
 ) -> None:
     """Generate EU AI Act Article 11 / Annex IV technical documentation.
 
@@ -790,14 +794,20 @@ def docs(
     doc = generate_annex_iv(scan_result, gap_report)
     reporter = DocsReporter()
 
+    rendered = reporter.render(doc)
+
     if output:
         reporter.write(doc, output)
         console.print(f"Documentation written to [bold]{output}[/bold]")
     else:
-        stdout_console.print(reporter.render(doc))
+        stdout_console.print(rendered)
 
     # Print completion summary
     _print_docs_summary(doc)
+
+    # Agent-friendly checks
+    if agent_friendly:
+        _run_agent_friendly_checks(rendered)
 
 
 def _print_scan_summary(scan: "CodeScanResult") -> None:
@@ -864,6 +874,60 @@ def _print_docs_summary(doc: "AnnexIVDocument") -> None:
         console.print(
             "[dim]Tip: Use --traces to enrich sections 3, 6, and 9 with compliance data[/dim]"
         )
+
+
+def _run_agent_friendly_checks(markdown: str) -> None:
+    """Run and display agent-friendly documentation checks."""
+    from ai_trace_auditor.agent_friendly import check_agent_friendly
+
+    report = check_agent_friendly(markdown)
+
+    console.print()
+    table = Table(title="Agent-Friendly Documentation Checks")
+    table.add_column("Check", style="bold")
+    table.add_column("Status")
+    table.add_column("Value", justify="right")
+    table.add_column("Detail")
+
+    status_style = {"pass": "green", "warn": "yellow", "fail": "red"}
+
+    for check in report.checks:
+        style = status_style.get(check.status, "white")
+        symbol = {"pass": "✓", "warn": "⚠", "fail": "✗"}.get(check.status, "?")
+        table.add_row(
+            check.title,
+            f"[{style}]{symbol} {check.status}[/{style}]",
+            check.value,
+            check.detail,
+        )
+
+    console.print(table)
+    console.print(
+        f"\n[bold]Agent-friendly score:[/bold] {report.score_pct:.0f}% "
+        f"({report.passed} passed, {report.warnings} warnings, {report.failed} failed)"
+    )
+
+
+@app.command(name="agent-friendly")
+def agent_friendly_cmd(
+    path: Annotated[
+        Path, typer.Argument(help="Markdown file to check"),
+    ],
+) -> None:
+    """Check if a Markdown document is agent-friendly.
+
+    Evaluates whether a compliance document (or any Markdown file) can
+    be effectively consumed by AI coding agents. Checks document size,
+    structure, placeholder density, information density, and more.
+
+    Based on the Agent-Friendly Documentation Spec (agentdocsspec.com).
+    """
+    if not path.exists():
+        console.print(f"[red]Error:[/red] {path} does not exist")
+        raise typer.Exit(code=2)
+
+    markdown = path.read_text(encoding="utf-8")
+    _run_agent_friendly_checks(markdown)
 
 
 @app.command()
