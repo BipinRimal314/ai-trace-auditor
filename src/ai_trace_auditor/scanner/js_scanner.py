@@ -38,6 +38,17 @@ for db, packages in JS_VECTOR_DB_IMPORTS.items():
         _JS_IMPORT_LOOKUP[pkg] = ("vector_db", db)
 
 
+# API URL patterns for BYOK/fetch-based AI usage (no SDK import)
+_AI_API_URL_PATTERNS: dict[str, re.Pattern[str]] = {
+    "anthropic": re.compile(r"""api\.anthropic\.com"""),
+    "openai": re.compile(r"""api\.openai\.com"""),
+    "google_genai": re.compile(r"""generativelanguage\.googleapis\.com"""),
+    "cohere": re.compile(r"""api\.cohere\.ai"""),
+    "mistral": re.compile(r"""api\.mistral\.ai"""),
+    "huggingface": re.compile(r"""api-inference\.huggingface\.co"""),
+}
+
+
 def scan_js_file(file_path: Path) -> dict[str, list]:
     """Scan a JS/TS file for AI framework usage.
 
@@ -60,6 +71,7 @@ def scan_js_file(file_path: Path) -> dict[str, list]:
     lines = source.splitlines()
     fp = str(file_path)
     has_ai_import = False
+    api_url_providers_seen: set[str] = set()
 
     for i, line in enumerate(lines, 1):
         # --- Import detection ---
@@ -84,6 +96,18 @@ def scan_js_file(file_path: Path) -> dict[str, list]:
                             file_path=fp,
                             line_number=i,
                         ))
+
+        # --- BYOK / fetch-based API URL detection ---
+        for provider, url_pattern in _AI_API_URL_PATTERNS.items():
+            if provider not in api_url_providers_seen and url_pattern.search(line):
+                api_url_providers_seen.add(provider)
+                result["ai_imports"].append(AIImport(
+                    library=provider,
+                    module_path=f"fetch/{provider} (BYOK — API URL detected, no SDK import)",
+                    file_path=fp,
+                    line_number=i,
+                ))
+                has_ai_import = True
 
         # --- Model identifier detection ---
         for pattern in MODEL_PATTERNS:

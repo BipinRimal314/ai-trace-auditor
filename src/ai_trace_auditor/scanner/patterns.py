@@ -172,6 +172,9 @@ SKIP_DIRS: frozenset[str] = frozenset({
     "node_modules", ".venv", "venv", "__pycache__", ".git", "dist", "build",
     ".next", ".tox", ".mypy_cache", ".pytest_cache", ".ruff_cache", "env",
     ".eggs", "*.egg-info", "coverage", ".coverage", "htmlcov",
+    # Test fixtures and sample code — not real dependencies
+    "fixtures", "test_data", "testdata", "sample_codebase", "examples",
+    "samples", "__fixtures__", "mock_data", "mocks",
 })
 
 # ---------------------------------------------------------------------------

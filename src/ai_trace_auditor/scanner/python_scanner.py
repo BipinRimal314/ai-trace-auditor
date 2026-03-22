@@ -140,9 +140,21 @@ def _add_import(
         ))
 
 
+# API URL patterns for BYOK/requests-based AI usage (no SDK import)
+_PY_API_URL_PATTERNS: dict[str, re.Pattern[str]] = {
+    "anthropic": re.compile(r"""api\.anthropic\.com"""),
+    "openai": re.compile(r"""api\.openai\.com"""),
+    "google_genai": re.compile(r"""generativelanguage\.googleapis\.com"""),
+    "cohere": re.compile(r"""api\.cohere\.ai"""),
+    "mistral": re.compile(r"""api\.mistral\.ai"""),
+    "huggingface": re.compile(r"""api-inference\.huggingface\.co"""),
+}
+
+
 def _scan_lines(lines: list[str], fp: str, result: dict[str, list]) -> None:
-    """Regex scan for training data patterns and eval metrics."""
+    """Regex scan for training data, eval metrics, and BYOK API URLs."""
     eval_metrics_found: list[str] = []
+    api_url_providers_seen: set[str] = set()
 
     for i, line in enumerate(lines, 1):
         for pattern in TRAINING_DATA_PATTERNS:
@@ -160,6 +172,17 @@ def _scan_lines(lines: list[str], fp: str, result: dict[str, list]) -> None:
                 metric_name = pattern.pattern.rstrip(r"\s*\(")
                 if metric_name not in eval_metrics_found:
                     eval_metrics_found.append(metric_name)
+
+        # BYOK / requests-based API URL detection
+        for provider, url_pattern in _PY_API_URL_PATTERNS.items():
+            if provider not in api_url_providers_seen and url_pattern.search(line):
+                api_url_providers_seen.add(provider)
+                result["ai_imports"].append(AIImport(
+                    library=provider,
+                    module_path=f"requests/{provider} (BYOK — API URL detected, no SDK import)",
+                    file_path=fp,
+                    line_number=i,
+                ))
 
     if eval_metrics_found:
         result["eval_metrics"].append(EvalScriptRef(
