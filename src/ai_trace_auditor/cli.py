@@ -1008,6 +1008,10 @@ def comply(
         bool,
         typer.Option("--split", help="Write individual report files to a directory"),
     ] = False,
+    report_format: Annotated[
+        str,
+        typer.Option("--format", "-f", help="Output format: markdown, pdf, both"),
+    ] = "markdown",
 ) -> None:
     """Run the full EU AI Act compliance suite in one command.
 
@@ -1044,15 +1048,40 @@ def comply(
 
     # Output
     reporter = ComplyReporter()
+    want_pdf = report_format in ("pdf", "both")
+    want_md = report_format in ("markdown", "both")
+
+    if want_pdf:
+        from ai_trace_auditor.reports.pdf_report import check_pdf_available, markdown_to_pdf
+        if not check_pdf_available():
+            console.print(
+                "[red]Error:[/red] PDF output requires extra dependencies. "
+                "Install with: [bold]pip install ai-trace-auditor\\[pdf][/bold]"
+            )
+            raise typer.Exit(code=2)
 
     if split and output:
         created = reporter.write_split(pkg, output)
         console.print(f"\n[bold]Compliance package written to {output}/[/bold]")
         for f in created:
             console.print(f"  {f.name}")
+        if want_pdf:
+            from ai_trace_auditor.reports.pdf_report import markdown_to_pdf
+            for f in created:
+                if f.suffix == ".md":
+                    pdf_path = f.with_suffix(".pdf")
+                    markdown_to_pdf(f.read_text(encoding="utf-8"), pdf_path)
+                    console.print(f"  {pdf_path.name} [green](PDF)[/green]")
     elif output:
-        reporter.write(pkg, output)
-        console.print(f"\nCompliance package written to [bold]{output}[/bold]")
+        md_content = reporter.render(pkg)
+        if want_md:
+            output.write_text(md_content, encoding="utf-8")
+            console.print(f"\nCompliance package written to [bold]{output}[/bold]")
+        if want_pdf:
+            from ai_trace_auditor.reports.pdf_report import markdown_to_pdf
+            pdf_path = output.with_suffix(".pdf") if output.suffix == ".md" else Path(str(output) + ".pdf")
+            markdown_to_pdf(md_content, pdf_path)
+            console.print(f"PDF report written to [bold]{pdf_path}[/bold]")
     else:
         stdout_console.print(reporter.render(pkg))
 

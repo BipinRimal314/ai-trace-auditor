@@ -30,6 +30,9 @@ dependencies = [
     "pyyaml>=6.0",
 ]
 
+[project.optional-dependencies]
+pdf = ["weasyprint>=62.0", "markdown>=3.5"]
+
 [project.scripts]
 aitrace = "ai_trace_auditor.cli:app"
 
