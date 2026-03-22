@@ -77,7 +77,22 @@ def _transfer_description(flow: DataFlow) -> str:
     """Describe data transfer characteristics."""
     if flow.gdpr_role == "controller":
         return "Internal processing (no third-party transfer); your organization is the controller"
-    return (
-        f"Transfer to {flow.destination}; the operating organization typically "
-        f"acts as {flow.gdpr_role} (verify per provider's DPA/terms)"
-    )
+
+    parts = [f"Transfer to {flow.destination}"]
+
+    if flow.gdpr_role_note:
+        parts.append(flow.gdpr_role_note)
+    else:
+        parts.append(
+            f"the operating organization typically acts as {flow.gdpr_role} "
+            f"(verify per provider's DPA/terms)"
+        )
+
+    if flow.requires_transfer_safeguards:
+        jurisdiction = flow.provider_jurisdiction or "non-EEA"
+        parts.append(
+            f"Cross-border transfer ({jurisdiction}): requires SCCs or equivalent "
+            f"safeguards under GDPR Chapter V"
+        )
+
+    return "; ".join(parts)

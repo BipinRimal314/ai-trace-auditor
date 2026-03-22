@@ -322,9 +322,12 @@ def _build_ai_provider_flows(
             data_type=gdpr["data_type"],
             purpose=gdpr["purpose"],
             gdpr_role=gdpr["gdpr_role"],
+            gdpr_role_note=gdpr.get("gdpr_role_note", ""),
             file_path=imp.file_path,
             line_number=imp.line_number,
             contains_pii=gdpr["contains_pii"],
+            requires_transfer_safeguards=bool(gdpr.get("requires_transfer_safeguards", False)),
+            provider_jurisdiction=gdpr.get("provider_jurisdiction", ""),
         ))
 
 
@@ -358,9 +361,12 @@ def _build_vector_db_flows(
             data_type=gdpr["data_type"],
             purpose=gdpr["purpose"],
             gdpr_role=gdpr["gdpr_role"],
+            gdpr_role_note=gdpr.get("gdpr_role_note", ""),
             file_path=vdb.file_path,
             line_number=vdb.line_number,
             contains_pii=gdpr["contains_pii"],
+            requires_transfer_safeguards=bool(gdpr.get("requires_transfer_safeguards", False)),
+            provider_jurisdiction=gdpr.get("provider_jurisdiction", ""),
         ))
 
 

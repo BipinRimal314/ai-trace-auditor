@@ -35,7 +35,7 @@ class CompliancePackage:
     # Article 11 — Technical documentation
     annex_iv: AnnexIVDocument | None = None
 
-    # Article 13 — Transparency + GDPR Article 30
+    # Data flow mapping (supports Article 13 documentation + GDPR Article 30)
     flow_scan: FlowScanResult | None = None
     flow_diagram: FlowDiagram | None = None
     ropa: RoPAReport | None = None
@@ -80,7 +80,14 @@ def run_full_compliance(
     1. Scan codebase (shared between docs + flow)
     2. If traces provided: run Article 12 audit
     3. Generate Article 11 Annex IV documentation
-    4. Map Article 13 data flows + GDPR Article 30 RoPA
+    4. Map data flows (supports Article 13 evidence + GDPR Article 30 RoPA)
+    5. Flag Article 50 obligations when user-facing endpoints detected
+
+    Note on Article 13 vs 50:
+    - Article 13: provider must document system for deployers (documentation obligation)
+    - Article 50: deployer must disclose AI to end users (UI/UX obligation)
+    This tool provides supporting evidence for Article 13 but cannot satisfy it alone.
+    Article 50 compliance requires UI changes that are outside this tool's scope.
 
     Returns a CompliancePackage with all results.
     """
@@ -96,6 +103,15 @@ def run_full_compliance(
             "No AI framework usage detected. "
             "The scanner checks Python and JS/TS files for known AI SDKs."
         )
+
+    # Scope classification warning (from PR review feedback: deployers
+    # must not self-classify as non-high-risk without legal review)
+    warnings.append(
+        "Risk classification: This tool audits technical compliance but cannot "
+        "determine whether your system is high-risk under Annex III. "
+        "Risk classification depends on use case, not technology. "
+        "Do not self-classify without legal review."
+    )
 
     # Step 2: Article 12 — Trace audit (if traces provided)
     gap_report = None
@@ -122,7 +138,11 @@ def run_full_compliance(
     annex_iv = generate_annex_iv(code_scan, gap_report)
     articles.append("Article 11 (Technical Documentation)")
 
-    # Step 4: Article 13 — Data flow mapping + GDPR Article 30
+    # Step 4: Data flow mapping (supports Article 13 + Article 50 + GDPR Article 30)
+    # Note: Article 13 = provider→deployer documentation (this tool provides
+    # supporting evidence, not the documentation itself).
+    # Article 50 = deployer→user disclosure (cannot be automated by this tool,
+    # but flagged as a reminder when user-facing endpoints are detected).
     flow_scan = detect_flows(codebase_dir, code_scan)
     mermaid_src = generate_mermaid(flow_scan)
     ropa = generate_ropa(flow_scan)
@@ -135,8 +155,31 @@ def run_full_compliance(
         source_dir=str(codebase_dir),
         trace_enriched=gap_report is not None,
     )
-    articles.append("Article 13 (Transparency)")
+    articles.append("Article 13 (Transparency — provider→deployer documentation)")
     articles.append("GDPR Article 30 (RoPA)")
+
+    # Article 50 reminder when user-facing AI is detected
+    if code_scan.ai_endpoints:
+        articles.append("Article 50 (Transparency — deployer→user disclosure)")
+        warnings.append(
+            "Article 50: User-facing AI endpoints detected. Deployers must "
+            "inform end users that they are interacting with an AI system. "
+            "This is a UI/UX obligation that cannot be satisfied by logging alone."
+        )
+
+    # Flag cross-border transfers requiring safeguards
+    transfer_providers = [
+        f.destination for f in flow_scan.data_flows
+        if f.requires_transfer_safeguards
+    ]
+    if transfer_providers:
+        warnings.append(
+            f"Cross-border transfers detected to non-EEA providers: "
+            f"{', '.join(transfer_providers)}. "
+            f"Each requires Standard Contractual Clauses (SCCs) or equivalent "
+            f"safeguards under GDPR Chapter V. Review each provider's transfer "
+            f"mechanism individually."
+        )
 
     return CompliancePackage(
         generated_at=now,

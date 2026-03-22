@@ -27,9 +27,12 @@ class DataFlow(BaseModel):
     data_type: str  # "prompts", "embeddings", "user_data", "model_responses", "logs"
     purpose: str  # "inference", "storage", "training", "monitoring"
     gdpr_role: str  # "controller", "processor", "joint_controller", "sub_processor"
+    gdpr_role_note: str = ""  # qualifier: "verify per provider DPA" or empty for definitive roles
     file_path: str
     line_number: int
     contains_pii: str = "unknown"  # "yes", "no", "unknown", "likely"
+    requires_transfer_safeguards: bool = False  # True if provider is outside EEA
+    provider_jurisdiction: str = ""  # "US", "EU", "self_hosted", etc.
 
 
 class HTTPClientUsage(BaseModel):

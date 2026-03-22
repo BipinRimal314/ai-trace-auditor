@@ -417,13 +417,68 @@ Tested `aitrace comply` on 5 open-source projects (Haystack, CrewAI, LiteLLM, n8
 
 ---
 
-## Competitive Positioning
+## Market Adoption Strategy (Added March 23, 2026)
+
+### Strategic decision: split the product
+
+The CLI currently has 12 commands serving two distinct products:
+1. **EU AI Act compliance suite** (`audit`, `docs`, `flow`, `comply`) — buyer: compliance officer, deadline: August 2, 2026
+2. **Claude Code analytics** (`insights`, `workflow`, `predict`, `agents`, `health`) — buyer: developer, no deadline
+
+These serve different buyers with different urgency. The compliance suite has a hard deadline driving demand. The analytics suite is nice-to-have.
+
+**Decision:** Focus all energy on the compliance suite. Analytics features are parked, not deleted. They can become a separate package later (`aitrace-insights`).
+
+### Phase 1: First 10 paying users (April 2026)
+
+| # | Action | Why | Status |
+|---|--------|-----|--------|
+| 1 | **Publish GitHub Action to Marketplace** | Distribution channel. Compliance teams add CI steps, not pip install CLIs | Action.yml exists, needs release tag + marketplace listing |
+| 2 | **Landing page on GitHub Pages** | One page: deadline urgency, 60-second demo, install CTA | Not started |
+| 3 | **PDF report output** | Compliance officers email PDFs to lawyers. Markdown means nothing to them | Not started |
+| 4 | **Email 5 OSS maintainers** | LiteLLM, n8n, Dify, Haystack, CrewAI — already PRed compliance guides. Pitch: run the tool in their CI | PRs submitted, guides merged/pending |
+| 5 | **Publish to PyPI (v0.11)** | Current v0.10.1 may not be on PyPI. Must be installable via `pip install ai-trace-auditor` | Check status |
+| 6 | **README rewrite** | Current README is developer-focused. Needs to lead with the business problem: "August 2026 deadline. Your AI system. Are your logs compliant?" | Not started |
+
+### Phase 2: Revenue — SaaS tier (May-June 2026)
+
+| # | Action | Pricing | Why |
+|---|--------|---------|-----|
+| 7 | **Hosted dashboard** | $99/month (single repo), $499/month (org, multi-repo) | Connect GitHub, get compliance dashboard. No CLI needed. This is where the money is |
+| 8 | **Team features** | Included in $499 tier | Multi-repo compliance view, org-wide gap tracking, exportable evidence pack |
+| 9 | **Article 50 frontend checker** | Included | Scan frontend code for AI disclosure requirements. Nobody does this |
+| 10 | **Scheduled compliance scans** | Included | Weekly automated scans, Slack/email alerts when compliance regresses |
+
+### Phase 3: Market position (June-August 2026)
+
+| # | Action | Why |
+|---|--------|-----|
+| 11 | **Integrations: Langfuse, Arize, Datadog** | Pull traces from where teams already store them. Don't make users export JSONL |
+| 12 | **Compliance-as-Code standard** | Make the YAML requirement format the open standard. If other tools adopt it, we become the platform |
+| 13 | **ISO 42001 + ISO 27001 requirement packs** | Buyers who need EU AI Act also need ISO. Same tool, more regulations |
+| 14 | **SOC 2 AI addendum** | Map AI-specific controls to SOC 2 trust criteria. Bridges the gap between SOC 2 (which companies already have) and AI Act (which they need) |
+
+### Revenue model
+
+```
+Free (open-source CLI)          → adoption, community, OSS credibility
+$99/month (single repo SaaS)    → small teams, startups
+$499/month (org SaaS)           → enterprise, multi-repo, evidence packs
+$2K-$10K (consulting)           → custom compliance assessments using the tool
+```
+
+Target: $5K MRR by August 2026 deadline (50 repos at $99 or 10 orgs at $499).
+
+### Competitive moat
 
 No tool in the market does this. The closest:
-- **Claude Code Analytics API** (Anthropic) — org-level metrics for Team/Enterprise plans. Per-developer productivity, not per-session workflow intelligence.
-- **Cursor analytics** — basic token usage. No workflow patterns, no file hotspots, no efficiency scoring.
-- **GitHub Copilot metrics** — acceptance rate, lines suggested. No conversation analysis, no cost breakdown.
+- **Credo AI** ($41M raised) — Enterprise AI governance platform. Expensive, sales-driven. We're free + self-serve.
+- **OneTrust / Vanta** — GRC policy management. Generic, not AI-specific. Can't read code or traces.
+- **Holistic AI** — AI risk management. Consulting-heavy. No CLI, no CI integration.
+- **Langfuse / Arize** — Observability. They collect traces but don't interpret them against regulations.
 
-AI Trace Auditor is the only tool that gives individual developers deep, local, private insight into how they use AI coding assistants. The data never leaves your machine.
+**Why providers won't build this:** Anthropic, OpenAI, and Google ship usage APIs. Building regulatory interpretation creates liability they don't want.
 
-That last point is the moat. Every competitor who tries to build this will need to collect your data to analyze it. We analyze it where it lives.
+**Why observability tools won't build this:** Langfuse/Arize sell dashboards to engineers. Compliance evidence packs for regulators is a different buyer, different product, different sales motion.
+
+**Our moat:** Open-source CLI + GitHub Action = zero-friction adoption. By the time competitors build, we'll have the install base and the YAML standard.
