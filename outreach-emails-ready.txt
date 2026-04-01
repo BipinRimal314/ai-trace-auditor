@@ -1,0 +1,168 @@
+## Outreach Emails — Ready to Send (March 24, 2026)
+
+Where to send: GitHub Discussions, maintainer emails (from their profiles),
+or as comments on the merged/open PRs. LinkedIn DMs also work.
+
+---
+
+### 1. LiteLLM (BerriAI)
+
+Send to: PR #24248 comment, or krrish@berri.ai (from their README)
+
+Subject: EU AI Act compliance check for LiteLLM — GitHub Action available
+
+Hi,
+
+I submitted PR #24248 (EU AI Act compliance guide for LiteLLM deployers).
+It's been through 20 rounds of automated review (Greptile) and all
+comments have been addressed — scope checks, provider/deployer role
+distinction, Article 14 human oversight corrections, and Article 26(5)
+retention periods.
+
+The guide was generated using AI Trace Auditor, a tool I built that
+scans AI codebases against EU AI Act Articles 11, 12, 13, 50 and
+GDPR Article 30. It's available as a GitHub Action:
+
+    - uses: BipinRimal314/ai-trace-auditor@v0.11.0
+      with:
+        command: comply
+        path: .
+
+For LiteLLM specifically, this catches:
+- Which AI providers are in the codebase and their GDPR transfer status
+- Whether logging callbacks satisfy Article 12 record-keeping
+- Data flow diagrams with cross-border transfer warnings
+
+Open source, Apache 2.0, runs entirely in CI. No data leaves GitHub.
+
+Would you consider adding it to LiteLLM's CI pipeline? Happy to open
+a PR with the workflow file.
+
+Bipin Rimal
+https://bipinrimal314.github.io/ai-trace-auditor/
+
+---
+
+### 2. n8n
+
+Send to: PR #27370 comment (tracked as GHC-7388)
+
+Subject: EU AI Act compliance CI check for n8n — from PR #27370 author
+
+Hi n8n team,
+
+I'm the author of PR #27370 (EU AI Act compliance guide for n8n AI
+workflows). It's been assigned internal tracker GHC-7388.
+
+The guide identifies a unique risk for n8n: low-code users can build
+high-risk AI systems (lead scoring, HR screening) without realizing
+they've crossed the regulatory threshold.
+
+The tool that generated the guide is now a GitHub Action:
+
+    - uses: BipinRimal314/ai-trace-auditor@v0.11.0
+      with:
+        command: comply
+        path: .
+
+It flags when n8n's codebase adds new AI provider integrations
+that create GDPR transfer obligations, and tracks compliance gaps
+as the codebase evolves toward August 2026.
+
+Open source, Apache 2.0. Would be happy to discuss integration.
+
+Bipin Rimal
+https://bipinrimal314.github.io/ai-trace-auditor/
+
+---
+
+### 3. Dify (langgenius)
+
+Send to: crazywoola (the maintainer who merged PR #33838), or Dify Discord
+
+Subject: Thanks for merging the EU AI Act guide — GitHub Action available
+
+Hi Dify team,
+
+Thanks for merging PR #33838 (EU AI Act compliance guide). Dify is
+the first major AI framework to ship compliance documentation — that's
+a meaningful signal to deployers evaluating platforms.
+
+The tool behind the guide is now a GitHub Action. For Dify specifically,
+it auto-detects:
+- LLM provider integrations and their GDPR jurisdictions
+- Vector DB connections (Pinecone, Weaviate, Qdrant) with transfer flags
+- User-facing endpoints that trigger Article 50 disclosure obligations
+
+It generates Annex IV documentation skeletons and GDPR Article 30
+Records of Processing Activities from code scanning alone.
+
+    - uses: BipinRimal314/ai-trace-auditor@v0.11.0
+
+Running this in Dify's CI would keep the compliance docs current as
+the codebase evolves. Open source, Apache 2.0. Happy to submit a
+workflow PR if interested.
+
+Bipin Rimal
+https://bipinrimal314.github.io/ai-trace-auditor/
+
+---
+
+### 4. Haystack (deepset-ai)
+
+Send to: PR #10891 comment, or deepset team via their Discord
+
+Subject: EU AI Act compliance automation for Haystack — from PR #10891
+
+Hi deepset team,
+
+I submitted PR #10891 with an EU AI Act compliance guide for Haystack
+deployers. CLA is signed.
+
+Haystack's RAG pipelines have specific compliance implications:
+document provenance for Article 10, embedding storage for GDPR,
+and pipeline transparency for Article 13. The tool that generated
+the guide auto-detects these from the codebase.
+
+It's now a GitHub Action:
+
+    - uses: BipinRimal314/ai-trace-auditor@v0.11.0
+      with:
+        command: comply
+        path: .
+
+Would flag new provider integrations, track GDPR transfer obligations,
+and generate updated Annex IV docs on every PR. Open source, Apache 2.0.
+
+Bipin Rimal
+https://bipinrimal314.github.io/ai-trace-auditor/
+
+---
+
+### 5. CrewAI
+
+Send to: PR #4995 comment, or CrewAI Discord
+
+Subject: EU AI Act compliance for CrewAI — GitHub Action from PR #4995
+
+Hi CrewAI team,
+
+I submitted PR #4995 with an EU AI Act compliance guide for CrewAI
+deployers.
+
+CrewAI's multi-agent architecture has a compliance angle that most
+frameworks don't: agent delegation chains need trace linkage for
+Article 12 (who made what decision), and tool usage by agents needs
+logging for audit trails.
+
+The tool behind the guide is now a GitHub Action that can run in CI:
+
+    - uses: BipinRimal314/ai-trace-auditor@v0.11.0
+
+It auto-detects AI providers, generates data flow diagrams, and
+flags cross-border GDPR transfers. Open source, Apache 2.0.
+
+Happy to open a workflow PR if you'd like to try it.
+
+Bipin Rimal
+https://bipinrimal314.github.io/ai-trace-auditor/

@@ -1,0 +1,21 @@
+## Stale PR Follow-Up Pings
+
+---
+
+### CrewAI PR #4995
+
+Hi, just checking in on this PR. The EU AI Act deadline is currently
+August 2, 2026, though the European Parliament voted in March to
+extend to December 2027 (trilogue negotiations ongoing). Either way,
+the compliance guide is based on the final regulatory text, not the
+calendar. Let me know if anything needs changes on my end.
+
+---
+
+### Ollama PR #15019
+
+Hi, friendly ping on this PR. The EU AI Act compliance obligations
+are based on final regulatory text; the Parliament recently voted to
+extend the application deadline from August 2026 to December 2027,
+but the requirements themselves are unchanged. Happy to update or
+adjust scope if that would help move this forward.

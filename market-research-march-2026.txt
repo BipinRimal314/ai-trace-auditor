@@ -1,0 +1,556 @@
+EU AI ACT COMPLIANCE TOOLING — COMPETITIVE INTELLIGENCE REPORT
+Research date: March 30, 2026
+================================================================
+
+EXECUTIVE SUMMARY
+
+The EU AI Act compliance tooling market is real, growing fast, and entering
+a critical inflection point. Gartner (Feb 2026) projects AI governance
+spending at $492M in 2026, surpassing $1B by 2030. The broader EU AI Act
+compliance market could reach EUR 17B by 2030. However, the landscape is
+fragmenting into three distinct tiers: enterprise SaaS platforms ($50K-200K/yr),
+developer-focused open-source tools (free), and consulting services
+($5K-15M depending on scope). A major wildcard: the European Parliament
+voted on March 18, 2026 to extend the August 2, 2026 high-risk deadline
+to December 2, 2027 (trilogue negotiations ongoing, targeting agreement
+by April 28). This changes urgency calculus significantly.
+
+
+================================================================
+1. COMPETITOR LANDSCAPE
+================================================================
+
+TIER 1: ENTERPRISE AI GOVERNANCE PLATFORMS (Custom pricing, $50K-200K+/yr)
+
+  Credo AI
+  - Funding: $41.3M total
+  - Customers: 6 Fortune 50, IBM, Mastercard
+  - Positioning: Enterprise-grade AI governance, model risk management,
+    compliance automation
+  - EU AI Act: Strongest Annex IV documentation approach among specialists
+  - Recognized in Gartner's Market Guide for AI Governance Platforms (2025)
+  - Pricing: Custom, enterprise-only. Available on AWS Marketplace.
+  - Strength: AI inventory + classification. Weakest at: runtime trace analysis
+
+  Holistic AI
+  - Positioning: End-to-end governance (inventory, risk assessment, compliance
+    tracking, performance optimization)
+  - EU AI Act: Active in Europe, advising regulators directly
+  - Leads on AI inventory and classification alongside Credo AI
+  - Pricing: Custom, no public tiers
+
+  KLA Digital
+  - Location: Monaco. Backed by NVIDIA Inception + Monaco Tech
+  - Funding: Not publicly disclosed (pre-seed/seed stage)
+  - Positioning: AI governance platform for regulated AI agents
+  - Differentiator: "Evidence Room" concept with tamper-proof audit trails,
+    append-only storage, Annex IV exports, searchable audit trail
+  - Closest competitor to AI Trace Auditor's positioning
+  - Published buyer guide ranking competitors (self-serving but useful intel)
+
+  Trail ML
+  - Location: Munich. Backed by Mozilla Ventures
+  - Funding: EUR 1.45M pre-seed
+  - Positioning: "AI Governance Copilot" — guides toward responsible AI
+    and EU AI Act compliance
+  - AI Pact signatory
+  - Early stage but European-native (regulatory proximity advantage)
+
+
+TIER 2: GRC INCUMBENTS ADDING AI MODULES
+
+  OneTrust
+  - Status: Already has AI Governance product
+  - EU AI Act: Useful for GDPR-AI Act intersection, privacy impact assessments
+  - Limitation: Lacks native AI Act classification logic (Annex III),
+    Annex IV structured documentation, conformity assessment workflow
+  - Published Digital Omnibus analysis (shows they're tracking regulation closely)
+  - Verdict: Strong on privacy overlap, weak on AI-specific compliance
+
+  Vanta
+  - Status: EU AI Act product launched
+  - Features: 400+ integrations, pre-built templates, real-time automation,
+    unified compliance dashboard
+  - Limitation: General GRC tool extended to AI; lacks native AI Act
+    classification logic
+  - Distribution: Strong existing customer base from SOC 2 compliance
+
+  ServiceNow
+  - Status: AI Control Tower integrating with ITOM, IRM, TPRM modules
+  - Strength: Enterprise workflow automation, existing IT governance customers
+  - Positioning: Unifying compliance activities for large enterprises
+
+  Secureframe
+  - Positioning: SOC 2 / GDPR / EU AI Act compliance guide, less developed
+    than OneTrust/Vanta on AI-specific features
+
+  Drata
+  - Status: General GRC, peripheral AI Act support
+  - Same limitation as Vanta: generic compliance, not AI-native
+
+
+TIER 3: SPECIALIZED / NICHE PLAYERS
+
+  ComplyAct
+  - Positioning: Exclusively focused on EU AI Act compliance
+  - Features: Automated risk classification engine (risk tiers), guided
+    30-minute compliance assessment, automated Annex IV technical documentation
+    generation, PDF/DOCX export
+  - Differentiator: Laser focus on AI Act (not trying to be a general GRC tool)
+  - Direct competitor for SMB market segment
+
+  AiActo
+  - Positioning: AI Act diagnostic for classification + compliance file generation
+  - Target: SMEs (deployers and providers)
+  - Features: Guided classification, initial compliance file elements
+  - Appears to be EU-based, smaller operation
+
+  FairNow
+  - Funding: $3.6M (seed)
+  - Location: McLean, VA
+  - Focus: HR/financial services AI governance (bias, fairness monitoring)
+  - Founded: 2023. Narrower scope than full AI Act compliance
+
+  Lumenova AI
+  - Location: LA
+  - Funding: None raised (as of search date)
+  - Listed on UK GOV.UK AI Assurance registry
+  - All-in-one governance, risk, and compliance platform
+
+  Enactia
+  - Positioning: Unified GRC platform, EU-focused
+  - Limited public information available
+
+  Modulos AI
+  - Status: Active AI governance platform
+  - Published urgency article about 352-day countdown (written mid-2025)
+  - Limited pricing/feature detail available
+
+  EQS Group
+  - Positioning: End-to-end AI governance for global enterprises
+  - Established compliance vendor adding AI governance module
+
+  Protectron
+  - Launched: January 2026 (new entrant)
+  - Claims: 10-50x cost reduction vs enterprise tools
+  - Pricing: Appears to target EUR 99/month range
+  - Built in 72 hours per founder's Medium post
+  - Early stage, unproven
+
+
+NEW ENTRANTS SINCE JANUARY 2026:
+- Protectron (January 2026 launch, budget SaaS)
+- Multiple HN "Show HN" projects (see open-source section)
+- AgentGuard (compliance middleware for LLM apps)
+- AIR Blackbox (open-source scanner)
+- NeuralFlow (Article 50 transparency toolkit)
+- EuConform (offline-first compliance tool)
+
+
+================================================================
+2. OPEN-SOURCE ALTERNATIVES
+================================================================
+
+The open-source EU AI Act tooling ecosystem exploded in Q1 2026. Multiple
+Show HN posts, several with significant engagement.
+
+  AIR Blackbox
+  - License: Apache 2.0
+  - Distribution: PyPI (pip install air-compliance), CLI, MCP server, GitHub Action
+  - Scope: 39 checks across Articles 9-15
+  - Features: HMAC-SHA256 tamper-evident audit chains, PII detection,
+    prompt injection blocking
+  - Framework support: LangChain, CrewAI, AutoGen, OpenAI, Google ADK,
+    Claude Agent SDK
+  - HN: "Show HN: Open-source scanner finds 97% of AI agent code non-compliant"
+  - Relevance to AI Trace Auditor: HIGH. Closest open-source competitor.
+    Scans code rather than traces, but overlapping compliance claims.
+
+  Systima Comply (@systima/comply)
+  - License: Open source
+  - Distribution: npm (npx @systima/comply), GitHub Action (systima-ai/comply@v1),
+    TypeScript API
+  - Scope: Static codebase scanning for EU AI Act compliance risks
+  - Speed: ~8 seconds on 20K-star Vercel AI chatbot repo
+  - Output: PDF reports, template compliance documentation
+  - Differentiator: JS/TS ecosystem native (npm, not pip)
+  - Relevance to AI Trace Auditor: MODERATE. Static analysis vs runtime traces.
+
+  EuConform
+  - License: Open source
+  - Distribution: GitHub (Hiepler/EuConform), browser-based
+  - Scope: Risk classification (Articles 5-15), bias evaluation (CrowS-Pairs),
+    Annex IV PDF reports
+  - Differentiator: 100% offline, GDPR-by-design, WCAG 2.2 AA accessible
+  - Supports: Llama, Mistral, Qwen via local Ollama
+  - Built by a 16-year-old developer (per HN post)
+  - Relevance to AI Trace Auditor: LOW. Different use case (classification
+    and bias testing, not trace auditing)
+
+  AgentGuard
+  - GitHub: Sagar-Gogineni/agentguard
+  - Website: agentguard.tech
+  - Positioning: EU AI Act compliance middleware for LLM apps
+  - Claims: "3 lines of code" to make any LLM agent EU-deployable
+  - Features: Article 12 audit logging (file, SQLite, or custom backend),
+    configurable retention, input/output logging
+  - Framework support: LangChain, CrewAI, AutoGen, MCP-compatible agents
+  - HN: "Show HN: AgentGuard -- Open-source EU AI Act compliance middleware"
+  - Relevance to AI Trace Auditor: HIGH. Runtime compliance layer, similar
+    positioning but middleware (intercept) vs auditor (analyze after the fact).
+
+  COMPL-AI Framework
+  - Maintainers: ETH Zurich, INSAIT, LatticeFlow AI
+  - Scope: Compliance-centered evaluation/benchmarking for LLMs
+  - Focus: Technical interpretation of EU AI Act for model evaluation
+  - Relevance to AI Trace Auditor: LOW. Model evaluation, not trace auditing.
+
+  MCP EU AI Act Compliance Scanner (ark-forge/mcp-eu-ai-act)
+  - Scope: Static analysis detecting AI framework usage in codebases
+  - Scans: .py, .js, .ts, .java, .go, .rs, .cpp, .c + dependency files
+  - Distribution: MCP server
+  - Relevance to AI Trace Auditor: LOW. Code detection, not trace analysis.
+
+  NeuralFlow (@neuralflow/ai-act)
+  - License: MIT
+  - Distribution: npm, CLI, WordPress plugin
+  - Scope: Article 50 transparency (machine-readable AI disclosure)
+  - Size: 5.1 KB, zero dependencies
+  - Relevance to AI Trace Auditor: NONE. Different article, different problem.
+
+  Article 12 Logging Infrastructure (unnamed, HN post)
+  - HN: "Show HN: Open-Source Article 12 Logging Infrastructure for the EU AI Act"
+  - Details sparse from search; worth investigating directly
+  - Relevance to AI Trace Auditor: POTENTIALLY HIGH. Same article focus.
+
+GITHUB TOPIC: github.com/topics/eu-ai-act shows active community.
+
+KEY OBSERVATION: The open-source landscape is fragmented into:
+  (a) Static code scanners (Systima, MCP scanner, AIR Blackbox partly)
+  (b) Runtime compliance middleware (AgentGuard, AIR Blackbox partly)
+  (c) Classification/assessment tools (EuConform, ComplyAct partly)
+  (d) Documentation generators (EuConform, Systima)
+
+AI Trace Auditor occupies a distinct position: runtime trace analysis
+against regulatory requirements. No open-source tool does exactly this.
+AIR Blackbox and AgentGuard are closest but approach from different angles
+(scanning code and intercepting calls respectively, vs analyzing traces
+after the fact).
+
+
+================================================================
+3. AUGUST 2026 DEADLINE — URGENCY & MARKET SENTIMENT
+================================================================
+
+THE DEADLINE MAY MOVE.
+
+Critical development (March 2026): The European Parliament voted 569-45
+on March 18, 2026 to extend the August 2, 2026 high-risk deadline.
+Three EU bodies have proposed different extensions:
+
+  - Commission (Nov 2025): Conditional delay of up to 16 months
+  - Parliament (Mar 18, 2026): December 2, 2027 (fixed date)
+  - Council: December 2, 2027 (stand-alone high-risk) /
+             August 2, 2028 (product-embedded high-risk)
+
+Trilogue negotiations began March 26, targeting political agreement by
+April 28, 2026. Backstop deadline: December 2, 2027 regardless.
+
+ROOT CAUSE: The Commission failed to publish required technical guidance
+(harmonized standards) by its February 2026 deadline. Only 8 of 27 EU
+member states are ready for enforcement.
+
+WHAT THIS MEANS FOR THE MARKET:
+  - Companies that haven't started will breathe a sigh of relief and
+    further delay investment (BAD for tooling vendors)
+  - Companies already investing will continue (compliance infrastructure
+    takes 12-18 months regardless)
+  - The urgency narrative shifts from "5 months" to "18 months"
+  - Tooling vendors lose the panic-buy forcing function temporarily
+  - BUT: the regulation is not going away, just the timeline
+
+CURRENT MARKET SENTIMENT (from search results):
+
+  Panic signals:
+  - "352 days to compliance: Why deadlines are already critical" (Modulos)
+  - "Your AI agents have 5 months to comply" (multiple articles)
+  - "97% of AI agent code non-compliant" (AIR Blackbox claim)
+  - "Over half of organizations still lack a basic AI inventory"
+  - Only 8/27 EU member states ready for enforcement
+  - HN post: "Early signals that EU AI Act compliance is becoming a
+    sales blocker for AI SaaS"
+
+  Enterprise procurement impact:
+  - Vendor risk assessments rewritten to include AI compliance clauses
+  - "If you cannot produce documentation proving AI features are compliant,
+    the deal is dead"
+  - Companies that evidence compliance move faster through procurement,
+    legal, and risk review cycles
+  - EU AI Act compliance is becoming a competitive differentiator in
+    enterprise sales, similar to SOC 2 for SaaS
+
+  Cost of non-compliance:
+  - Fines: up to EUR 35M or 7% of global annual turnover
+  - Realistic compliance timeline: 32-56 weeks (8-14 months)
+  - Notified body capacity severely limited at launch
+  - Large enterprise compliance: $8-15M initial investment
+
+
+================================================================
+4. FRAMEWORK COMPLIANCE DOCUMENTATION
+================================================================
+
+LANGCHAIN:
+  - GitHub Issue #35357: "Feature: Structured compliance audit logging for
+    EU AI Act (Article 12)" — filed February 20, 2026
+  - Status: Feature REQUEST, not implemented
+  - The issue notes LangChain's callback system (BaseCallbackHandler) and
+    LangSmith integration are designed for debugging/monitoring, NOT for
+    regulatory compliance audits
+  - Gap: No standardized structured log format for compliance, no
+    deterministic identifiers per chain execution, no PII redaction by default
+  - This is a direct validation of AI Trace Auditor's thesis: frameworks
+    are NOT building compliance into their core
+
+LLAMAINDEX:
+  - No specific EU AI Act compliance documentation found
+  - Focus remains on RAG quality, not regulatory compliance
+
+HAYSTACK:
+  - Positioned for "production stability, enterprise features, and proven
+    scalability, particularly in regulated environments"
+  - No specific EU AI Act compliance module or documentation found
+  - Awareness of the requirement but no native tooling
+
+OPENTELEMETRY GenAI:
+  - Semantic conventions for agentic systems under active development
+  - Defines attributes for LLM calls, agent steps, sessions, vector DB queries
+  - Currently EXPERIMENTAL, not stable. No announced stable release date.
+  - Datadog natively supports OTel GenAI conventions (v1.37+)
+  - These conventions standardize TELEMETRY, not COMPLIANCE INTERPRETATION
+
+DEV.TO GUIDE (notable):
+  - "EU AI Act + LangChain: What You Actually Need to Build Before August 2026"
+  - Community-authored compliance implementation guide
+  - Calls out specific requirements: structured metadata per tool invocation,
+    REQUIRE_APPROVAL policies on sensitive tool categories
+
+KEY FINDING: No major AI framework has added native EU AI Act compliance
+documentation or tooling as of March 2026. LangChain has an open feature
+request. The gap between "observability" and "compliance" remains wide.
+This is the exact gap AI Trace Auditor targets.
+
+
+================================================================
+5. PRICING BENCHMARKS
+================================================================
+
+ENTERPRISE SaaS PLATFORMS:
+  - Credo AI: Custom pricing, enterprise-only (estimated $50K-200K/yr)
+  - Holistic AI: Custom pricing, no public tiers
+  - OneTrust AI Governance: Custom pricing (part of broader OneTrust suite)
+  - KLA Digital: Custom pricing (early stage)
+  - ComplyAct: Not publicly listed, appears more accessible than enterprise tier
+  - Vanta EU AI Act: Part of Vanta subscription (typically $10K-50K/yr range
+    for overall compliance platform)
+
+BUDGET SaaS:
+  - Protectron: Claims EUR 99/month (launched Jan 2026)
+  - Various new entrants targeting SMB at <EUR 500/month
+
+CONSULTING SERVICES:
+  - One-off audit/implementation: EUR 5,000-10,000 (developer prompt
+    engineering + compliance audit)
+  - Enterprise consulting: EUR 50,000+ per engagement
+  - Full compliance program (large enterprise): $8-15M initial investment
+  - Self-assessment (Annex VI): EUR 9,500-14,500 + internal time
+  - QMS implementation: EUR 165,000-315,000 on top of conformity assessment
+  - Post-market monitoring (annual): EUR 40,000-80,000
+  - Third-party audits: $200K-800K annually
+
+INDUSTRY-SPECIFIC COMPLIANCE COSTS (setup):
+  - FinTech / HealthTech: EUR 350K-500K
+  - SaaS HR (recruitment, performance): EUR 280K-380K
+  - E-commerce: EUR 200K-300K
+  - Compliance personnel: $150-250K per FTE
+
+OPEN SOURCE:
+  - AIR Blackbox: Free (Apache 2.0)
+  - Systima Comply: Free (open source)
+  - EuConform: Free (open source)
+  - AgentGuard: Free (open source)
+  - AI Trace Auditor: Free (Apache 2.0)
+
+PRICING GAP: There is a massive gap between "free open-source tool" and
+"$50K+/yr enterprise platform." The EUR 99-500/month SMB tier is almost
+empty. Only Protectron (brand new, unproven) targets this.
+
+OPPORTUNITY: A well-positioned open-source tool with a paid tier
+(hosted reports, team features, CI integration support) at $200-500/month
+could own the mid-market.
+
+
+================================================================
+6. DISTRIBUTION CHANNELS
+================================================================
+
+WHERE COMPLIANCE TEAMS FIND TOOLS:
+
+  Developer channels:
+  - PyPI: AIR Blackbox (pip install air-compliance)
+  - npm: Systima Comply (npx @systima/comply)
+  - GitHub Actions: Systima (systima-ai/comply@v1), AIR Blackbox, MCP scanner
+  - GitHub Topics: github.com/topics/eu-ai-act (active community)
+  - Hacker News: Multiple Show HN posts generating engagement
+  - DEV.to: Implementation guides, tool announcements
+  - MCP Servers: MCP EU AI Act scanner, AIR Blackbox MCP server
+
+  Enterprise channels:
+  - AWS Marketplace: Credo AI listed (direct procurement integration)
+  - Gartner reports: Market Guide for AI Governance Platforms
+  - Direct sales: OneTrust, Vanta, ServiceNow (existing GRC relationships)
+  - Consulting firms: Big 4, specialized AI governance consultancies
+  - Industry analysts: Forrester, IDC
+
+  Regulatory channels:
+  - EU AI Act Service Desk: Official compliance checker + explorer
+  - AI Act Single Information Platform (EU Commission)
+  - IAPP: EU AI Act Compliance Matrix (reference resource)
+
+  Community channels:
+  - Hacker News: Active discussion threads (Ask HN, Show HN)
+  - "awesome-compliance" GitHub repo (curated list)
+  - LinkedIn thought leadership (law firms, consulting firms)
+  - Medium: Multiple articles on implementation approaches
+
+DISTRIBUTION INSIGHT FOR AI TRACE AUDITOR:
+
+The tool is currently distributed via:
+  - PyPI (pip install)
+  - GitHub
+
+Missing channels that competitors use:
+  - GitHub Action (high priority — CI/CD integration is table stakes)
+  - MCP server (emerging channel, AIR Blackbox already there)
+  - npm wrapper (reaches JS/TS ecosystem)
+  - AWS/Azure Marketplace (enterprise procurement)
+  - Hacker News Show HN (zero-cost awareness)
+  - DEV.to writeup (zero-cost SEO + community)
+
+
+================================================================
+STRATEGIC IMPLICATIONS FOR AI TRACE AUDITOR
+================================================================
+
+1. POSITIONING REMAINS VALID
+   The trace-analysis-to-compliance-evidence gap is real and unfilled.
+   No open-source tool does exactly what AI Trace Auditor does (analyze
+   existing traces against regulatory requirements). Competitors either
+   scan code (static analysis) or intercept calls (middleware). AI Trace
+   Auditor works on traces after collection, which is a different and
+   complementary approach.
+
+2. THE DEADLINE EXTENSION IS A DOUBLE-EDGED SWORD
+   If August 2026 moves to December 2027:
+   - Panic buyers disappear (bad for short-term adoption)
+   - More time to build deeper features before enforcement (good for quality)
+   - More competitors will enter the market in the extra 16 months (bad)
+   - The market becomes larger as more companies start planning (good)
+   NET: More time helps if you use it to ship, not plan.
+
+3. CLOSEST COMPETITORS TO WATCH
+   - AIR Blackbox: Open-source, PyPI, GitHub Action, MCP server, Apache 2.0.
+     Covers Articles 9-15 with 39 checks. Most feature-complete OSS competitor.
+   - AgentGuard: Runtime middleware approach. "3 lines of code" pitch.
+     Direct threat if they add trace analysis.
+   - KLA Digital: Enterprise platform with tamper-proof audit trails.
+     The "what AI Trace Auditor could become at scale" version.
+   - Systima Comply: npm ecosystem presence. Different language ecosystem
+     but same market.
+
+4. LANGCHAIN ISSUE #35357 IS AN OPPORTUNITY
+   LangChain explicitly has an open feature request for Article 12
+   compliance logging. AI Trace Auditor could:
+   - Comment on the issue with a working solution
+   - Build a LangChain integration that exports compliance-grade traces
+   - Position as "the tool LangChain's compliance logging feeds into"
+
+5. PRICING WHITE SPACE
+   Free (OSS) to $50K/yr (enterprise) has almost nothing in between.
+   A $99-499/month hosted tier with team features, CI dashboards, and
+   compliance report generation could own the mid-market SMB/startup segment.
+
+6. DISTRIBUTION GAPS TO CLOSE
+   Priority order:
+   (1) GitHub Action (table stakes — Systima and AIR Blackbox both have this)
+   (2) Show HN post (zero cost, high awareness)
+   (3) DEV.to article (SEO, community)
+   (4) MCP server (emerging but growing channel)
+
+
+================================================================
+MARKET SIZE SUMMARY
+================================================================
+
+  AI governance spending 2026:          $492M (Gartner, Feb 2026)
+  AI governance spending 2030:          $1B+ (Gartner)
+  EU AI Act compliance market by 2030:  EUR 17B (estimated, all segments)
+  High-risk AI systems requiring
+    ongoing compliance by 2030:         65,000+ (estimated)
+  LLM observability market 2025:        $1.97B (36% CAGR)
+  AI detector market 2025-2030:         $0.58B to $2.06B
+
+  Enterprise compliance cost range:
+    SME:                                EUR 200K-500K (setup)
+    Large enterprise:                   $8-15M (initial investment)
+    Ongoing annual:                     EUR 40K-800K (monitoring + audits)
+
+
+================================================================
+SOURCES
+================================================================
+
+Enterprise platforms:
+- https://kla.digital/blog/best-eu-ai-act-compliance-software-2026
+- https://www.vanta.com/products/eu-ai-act
+- https://www.onetrust.com/solutions/eu-ai-act-compliance/
+- https://www.credo.ai/eu-ai-act
+- https://www.trail-ml.com/
+- https://complyactai.com/blog/software-for-compliance-management
+- https://www.aiacto.eu/en/blog/ai-act-conformite-pme-2026
+
+Open source tools:
+- https://github.com/ark-forge/mcp-eu-ai-act
+- https://dev.to/systima/open-source-eu-ai-act-compliance-scanning-for-cicd-4ogj
+- https://github.com/Hiepler/EuConform
+- https://github.com/compl-ai/compl-ai
+- https://github.com/Sagar-Gogineni/agentguard
+- https://github.com/airblackbox
+- https://news.ycombinator.com/item?id=47141347
+- https://news.ycombinator.com/item?id=47247314
+- https://news.ycombinator.com/item?id=47230438
+- https://news.ycombinator.com/item?id=46557823
+- https://news.ycombinator.com/item?id=47158805
+
+Deadline and regulation:
+- https://artificialintelligenceact.eu/implementation-timeline/
+- https://www.kennedyslaw.com/en/thought-leadership/article/2026/the-eu-ai-act-implementation-timeline-understanding-the-next-deadline-for-compliance/
+- https://idtechwire.com/european-parliament-votes-to-delay-eu-ai-act-high-risk-deadlines-to-december-2027-affecting-biometric-systems/
+- https://www.onetrust.com/blog/eu-digital-omnibus-proposes-delay-of-ai-compliance-deadlines/
+- https://worldreporter.com/eu-ai-act-august-2026-deadline-only-8-of-27-eu-states-ready-what-it-means-for-global-ai-compliance/
+
+Framework compliance:
+- https://github.com/langchain-ai/langchain/issues/35357
+- https://dev.to/supra-dev/eu-ai-act-langchain-what-you-actually-need-to-build-before-august-2026-pah
+- https://huggingface.co/blog/eu-ai-act-for-oss-developers
+
+Pricing and market size:
+- https://www.gartner.com/en/newsroom/press-releases/2026-02-17-gartner-global-ai-regulations-fuel-billion-dollar-market-for-ai-governance-platforms
+- https://medium.com/@cyriaczeh/how-i-built-an-eu-ai-act-compliance-saas-platform-in-72-hours-and-why-enterprise-tools-charging-28730ae3000d
+- https://www.softwareseni.com/budgeting-for-eu-ai-act-compliance-cost-models-for-smb-tech-companies-by-use-case/
+- https://www.softwareseni.com/what-eu-ai-act-compliance-actually-costs-an-smb-and-what-happens-if-you-dont-comply/
+
+Distribution and sales:
+- https://news.ycombinator.com/item?id=46969644
+- https://www.getmaxim.ai/articles/top-5-ai-governance-platforms-in-2026/
+- https://www.cloudeagle.ai/blogs/10-best-ai-governance-platforms-in-2026

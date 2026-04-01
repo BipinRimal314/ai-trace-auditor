@@ -1,0 +1,50 @@
+## Comment for LangChain Issue #35357
+
+---
+
+This is a real gap. LangChain's callbacks were designed for debugging
+and observability, not regulatory record-keeping. The difference
+matters: debugging traces are best-effort and can be dropped;
+Article 12 records need guaranteed capture, retention periods, and
+specific fields (decision rationale, data provenance, human oversight
+checkpoints).
+
+Retrofitting callbacks into compliance logging would mean either
+overloading their current purpose or maintaining a parallel system.
+Neither is great.
+
+An alternative that works today: export LangChain traces via Langfuse
+or OpenTelemetry, then run them through a compliance-specific analyzer.
+
+I built a tool that does exactly this. AI Trace Auditor reads OTel
+spans or Langfuse sessions and maps them against EU AI Act
+requirements. It tells you which Article 12 fields are present, which
+are missing, and what to add.
+
+Here's a minimal integration path:
+
+```python
+# 1. Export LangChain traces via Langfuse (existing integration)
+from langfuse.callback import CallbackHandler
+handler = CallbackHandler()
+chain.invoke({"input": query}, config={"callbacks": [handler]})
+
+# 2. Export traces as JSON
+langfuse.flush()
+# Langfuse API: GET /api/public/sessions/{id}
+
+# 3. Run compliance check against exported traces
+# $ aitrace audit-traces ./exported_traces/ --format langfuse
+# Output: Article 12 gap report showing missing fields
+```
+
+The tool generates a gap report mapping each trace field to the
+specific Article 12 requirement it satisfies (or doesn't). It also
+flags retention period requirements and cross-border transfer issues
+if your trace data flows through non-EU infrastructure.
+
+Open source, Apache 2.0: https://github.com/BipinRimal314/ai-trace-auditor
+
+This doesn't solve the architectural question of whether LangChain
+should have native compliance-grade logging. But it gives teams a
+way to assess their current gaps without waiting for that to land.

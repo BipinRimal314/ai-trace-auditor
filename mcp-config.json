@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "ai-trace-auditor": {
+      "command": "aitrace-mcp",
+      "args": []
+    }
+  }
+}

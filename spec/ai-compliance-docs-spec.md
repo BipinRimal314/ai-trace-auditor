@@ -196,12 +196,12 @@ Section 9 must describe the post-market monitoring system per Article 72.
 
 ### ACS-11.10 — Retention Period Stated
 
-Documentation must state the applicable retention period (10 years for providers under Article 18, 6 months minimum for deployer logs under Article 26(6)).
+Documentation must state the applicable retention period (10 years for providers under Article 18, 6 months minimum for deployer logs under Article 26(5)).
 
 | Field | Value |
 |-------|-------|
 | **ID** | `ACS-11.10` |
-| **Article** | Article 18; Article 26(6) |
+| **Article** | Article 18; Article 26(5) |
 | **Severity** | mandatory |
 | **Input** | Annex IV document (any section) |
 | **Pass** | Retention period explicitly stated with correct Article reference |
@@ -361,7 +361,7 @@ Logs must be retained for at least 6 months (deployer) or as specified by the pr
 | Field | Value |
 |-------|-------|
 | **ID** | `ACS-12.10` |
-| **Article** | Article 19(1); Article 26(6) |
+| **Article** | Article 19(1); Article 26(5) |
 | **Severity** | mandatory |
 | **Input** | Trace data timestamps + current date |
 | **Pass** | Oldest trace is >= 6 months old and still accessible |

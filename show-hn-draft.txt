@@ -1,0 +1,35 @@
+Show HN: AI Trace Auditor — EU AI Act compliance checks for LLM traces
+
+I built a CLI that reads your existing AI traces (OTel spans, Langfuse
+sessions, raw JSON) and tells you what's missing for EU AI Act
+compliance. Articles 11, 12, 13, 50 + GDPR Article 30.
+
+The gap it fills: observability tools collect traces. GRC platforms
+manage policies. Nothing in between maps collected telemetry to
+regulatory requirements. aitrace does that mapping.
+
+What it actually generates:
+- Annex IV technical documentation skeletons (auto-populated from code)
+- Article 12 gap reports (which fields you log vs. which you need)
+- Data flow diagrams with cross-border GDPR transfer warnings
+- Article 50 transparency flags for user-facing AI endpoints
+- GDPR Article 30 Records of Processing Activities
+
+It runs against your codebase or your exported traces. No API keys,
+no cloud, everything stays local. Also ships as a GitHub Action so
+you can fail builds when compliance gaps appear.
+
+The EU AI Act deadline is currently August 2, 2026, though the
+Parliament voted in March to extend to December 2027 (trilogue
+ongoing). Either way, compliance infrastructure takes 12-18 months
+to stand up. The regulatory text is final; only the calendar is
+moving.
+
+Open source, Apache 2.0. Tested against LiteLLM, n8n, Dify,
+Haystack, and CrewAI codebases. PRs with compliance guides submitted
+to all five.
+
+pip install ai-trace-auditor && aitrace comply ./
+
+Landing page: https://bipinrimal314.github.io/ai-trace-auditor/
+GitHub: https://github.com/BipinRimal314/ai-trace-auditor

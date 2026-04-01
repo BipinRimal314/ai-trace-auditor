@@ -7,7 +7,7 @@ Fixes applied (v0.10.1):
 - Bug 1: GDPR roles reference organizations, not software
 - Bug 2: Article 13 (provider→deployer) vs Article 50 (deployer→user) separated
 - Bug 3: No percentage claims for per-article coverage
-- Bug 4: Retention distinguishes Article 18 (10yr) from Article 26(6) (6mo)
+- Bug 4: Retention distinguishes Article 18 (10yr) from Article 26(5) (6mo)
 - Bug 5: Scope check / risk classification included
 """
 
@@ -27,6 +27,26 @@ def build_scope_check(scan: CodeScanResult) -> AnnexIVSection:
     """
     parts: list[str] = []
 
+    parts.append("### Are you a provider or a deployer?\n")
+    parts.append(
+        "The EU AI Act assigns different obligations depending on your role:\n"
+    )
+    parts.append(
+        "- **Provider** (Article 3(3)): You developed or placed the AI system on the "
+        "market. If you built a custom AI application using LLM APIs, you are likely "
+        "the provider. Full Articles 9-21 obligations apply: risk management, technical "
+        "documentation, conformity assessment, and post-market monitoring."
+    )
+    parts.append(
+        "- **Deployer** (Article 3(4)): You use a pre-built AI system under your own "
+        "authority. Narrower obligations under Article 26: human oversight, logging "
+        "retention, and monitoring."
+    )
+    parts.append("")
+    parts.append(
+        "When in doubt, assume the heavier provider obligations.\n"
+    )
+
     parts.append("### Is your system in scope?\n")
     parts.append(
         "Articles 9-15 of the EU AI Act (including the technical documentation "
@@ -42,11 +62,11 @@ def build_scope_check(scan: CodeScanResult) -> AnnexIVSection:
     parts.append("- **Essential public services** — evaluating eligibility for benefits, housing, emergency services")
     parts.append("")
     parts.append(
-        "If your system does not obviously fall into these categories, the "
-        "high-risk obligations (Articles 9-15) are less likely to apply. However, "
-        "risk classification is context-dependent and can change as your system "
-        "evolves. **Do not self-classify without legal review.** You may still "
-        "have obligations under:\n"
+        "If your system does not fall into these categories, the "
+        "high-risk obligations (Articles 9-15) do not apply via the Annex III "
+        "pathway. However, risk classification is context-dependent and can "
+        "change as your system evolves. **Do not self-classify without legal "
+        "review.** You may still have obligations under:\n"
     )
     parts.append("- **Article 50** — transparency for chatbots and systems interacting directly with users")
     parts.append("- **GDPR** — if processing personal data through AI providers")
@@ -54,6 +74,16 @@ def build_scope_check(scan: CodeScanResult) -> AnnexIVSection:
     parts.append(
         "Consult a qualified legal professional to confirm your system's "
         "classification before relying on this assessment.\n"
+    )
+
+    parts.append("### Note on open-source frameworks\n")
+    parts.append(
+        "If this codebase is an open-source framework or library (not a deployed AI "
+        "system), the framework itself has no obligations under the EU AI Act "
+        "(Article 25(4) exempts open-source component suppliers). However, "
+        "**deployers who build AI systems using this framework** are the providers "
+        "under Article 3(3) and carry the full compliance burden. This documentation "
+        "helps those deployers meet their obligations.\n"
     )
 
     if scan.has_ai_usage:
@@ -228,9 +258,17 @@ def build_section_3(
             parts.append(f"- {dc.config_type}: `{dc.file_path}`{ai_flag}")
         parts.append("")
 
-    parts.append("### Human Oversight Measures\n")
+    parts.append("### Human Oversight Measures (Article 14)\n")
     parts.append(f"{MANUAL}\n")
-    parts.append("*Describe human-in-the-loop mechanisms, override capabilities, and escalation procedures.*\n")
+    parts.append(
+        "*Article 14 requires oversight by natural persons, not automated controls. "
+        "Rate limiting, content moderation, and budget controls are Article 9/15 "
+        "(risk management and robustness), not Article 14. Describe:*\n"
+    )
+    parts.append("- *How a human can interpret system outputs before they are acted upon*")
+    parts.append("- *How a human can decide not to use a specific output*")
+    parts.append("- *How a human can intervene or halt the system mid-operation*")
+    parts.append("- *Escalation procedures when automated flags trigger human review*\n")
 
     parts.append("### Logging and Monitoring\n")
     parts.append(f"{MANUAL}\n")
@@ -435,7 +473,7 @@ def build_section_9(
         "The required retention period depends on your role under the Act. "
         "**Article 18** requires providers of high-risk systems to retain logs "
         "and technical documentation for **10 years** after market placement. "
-        "**Article 26(6)** requires deployers to retain logs for at least "
+        "**Article 26(5)** requires deployers to retain logs for at least "
         "**6 months**, or longer if appropriate to the intended purpose. "
         "Confirm the applicable period with legal counsel.\n"
     )

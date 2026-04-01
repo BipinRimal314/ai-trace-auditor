@@ -1217,6 +1217,130 @@ def _print_comply_summary(pkg: "CompliancePackage") -> None:
                   f"Models: {', '.join(pkg.code_scan.models[:3]) or 'none'}[/dim]")
 
 
+@app.command(name="import")
+def import_traces(
+    source: Annotated[
+        str,
+        typer.Argument(help="Platform to import from: langfuse"),
+    ],
+    api_url: Annotated[
+        str,
+        typer.Option("--api-url", help="Platform API base URL"),
+    ] = "",
+    api_key: Annotated[
+        str,
+        typer.Option("--api-key", help="API key (or Langfuse public key)", envvar="AITRACE_API_KEY"),
+    ] = "",
+    secret_key: Annotated[
+        str,
+        typer.Option("--secret-key", help="Secret key (Langfuse)", envvar="AITRACE_SECRET_KEY"),
+    ] = "",
+    since: Annotated[
+        Optional[str],
+        typer.Option("--since", help="Import traces after this date (ISO 8601)"),
+    ] = None,
+    until: Annotated[
+        Optional[str],
+        typer.Option("--until", help="Import traces before this date (ISO 8601)"),
+    ] = None,
+    limit: Annotated[
+        int,
+        typer.Option("--limit", help="Maximum traces to import"),
+    ] = 1000,
+    regulation: Annotated[
+        str,
+        typer.Option("-r", "--regulation", help="Regulation to audit against"),
+    ] = "EU AI Act",
+    output: Annotated[
+        Optional[Path],
+        typer.Option("-o", "--output", help="Output file (default: stdout)"),
+    ] = None,
+    report_format: Annotated[
+        str,
+        typer.Option("--report-format", help="Report format: markdown, json"),
+    ] = "markdown",
+    tags: Annotated[
+        Optional[str],
+        typer.Option("--tags", help="Comma-separated tags to filter"),
+    ] = None,
+) -> None:
+    """Import traces from an external platform and audit for compliance.
+
+    Pulls traces directly from observability platforms (Langfuse, etc.)
+    and runs compliance analysis. No file export needed.
+
+    Example:
+        aitrace import langfuse --api-key pk-... --secret-key sk-... --since 2026-03-01
+    """
+    from datetime import datetime as dt
+
+    from ai_trace_auditor.importers.base import ImportConfig
+
+    source_lower = source.lower()
+
+    if source_lower == "langfuse":
+        try:
+            from ai_trace_auditor.importers.langfuse_api import LangfuseImporter
+        except ImportError:
+            console.print(
+                "[red]httpx is required for Langfuse import. "
+                "Install with: pip install ai-trace-auditor[langfuse][/red]"
+            )
+            raise typer.Exit(1)
+
+        url = api_url or "https://cloud.langfuse.com"
+        importer = LangfuseImporter(api_url=url, api_key=api_key, secret_key=secret_key)
+    else:
+        console.print(f"[red]Unknown import source: {source}. Supported: langfuse[/red]")
+        raise typer.Exit(1)
+
+    console.print(f"[bold]Connecting to {importer.platform_name}...[/bold]")
+    if not importer.test_connection():
+        console.print("[red]Connection failed. Check your API key and URL.[/red]")
+        raise typer.Exit(1)
+    console.print("[green]Connected.[/green]")
+
+    config = ImportConfig(
+        api_url=api_url or "https://cloud.langfuse.com",
+        api_key=api_key,
+        secret_key=secret_key,
+        since=dt.fromisoformat(since) if since else None,
+        until=dt.fromisoformat(until) if until else None,
+        limit=limit,
+        tags=tags.split(",") if tags else None,
+    )
+
+    console.print(f"[bold]Importing up to {limit} traces...[/bold]")
+    traces = importer.import_traces(config)
+
+    if not traces:
+        console.print("[yellow]No traces found matching filters.[/yellow]")
+        raise typer.Exit(0)
+
+    total_spans = sum(len(t.spans) for t in traces)
+    console.print(f"[green]Imported {len(traces)} traces ({total_spans} spans).[/green]")
+
+    console.print(f"[bold]Auditing against {regulation}...[/bold]")
+    registry = RequirementRegistry()
+    registry.load_builtin()
+
+    analyzer = ComplianceAnalyzer(registry)
+    report = analyzer.analyze(traces, regulation=regulation)
+
+    _print_report_summary(report)
+
+    if report_format == "json":
+        content = JSONReporter().render(report)
+    else:
+        content = MarkdownReporter().render(report)
+
+    if output:
+        output.write_text(content, encoding="utf-8")
+        console.print(f"[green]Report written to {output}[/green]")
+    else:
+        stdout_console.print(content)
+
+
 @app.command()
 def version() -> None:
     """Print version information."""

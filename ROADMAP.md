@@ -398,7 +398,7 @@ Tested `aitrace comply` on 5 open-source projects (Haystack, CrewAI, LiteLLM, n8
 
 ### Bug 4: Retention period hardcoded as 6 months
 **Where:** `docs/sections.py` (Section 9), `reports/templates/*.jinja2`
-**Problem:** The tool references "6+ months" for data retention. Article 18 requires providers to retain for **10 years**. Article 26(6) requires deployers to retain for at least **6 months**. The applicable period depends on the deployer's role.
+**Problem:** The tool references "6+ months" for data retention. Article 18 requires providers to retain for **10 years**. Article 26(5) requires deployers to retain for at least **6 months**. The applicable period depends on the deployer's role.
 **Fix:** Replace hardcoded "6 months" with role-dependent guidance. Add Article 18/26(6) distinction to templates and section builders.
 
 ### Bug 5: No risk classification / scope check
@@ -414,6 +414,44 @@ Tested `aitrace comply` on 5 open-source projects (Haystack, CrewAI, LiteLLM, n8
 | Retention period | High | Low | v0.10.1 |
 | Scope check / risk classification | High | Medium | v0.10.1 |
 | Percentage claims | Medium | Low | v0.10.1 |
+
+---
+
+## Positioning & Framing (Updated March 25, 2026)
+
+### The legal reality
+
+Open-source AI frameworks (LlamaIndex, LangChain, Haystack, etc.) have **zero legal obligations** under the EU AI Act. Article 25(4) explicitly exempts "third parties making accessible to the public tools, services, processes, or components under a free and open-source licence." The compliance burden falls entirely on whoever builds the final AI system.
+
+But their **users** — the people building applications with these frameworks — ARE the providers under Article 3(3). Those users must produce Annex IV documentation, Article 12 logging, Article 13 deployer instructions, and retain everything for 10 years (Article 18).
+
+### The pitch that works vs. the pitch that doesn't
+
+| Wrong framing (gets rejected) | Right framing (gets merged) |
+|---|---|
+| "EU AI Act compliance guide for [Framework]" | "EU AI Act compliance guide for [Framework] **deployers**" |
+| Framework has compliance implications | Framework **users** have compliance obligations when building high-risk systems |
+| You need this in your repo | Your **users** need this — and providing it is a competitive advantage |
+| "Here's what YOUR repo needs" | "Here's what helps YOUR USERS stay compliant" |
+
+**Core principle:** Not "you must comply" but "helping your users comply makes your framework the safer choice."
+
+### Evidence
+
+- **Dify merged** the compliance guide — they understood the competitive angle instinctively.
+- **LlamaIndex rejected** it as "claude-law slop" — the old framing ("your repo needs this") triggered the wrong reaction.
+- **LangChain redirected** to separate packages — policy-based, not content-based rejection.
+
+### Competitive angle
+
+The EU AI Act deadline is August 2, 2026. Teams evaluating AI frameworks will ask "which framework makes compliance easier?" The framework that ships compliance docs wins those teams. This is how AI Trace Auditor creates value for framework maintainers: not by imposing obligations on them, but by making their ecosystem more attractive to compliance-conscious deployers.
+
+### Apply this framing everywhere
+
+- **PR descriptions:** Lead with "helps your deployers/users" not "your repo needs"
+- **README and landing page:** "Your users have compliance obligations. This tool helps them meet those obligations."
+- **CLI output:** Generated docs should say "for deployers of systems built with [Framework]"
+- **Outreach emails:** Pitch the competitive advantage, not the legal requirement
 
 ---
 

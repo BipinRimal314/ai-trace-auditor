@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Trace Auditor — EU AI Act Compliance from Code</title>
-    <meta name="description" content="Open-source CLI and GitHub Action that audits your AI codebase against EU AI Act Articles 11, 12, 13 and GDPR Article 30. August 2, 2026 deadline.">
+    <meta name="description" content="Open-source CLI and GitHub Action that audits your AI codebase against EU AI Act Articles 11, 12, 13 and GDPR Article 30. Compliance infrastructure takes 12-18 months to build.">
     <style>
         :root {
             --ink: #0a0a0a;
@@ -14,6 +14,7 @@
             --muted: #6b7280;
             --border: #d1d5db;
             --red: #b91c1c;
+            --amber: #b45309;
             --code-bg: #1e1e2e;
             --code-fg: #cdd6f4;
         }
@@ -34,7 +35,7 @@
         }
         .deadline {
             display: inline-block;
-            background: var(--red);
+            background: var(--amber);
             color: white;
             font-size: 13px;
             font-weight: 600;
@@ -227,9 +228,10 @@
 <body>
 
 <div class="hero">
-    <div class="deadline">DEADLINE: AUGUST 2, 2026</div>
+    <div class="deadline">EU AI ACT — DEADLINE IN FLUX</div>
     <h1>Your code deploys AI.<br><span>Do your logs comply?</span></h1>
     <p class="sub">Open-source CLI that audits AI codebases and traces against EU AI Act requirements. One command. Articles 11, 12, 13, 50 + GDPR Article 30.</p>
+    <p class="sub" style="font-size: 14px; margin-top: -20px;">The current legal deadline is <strong>August 2, 2026</strong>. The European Parliament voted 569-45 on March 18, 2026 to extend it to December 2, 2027; trilogue negotiations target agreement by April 28. Compliance infrastructure takes 12-18 months to build regardless of when the deadline lands. Teams evaluating AI frameworks are already asking: which one makes compliance easier?</p>
 
     <div class="install">
         <button class="copy-btn" onclick="navigator.clipboard.writeText('pip install ai-trace-auditor && aitrace comply ./');this.textContent='Copied'">Copy</button>

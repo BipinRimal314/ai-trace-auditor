@@ -221,4 +221,4 @@ class TestSection9:
         section = build_section_9(_rich_scan())
         assert "10 years" in section.content
         assert "Article 18" in section.content
-        assert "Article 26(6)" in section.content
+        assert "Article 26(5)" in section.content
