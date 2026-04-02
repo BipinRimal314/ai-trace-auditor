@@ -1,0 +1,64 @@
+{
+  "resourceSpans": [
+    {
+      "resource": {
+        "attributes": [
+          {"key": "service.name", "value": {"stringValue": "mcp-chain-test"}}
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {"name": "mcp.telemetry"},
+          "spans": [
+            {
+              "traceId": "mcp-trace-001",
+              "spanId": "span-agent",
+              "name": "Primary Agent",
+              "startTimeUnixNano": "1711900000000000000",
+              "endTimeUnixNano": "1711900020000000000",
+              "attributes": [
+                {"key": "gen_ai.agent.id", "value": {"stringValue": "primary-agent"}},
+                {"key": "gen_ai.agent.name", "value": {"stringValue": "Assistant"}},
+                {"key": "gen_ai.operation.name", "value": {"stringValue": "chat"}},
+                {"key": "gen_ai.provider.name", "value": {"stringValue": "anthropic"}},
+                {"key": "gen_ai.request.model", "value": {"stringValue": "claude-3-opus"}},
+                {"key": "gen_ai.response.model", "value": {"stringValue": "claude-3-opus-20240229"}},
+                {"key": "gen_ai.usage.input_tokens", "value": {"intValue": 3000}},
+                {"key": "gen_ai.usage.output_tokens", "value": {"intValue": 1500}}
+              ]
+            },
+            {
+              "traceId": "mcp-trace-001",
+              "spanId": "span-mcp-tool",
+              "parentSpanId": "span-agent",
+              "name": "MCP Tool Call",
+              "startTimeUnixNano": "1711900005000000000",
+              "endTimeUnixNano": "1711900010000000000",
+              "attributes": [
+                {"key": "gen_ai.agent.id", "value": {"stringValue": "mcp-executor"}},
+                {"key": "gen_ai.operation.name", "value": {"stringValue": "tool_call"}},
+                {"key": "gen_ai.tool.name", "value": {"stringValue": "database_query"}},
+                {"key": "gen_ai.mcp.server_uri", "value": {"stringValue": "stdio://localhost/db-server"}}
+              ]
+            },
+            {
+              "traceId": "mcp-trace-001",
+              "spanId": "span-proxied-api",
+              "parentSpanId": "span-mcp-tool",
+              "name": "Proxied API Call",
+              "startTimeUnixNano": "1711900006000000000",
+              "endTimeUnixNano": "1711900009000000000",
+              "attributes": [
+                {"key": "gen_ai.agent.id", "value": {"stringValue": "mcp-executor"}},
+                {"key": "gen_ai.operation.name", "value": {"stringValue": "chat"}},
+                {"key": "gen_ai.provider.name", "value": {"stringValue": "openai"}},
+                {"key": "gen_ai.request.model", "value": {"stringValue": "gpt-4"}},
+                {"key": "gen_ai.response.model", "value": {"stringValue": "gpt-4-0125-preview"}}
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

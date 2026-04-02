@@ -1,0 +1,86 @@
+{
+  "resourceSpans": [
+    {
+      "resource": {
+        "attributes": [
+          {"key": "service.name", "value": {"stringValue": "crewai-pipeline"}},
+          {"key": "session.id", "value": {"stringValue": "session-multi-001"}}
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {"name": "crewai.telemetry"},
+          "spans": [
+            {
+              "traceId": "multi-trace-001",
+              "spanId": "span-orchestrator",
+              "name": "CrewAI Orchestrator",
+              "startTimeUnixNano": "1711900000000000000",
+              "endTimeUnixNano": "1711900060000000000",
+              "attributes": [
+                {"key": "gen_ai.agent.id", "value": {"stringValue": "orchestrator-1"}},
+                {"key": "gen_ai.agent.name", "value": {"stringValue": "Router"}},
+                {"key": "gen_ai.operation.name", "value": {"stringValue": "agent"}},
+                {"key": "gen_ai.provider.name", "value": {"stringValue": "openai"}},
+                {"key": "gen_ai.request.model", "value": {"stringValue": "gpt-4"}},
+                {"key": "gen_ai.response.model", "value": {"stringValue": "gpt-4-0125-preview"}},
+                {"key": "crewai.crew_name", "value": {"stringValue": "research-crew"}}
+              ]
+            },
+            {
+              "traceId": "multi-trace-001",
+              "spanId": "span-researcher",
+              "parentSpanId": "span-orchestrator",
+              "name": "Research Agent",
+              "startTimeUnixNano": "1711900001000000000",
+              "endTimeUnixNano": "1711900030000000000",
+              "attributes": [
+                {"key": "gen_ai.agent.id", "value": {"stringValue": "researcher-1"}},
+                {"key": "gen_ai.agent.name", "value": {"stringValue": "Researcher"}},
+                {"key": "gen_ai.operation.name", "value": {"stringValue": "chat"}},
+                {"key": "gen_ai.provider.name", "value": {"stringValue": "openai"}},
+                {"key": "gen_ai.request.model", "value": {"stringValue": "gpt-4"}},
+                {"key": "gen_ai.response.model", "value": {"stringValue": "gpt-4-0125-preview"}},
+                {"key": "gen_ai.usage.input_tokens", "value": {"intValue": 1500}},
+                {"key": "gen_ai.usage.output_tokens", "value": {"intValue": 800}},
+                {"key": "crewai.agent_role", "value": {"stringValue": "researcher"}}
+              ]
+            },
+            {
+              "traceId": "multi-trace-001",
+              "spanId": "span-tool-search",
+              "parentSpanId": "span-researcher",
+              "name": "web_search",
+              "startTimeUnixNano": "1711900005000000000",
+              "endTimeUnixNano": "1711900010000000000",
+              "attributes": [
+                {"key": "gen_ai.agent.id", "value": {"stringValue": "researcher-1"}},
+                {"key": "gen_ai.operation.name", "value": {"stringValue": "tool_call"}},
+                {"key": "gen_ai.tool.name", "value": {"stringValue": "web_search"}}
+              ]
+            },
+            {
+              "traceId": "multi-trace-001",
+              "spanId": "span-writer",
+              "parentSpanId": "span-orchestrator",
+              "name": "Writer Agent",
+              "startTimeUnixNano": "1711900031000000000",
+              "endTimeUnixNano": "1711900055000000000",
+              "attributes": [
+                {"key": "gen_ai.agent.id", "value": {"stringValue": "writer-1"}},
+                {"key": "gen_ai.agent.name", "value": {"stringValue": "Writer"}},
+                {"key": "gen_ai.operation.name", "value": {"stringValue": "chat"}},
+                {"key": "gen_ai.provider.name", "value": {"stringValue": "anthropic"}},
+                {"key": "gen_ai.request.model", "value": {"stringValue": "claude-3-sonnet"}},
+                {"key": "gen_ai.response.model", "value": {"stringValue": "claude-3-sonnet-20240229"}},
+                {"key": "gen_ai.usage.input_tokens", "value": {"intValue": 2000}},
+                {"key": "gen_ai.usage.output_tokens", "value": {"intValue": 1200}},
+                {"key": "crewai.agent_role", "value": {"stringValue": "writer"}}
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ai-trace-auditor"
-version = "0.12.0"
-description = "EU AI Act compliance suite: Articles 11, 12, 13 + GDPR Article 30 from code and traces. One command, three articles."
+version = "0.13.0"
+description = "EU AI Act compliance suite: Articles 11, 12, 13, 25 + GDPR Article 30. Multi-agent DAG auditing with per-agent compliance scoring."
 readme = "README.md"
 license = "Apache-2.0"
 requires-python = ">=3.11"

@@ -1,0 +1,70 @@
+{
+  "resourceSpans": [
+    {
+      "resource": {
+        "attributes": [
+          {"key": "service.name", "value": {"stringValue": "langgraph-router"}},
+          {"key": "session.id", "value": {"stringValue": "session-lg-001"}}
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {"name": "langgraph.telemetry"},
+          "spans": [
+            {
+              "traceId": "langgraph-trace-001",
+              "spanId": "span-router",
+              "name": "Router Agent",
+              "startTimeUnixNano": "1711900000000000000",
+              "endTimeUnixNano": "1711900040000000000",
+              "attributes": [
+                {"key": "gen_ai.agent.id", "value": {"stringValue": "router-1"}},
+                {"key": "gen_ai.agent.name", "value": {"stringValue": "Router"}},
+                {"key": "gen_ai.operation.name", "value": {"stringValue": "agent"}},
+                {"key": "gen_ai.provider.name", "value": {"stringValue": "openai"}},
+                {"key": "gen_ai.request.model", "value": {"stringValue": "gpt-4"}},
+                {"key": "gen_ai.response.model", "value": {"stringValue": "gpt-4-0125-preview"}},
+                {"key": "metadata.langgraph_node", "value": {"stringValue": "router"}},
+                {"key": "metadata.langgraph_step", "value": {"intValue": 0}}
+              ]
+            },
+            {
+              "traceId": "langgraph-trace-001",
+              "spanId": "span-rag-agent",
+              "parentSpanId": "span-router",
+              "name": "Safe RAG Agent",
+              "startTimeUnixNano": "1711900005000000000",
+              "endTimeUnixNano": "1711900035000000000",
+              "attributes": [
+                {"key": "gen_ai.agent.id", "value": {"stringValue": "rag-agent-1"}},
+                {"key": "gen_ai.agent.name", "value": {"stringValue": "RAG Agent"}},
+                {"key": "gen_ai.operation.name", "value": {"stringValue": "chat"}},
+                {"key": "gen_ai.provider.name", "value": {"stringValue": "openai"}},
+                {"key": "gen_ai.request.model", "value": {"stringValue": "gpt-4"}},
+                {"key": "gen_ai.response.model", "value": {"stringValue": "gpt-4-0125-preview"}},
+                {"key": "gen_ai.usage.input_tokens", "value": {"intValue": 2000}},
+                {"key": "gen_ai.usage.output_tokens", "value": {"intValue": 500}},
+                {"key": "metadata.langgraph_node", "value": {"stringValue": "rag_agent"}},
+                {"key": "metadata.langgraph_step", "value": {"intValue": 1}}
+              ]
+            },
+            {
+              "traceId": "langgraph-trace-001",
+              "spanId": "span-vector-search",
+              "parentSpanId": "span-rag-agent",
+              "name": "vector_search",
+              "startTimeUnixNano": "1711900010000000000",
+              "endTimeUnixNano": "1711900015000000000",
+              "attributes": [
+                {"key": "gen_ai.agent.id", "value": {"stringValue": "rag-agent-1"}},
+                {"key": "gen_ai.operation.name", "value": {"stringValue": "tool_call"}},
+                {"key": "gen_ai.tool.name", "value": {"stringValue": "vector_search"}},
+                {"key": "metadata.langgraph_node", "value": {"stringValue": "rag_agent"}}
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

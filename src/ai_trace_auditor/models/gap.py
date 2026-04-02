@@ -50,3 +50,7 @@ class GapReport(BaseModel):
     overall_score: float  # 0.0 - 1.0
     requirement_results: list[RequirementResult]
     summary: GapSummary
+
+    # Multi-agent extensions
+    agent_scores: dict[str, float] | None = None  # agent_id -> compliance score
+    dag_mermaid: str | None = None  # Mermaid diagram source

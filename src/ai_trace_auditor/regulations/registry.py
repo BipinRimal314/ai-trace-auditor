@@ -84,6 +84,23 @@ class RequirementRegistry:
             if r.applies_to is None or risk_level in r.applies_to or "all" in r.applies_to
         ]
 
+    def get_applicable_for_trace(
+        self, risk_level: str = "high_risk", is_multi_agent: bool = False
+    ) -> list[Requirement]:
+        """Filter requirements based on risk level and multi-agent status.
+
+        Requirements tagged with "multi_agent_only" are excluded for
+        single-agent traces to avoid false-positive gaps.
+        """
+        base = self.get_applicable(risk_level)
+        if is_multi_agent:
+            return base
+        return [
+            r
+            for r in base
+            if r.applies_to is None or "multi_agent_only" not in r.applies_to
+        ]
+
     @property
     def regulations(self) -> list[str]:
         return sorted({r.regulation for r in self._requirements})

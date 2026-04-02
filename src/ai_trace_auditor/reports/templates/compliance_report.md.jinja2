@@ -19,6 +19,24 @@
 | Missing | {{ report.summary.missing }} |
 | N/A | {{ report.summary.not_applicable }} |
 
+{% if report.agent_scores %}
+## Per-Agent Compliance Scores
+
+| Agent ID | Score |
+|----------|-------|
+{% for agent_id, score in report.agent_scores.items() | sort %}
+| {{ agent_id }} | {{ (score * 100) | round(1) }}% |
+{% endfor %}
+
+{% endif %}
+{% if report.dag_mermaid %}
+## Execution DAG
+
+```mermaid
+{{ report.dag_mermaid }}
+```
+
+{% endif %}
 {% if report.summary.top_gaps %}
 ## Top Gaps
 

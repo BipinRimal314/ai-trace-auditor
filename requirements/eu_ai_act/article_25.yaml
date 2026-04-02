@@ -1,0 +1,74 @@
+regulation: "EU AI Act"
+article: "Article 25"
+title: "Value Chain Accountability"
+
+requirements:
+  - id: "EU-AIA-25.1"
+    title: "Agent identity traceability"
+    description: >
+      In multi-agent AI systems, each agent acting within the system
+      must be uniquely identifiable in the audit trail. This enables
+      attribution of outputs and decisions to specific agents along
+      the AI value chain.
+    severity: "mandatory"
+    applies_to: ["high_risk", "multi_agent_only"]
+    evidence_fields:
+      - field_path: "spans[].agent_id"
+        description: "Unique identifier for each agent in the system"
+        required: true
+        check_type: "non_null"
+      - field_path: "spans[].agent_name"
+        description: "Human-readable agent name for audit clarity"
+        required: false
+        check_type: "non_null"
+
+  - id: "EU-AIA-25.2"
+    title: "Delegation chain documentation"
+    description: >
+      When one AI agent delegates a task to another, the delegation
+      chain must be documented to enable reconstruction of the
+      decision path and attribution of responsibility per Article 25(1).
+    severity: "mandatory"
+    applies_to: ["high_risk", "multi_agent_only"]
+    evidence_fields:
+      - field_path: "spans[].delegation_path"
+        description: "Ordered chain of agent IDs from root to this span"
+        required: true
+        check_type: "non_empty"
+      - field_path: "spans[].parent_span_id"
+        description: "Parent span establishing the delegation relationship"
+        required: true
+        check_type: "non_null"
+
+  - id: "EU-AIA-25.3"
+    title: "MCP boundary transparency"
+    description: >
+      When agents interact with external tools via the Model Context
+      Protocol (MCP), the MCP server endpoint must be recorded to
+      maintain cross-boundary accountability per Article 25.
+    severity: "recommended"
+    applies_to: ["high_risk", "multi_agent_only"]
+    evidence_fields:
+      - field_path: "spans[].mcp_server_uri"
+        description: "MCP server endpoint for cross-boundary tool calls"
+        required: false
+        check_type: "non_null"
+
+  - id: "EU-AIA-25.4"
+    title: "Substantial modification detection"
+    description: >
+      Article 25(1)(c) states a deployer becomes a provider when making
+      a substantial modification. Agent framework and model identity must
+      be tracked to detect when orchestration logic substantially alters
+      system behavior.
+    severity: "mandatory"
+    applies_to: ["high_risk", "multi_agent_only"]
+    evidence_fields:
+      - field_path: "spans[].agent_framework"
+        description: "Agent framework identifier for detecting orchestration changes"
+        required: false
+        check_type: "non_null"
+      - field_path: "spans[].model_used"
+        description: "Model version per agent for detecting substantial changes"
+        required: true
+        check_type: "non_null"

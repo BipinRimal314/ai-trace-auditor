@@ -97,6 +97,18 @@ def _print_report_summary(report: GapReport) -> None:
         for i, gap in enumerate(report.summary.top_gaps, 1):
             console.print(f"  {i}. {gap}")
 
+    # Multi-agent per-agent scores
+    if report.agent_scores:
+        console.print()
+        agent_table = Table(title="Per-Agent Compliance Scores")
+        agent_table.add_column("Agent ID")
+        agent_table.add_column("Score", justify="right")
+        for agent_id, score in sorted(report.agent_scores.items()):
+            pct = score * 100
+            color = "green" if pct >= 90 else "yellow" if pct >= 50 else "red"
+            agent_table.add_row(agent_id, f"[{color}]{pct:.1f}%[/{color}]")
+        console.print(agent_table)
+
 
 @app.command()
 def audit(
@@ -118,6 +130,10 @@ def audit(
         str,
         typer.Option("--report-format", help="Output format: markdown, json, both"),
     ] = "markdown",
+    show_dag: Annotated[
+        bool,
+        typer.Option("--show-dag", help="Output Mermaid DAG visualization for multi-agent traces"),
+    ] = False,
 ) -> None:
     """Audit LLM traces against regulatory compliance requirements."""
     if not path.exists():
@@ -137,6 +153,18 @@ def audit(
         raise typer.Exit(code=0)
 
     _print_trace_summary(traces)
+
+    # Multi-agent detection
+    multi_agent_traces = [t for t in traces if t.is_multi_agent]
+    if multi_agent_traces:
+        total_agents = set()
+        for t in multi_agent_traces:
+            total_agents.update(t.agents)
+        console.print(
+            f"[bold cyan]Multi-agent system detected:[/bold cyan] "
+            f"{len(total_agents)} agents across "
+            f"{sum(t.span_count for t in multi_agent_traces)} spans"
+        )
 
     # Load requirements
     registry = RequirementRegistry()
@@ -175,6 +203,20 @@ def audit(
             stdout_console.print(jr)
 
     _print_report_summary(report)
+
+    # Multi-agent DAG visualization
+    if show_dag and multi_agent_traces:
+        from ai_trace_auditor.analysis.dag import build_adjacency_list
+        from ai_trace_auditor.analysis.dag_mermaid import generate_agent_dag_mermaid
+
+        console.print()
+        console.print("[bold]Agent Execution DAG:[/bold]")
+        for trace in multi_agent_traces:
+            if not trace.dag_adjacency_list:
+                trace.dag_adjacency_list = build_adjacency_list(trace)
+            mermaid = generate_agent_dag_mermaid(trace, report.agent_scores)
+            if mermaid:
+                console.print(f"\n```mermaid\n{mermaid}\n```")
 
     # Exit code: 0 = all satisfied, 1 = gaps found
     has_gaps = report.summary.missing > 0 or report.summary.partial > 0
@@ -1339,6 +1381,59 @@ def import_traces(
         console.print(f"[green]Report written to {output}[/green]")
     else:
         stdout_console.print(content)
+
+
+@app.command(name="lint-guide")
+def lint_guide_cmd(
+    path: Annotated[Path, typer.Argument(help="Markdown compliance guide to lint")],
+) -> None:
+    """Lint a compliance guide for common EU AI Act mistakes.
+
+    Catches: Article 13/50 conflation, retention period errors, missing scope
+    checks, provider/deployer conflation, self-promotional content, citation errors.
+    """
+    if not path.exists():
+        console.print(f"[red]Error:[/red] {path} does not exist")
+        raise typer.Exit(code=2)
+
+    from ai_trace_auditor.guide_linter.rules import lint_guide
+
+    content = path.read_text(encoding="utf-8")
+    issues = lint_guide(content)
+
+    if not issues:
+        console.print(f"[green]No issues found[/green] in {path}")
+        raise typer.Exit(code=0)
+
+    severity_colors = {"error": "red", "warning": "yellow", "info": "blue"}
+
+    table = Table(title=f"Guide Lint: {path.name}")
+    table.add_column("Rule", style="dim")
+    table.add_column("Sev")
+    table.add_column("Line", justify="right")
+    table.add_column("Issue")
+    table.add_column("Fix", style="dim")
+
+    for issue in issues:
+        color = severity_colors.get(issue.severity, "white")
+        table.add_row(
+            issue.rule_id,
+            f"[{color}]{issue.severity.upper()}[/{color}]",
+            str(issue.line),
+            issue.message,
+            issue.fix_hint,
+        )
+
+    console.print(table)
+
+    error_count = sum(1 for i in issues if i.severity == "error")
+    warn_count = sum(1 for i in issues if i.severity == "warning")
+    console.print(
+        f"\n[bold]{len(issues)} issues:[/bold] "
+        f"[red]{error_count} errors[/red], [yellow]{warn_count} warnings[/yellow]"
+    )
+
+    raise typer.Exit(code=1 if error_count > 0 else 0)
 
 
 @app.command()

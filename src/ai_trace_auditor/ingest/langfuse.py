@@ -77,6 +77,21 @@ def _parse_observation(obs: dict[str, Any]) -> NormalizedSpan:
     elif start and end:
         duration_ms = (end - start).total_seconds() * 1000
 
+    # Multi-agent identity from metadata
+    meta = obs.get("metadata") or {}
+    agent_id = meta.get("agent_id")
+    agent_name = meta.get("agent_name") or (obs.get("name") if obs_type == "SPAN" else None)
+    agent_framework = meta.get("framework")
+
+    # Span kind from Langfuse type
+    span_kind = None
+    if obs_type == "GENERATION":
+        span_kind = "llm_generation"
+    elif obs_type == "SPAN":
+        name_lower = (obs.get("name") or "").lower()
+        if any(kw in name_lower for kw in ("handoff", "delegate", "route")):
+            span_kind = "agent_handoff"
+
     return NormalizedSpan(
         span_id=obs.get("id", "unknown"),
         parent_span_id=obs.get("parentObservationId"),
@@ -116,6 +131,10 @@ def _parse_observation(obs: dict[str, Any]) -> NormalizedSpan:
                 "totalTokens",
             }
         },
+        agent_id=agent_id,
+        agent_name=agent_name,
+        agent_framework=agent_framework,
+        span_kind=span_kind,
     )
 
 
@@ -163,6 +182,7 @@ class LangfuseIngestor:
                     spans=spans,
                     source_format="langfuse",
                     metadata=metadata,
+                    session_id=trace_data.get("sessionId"),
                 )
             )
 

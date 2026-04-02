@@ -1,0 +1,62 @@
+{
+  "resourceSpans": [
+    {
+      "resource": {
+        "attributes": [
+          {"key": "service.name", "value": {"stringValue": "circular-test"}}
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {"name": "test.telemetry"},
+          "spans": [
+            {
+              "traceId": "circular-trace-001",
+              "spanId": "span-a",
+              "name": "Agent A",
+              "startTimeUnixNano": "1711900000000000000",
+              "endTimeUnixNano": "1711900010000000000",
+              "attributes": [
+                {"key": "gen_ai.agent.id", "value": {"stringValue": "agent-a"}},
+                {"key": "gen_ai.agent.name", "value": {"stringValue": "Planner"}},
+                {"key": "gen_ai.operation.name", "value": {"stringValue": "agent"}},
+                {"key": "gen_ai.provider.name", "value": {"stringValue": "openai"}},
+                {"key": "gen_ai.request.model", "value": {"stringValue": "gpt-4"}}
+              ]
+            },
+            {
+              "traceId": "circular-trace-001",
+              "spanId": "span-b",
+              "parentSpanId": "span-a",
+              "name": "Agent B",
+              "startTimeUnixNano": "1711900001000000000",
+              "endTimeUnixNano": "1711900008000000000",
+              "attributes": [
+                {"key": "gen_ai.agent.id", "value": {"stringValue": "agent-b"}},
+                {"key": "gen_ai.agent.name", "value": {"stringValue": "Executor"}},
+                {"key": "gen_ai.operation.name", "value": {"stringValue": "chat"}},
+                {"key": "gen_ai.provider.name", "value": {"stringValue": "openai"}},
+                {"key": "gen_ai.request.model", "value": {"stringValue": "gpt-4"}}
+              ]
+            },
+            {
+              "traceId": "circular-trace-001",
+              "spanId": "span-c",
+              "parentSpanId": "span-b",
+              "name": "Agent C",
+              "startTimeUnixNano": "1711900002000000000",
+              "endTimeUnixNano": "1711900007000000000",
+              "attributes": [
+                {"key": "gen_ai.agent.id", "value": {"stringValue": "agent-c"}},
+                {"key": "gen_ai.agent.name", "value": {"stringValue": "Reviewer"}},
+                {"key": "gen_ai.operation.name", "value": {"stringValue": "chat"}},
+                {"key": "gen_ai.provider.name", "value": {"stringValue": "openai"}},
+                {"key": "gen_ai.request.model", "value": {"stringValue": "gpt-4"}}
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

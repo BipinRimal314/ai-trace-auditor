@@ -100,6 +100,49 @@ def _extract_events(events: list[dict[str, Any]] | None) -> dict[str, Any]:
     return result
 
 
+def _detect_framework(attrs: dict[str, Any]) -> str | None:
+    """Detect the agent framework from span attributes."""
+    for key in attrs:
+        if "langgraph" in key.lower() or "langchain" in key.lower():
+            return "langgraph"
+        if "crewai" in key.lower():
+            return "crewai"
+        if "autogen" in key.lower():
+            return "autogen"
+        if "google.adk" in key.lower():
+            return "adk"
+    # Check explicit framework attribute
+    framework = attrs.get("gen_ai.agent.framework")
+    if framework:
+        return str(framework).lower()
+    # Arize/OpenInference graph attributes suggest LangGraph
+    if "graph.node.id" in attrs:
+        return "langgraph"
+    return None
+
+
+def _classify_span_kind(attrs: dict[str, Any]) -> str | None:
+    """Classify the span kind from operation and attributes."""
+    op = str(attrs.get("gen_ai.operation.name", "")).lower()
+
+    if op in ("chat", "text_completion", "embeddings"):
+        return "llm_generation"
+    if op == "tool_call" or attrs.get("gen_ai.tool.name"):
+        return "tool_call"
+    if attrs.get("gen_ai.agent.id") or op == "agent":
+        return "agent_handoff"
+
+    # Memory operations
+    for key in attrs:
+        k = key.lower()
+        if "memory" in k and "read" in k:
+            return "memory_read"
+        if "memory" in k and "write" in k:
+            return "memory_write"
+
+    return None
+
+
 def _parse_tool_calls(attrs: dict[str, Any]) -> list[ToolCall] | None:
     """Parse tool call information from attributes."""
     tool_name = attrs.get("gen_ai.tool.name")
@@ -228,6 +271,13 @@ def _parse_span(span: dict[str, Any]) -> NormalizedSpan:
         error_type=error_type,
         error_message=error_message,
         raw_attributes=all_attrs,
+        # Multi-agent identity
+        agent_id=all_attrs.get("gen_ai.agent.id") or all_attrs.get("graph.node.id"),
+        agent_name=all_attrs.get("gen_ai.agent.name"),
+        agent_framework=_detect_framework(all_attrs),
+        span_kind=_classify_span_kind(all_attrs),
+        tool_name=all_attrs.get("gen_ai.tool.name"),
+        mcp_server_uri=all_attrs.get("gen_ai.mcp.server_uri") or all_attrs.get("mcp.server.uri"),
     )
 
 
@@ -256,6 +306,9 @@ class OTelIngestor:
         if not raw_spans:
             return []
 
+        # Extract session_id from resource attributes
+        session_id = self._extract_session_id(data)
+
         # Group spans by trace_id
         traces_by_id: dict[str, list[dict[str, Any]]] = {}
         for span in raw_spans:
@@ -270,6 +323,7 @@ class OTelIngestor:
                 trace_id=trace_id,
                 spans=[_parse_span(s) for s in spans],
                 source_format="otel",
+                session_id=session_id,
             )
             for trace_id, spans in traces_by_id.items()
         ]
@@ -284,3 +338,15 @@ class OTelIngestor:
             for scope_span in resource_span.get("scopeSpans", []):
                 spans.extend(scope_span.get("spans", []))
         return spans
+
+    def _extract_session_id(self, data: dict[str, Any] | list[Any]) -> str | None:
+        """Extract session.id from resource-level attributes."""
+        if not isinstance(data, dict):
+            return None
+        for resource_span in data.get("resourceSpans", []):
+            resource = resource_span.get("resource", {})
+            attrs = _attrs_to_dict(resource.get("attributes", {}))
+            session_id = attrs.get("session.id")
+            if session_id:
+                return str(session_id)
+        return None

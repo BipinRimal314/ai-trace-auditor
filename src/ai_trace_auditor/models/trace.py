@@ -92,6 +92,23 @@ class NormalizedSpan(BaseModel):
     # Raw attributes for audit trail
     raw_attributes: dict[str, Any] = Field(default_factory=dict)
 
+    # Multi-agent identity (OTel gen_ai.agent.* semantic conventions)
+    agent_id: str | None = None
+    agent_name: str | None = None
+    agent_framework: str | None = None  # "langgraph", "crewai", "autogen", "adk"
+
+    # DAG context
+    orchestrator_id: str | None = None
+    delegation_path: list[str] | None = None  # ordered agent_ids from root to this span
+
+    # Span classification
+    span_kind: str | None = None  # "llm_generation", "tool_call", "agent_handoff", "memory_read", "memory_write"
+    tool_name: str | None = None
+    mcp_server_uri: str | None = None
+
+    # Tamper-evident audit trail (IETF Agent Audit Trail draft)
+    data_provenance_hash: str | None = None
+
 
 class NormalizedTrace(BaseModel):
     """A complete trace containing one or more spans.
@@ -105,9 +122,24 @@ class NormalizedTrace(BaseModel):
     source_format: str  # "otel", "langfuse", "raw_api"
     metadata: dict[str, Any] = Field(default_factory=dict)
 
+    # Multi-agent session context
+    session_id: str | None = None
+    dag_adjacency_list: dict[str, list[str]] | None = None
+    compliance_scores: dict[str, Any] | None = None
+
     @property
     def span_count(self) -> int:
         return len(self.spans)
+
+    @property
+    def agents(self) -> set[str]:
+        """Unique agent IDs found across all spans."""
+        return {s.agent_id for s in self.spans if s.agent_id}
+
+    @property
+    def is_multi_agent(self) -> bool:
+        """True if this trace involves more than one agent."""
+        return len(self.agents) > 1
 
     @property
     def total_input_tokens(self) -> int:

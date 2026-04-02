@@ -43,7 +43,7 @@ Add compliance checks to your CI pipeline:
 
 ```yaml
 - name: Audit AI traces
-  uses: BipinRimal314/ai-trace-auditor@v0.2.0
+  uses: BipinRimal314/ai-trace-auditor@v0.13.0
   with:
     path: traces/exported.json
     regulation: "EU AI Act"
@@ -64,6 +64,14 @@ The action fails if compliance gaps are found. Set `fail-on-gaps: "false"` to re
 - Tool/function call audit trails
 - Trace linkage for multi-step operations
 
+**EU AI Act Article 25 (Value Chain Accountability) -- NEW in v0.13.0:**
+- Agent identity traceability across multi-agent systems
+- Delegation chain documentation (who delegated what to whom)
+- MCP boundary transparency (cross-boundary tool calls)
+- Substantial modification detection (deployer-to-provider liability shift)
+- Bottom-up penalty propagation: downstream agent failures cascade to upstream delegators
+- Per-agent compliance scores with system-level aggregation
+
 **NIST AI RMF:**
 - Production monitoring (MEASURE 2.4)
 - Transparency documentation (MEASURE 2.8)
@@ -82,6 +90,29 @@ The action fails if compliance gaps are found. Set `fail-on-gaps: "false"` to re
 | Raw JSONL | Any provider's API logs |
 
 Auto-detected. Use `--format` to override.
+
+## Multi-Agent Support (v0.13.0)
+
+Automatically detects multi-agent traces from LangGraph, CrewAI, AutoGen, and Google ADK. When multiple agents are detected:
+
+- Reconstructs the execution DAG from parent-child span relationships
+- Computes per-agent compliance scores with bottom-up penalty propagation
+- Checks Article 25 "value chain accountability" requirements
+- Detects liability shifts when deployers may become providers
+- Generates Mermaid DAG visualizations with `--show-dag`
+
+```bash
+# Audit a multi-agent trace with DAG visualization
+aitrace audit multi_agent_traces.json --show-dag
+
+# Output includes per-agent scores:
+# Per-Agent Compliance Scores
+# | orchestrator-1 | 33.0% |  (red: penalized for downstream failures)
+# | researcher-1   | 66.4% |  (amber: own gaps + some coverage)
+# | writer-1       | 66.4% |  (amber: own gaps + some coverage)
+```
+
+Single-agent traces continue to work identically. Article 25 requirements are only checked when multiple agents are detected.
 
 ## Example Output
 
