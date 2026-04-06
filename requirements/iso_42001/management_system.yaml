@@ -1,0 +1,159 @@
+regulation: "ISO 42001"
+article: "AI Management System"
+title: "AI Management System Requirements"
+status: "beta"
+
+requirements:
+  - id: "ISO-42001-4.1"
+    title: "Context of the organization"
+    description: >
+      The organization shall determine external and internal issues that are
+      relevant to its purpose and that affect its ability to achieve the intended
+      outcomes of its AI management system.
+    severity: "mandatory"
+    applies_to: ["all"]
+    evidence_fields:
+      - field_path: "spans[].provider"
+        description: "AI providers in use (external context)"
+        required: true
+        check_type: "non_null"
+
+  - id: "ISO-42001-5.1"
+    title: "Leadership commitment"
+    description: >
+      Top management shall demonstrate leadership and commitment with respect
+      to the AI management system by ensuring AI policies and objectives are
+      established and compatible with strategic direction.
+    severity: "mandatory"
+    applies_to: ["all"]
+    evidence_fields:
+      - field_path: "spans[].operation"
+        description: "AI operations are categorized and documented"
+        required: true
+        check_type: "non_empty"
+
+  - id: "ISO-42001-6.1"
+    title: "Risk assessment for AI systems"
+    description: >
+      The organization shall plan actions to address risks and opportunities
+      related to AI systems, including assessing potential impacts on
+      individuals and groups of individuals.
+    severity: "mandatory"
+    applies_to: ["all"]
+    evidence_fields:
+      - field_path: "spans[].error_type"
+        description: "Error classification enables risk assessment"
+        required: true
+        check_type: "present"
+      - field_path: "spans[].finish_reasons"
+        description: "Operation outcomes tracked for risk patterns"
+        required: false
+        check_type: "present"
+
+  - id: "ISO-42001-7.1"
+    title: "Resources for AI management"
+    description: >
+      The organization shall determine and provide resources needed for the
+      establishment, implementation, maintenance, and continual improvement
+      of the AI management system.
+    severity: "mandatory"
+    applies_to: ["all"]
+    evidence_fields:
+      - field_path: "spans[].input_tokens"
+        description: "Resource consumption tracking (input)"
+        required: true
+        check_type: "non_null"
+      - field_path: "spans[].output_tokens"
+        description: "Resource consumption tracking (output)"
+        required: true
+        check_type: "non_null"
+
+  - id: "ISO-42001-8.1"
+    title: "Operational planning and control"
+    description: >
+      The organization shall plan, implement, and control processes needed
+      to meet AI management system requirements, including determining criteria
+      for AI processes.
+    severity: "mandatory"
+    applies_to: ["all"]
+    evidence_fields:
+      - field_path: "spans[].model_used"
+        description: "Model selection is documented per operation"
+        required: true
+        check_type: "non_null"
+      - field_path: "spans[].start_time"
+        description: "Operations are timestamped for process control"
+        required: true
+        check_type: "non_null"
+
+  - id: "ISO-42001-8.4"
+    title: "AI system impact assessment"
+    description: >
+      The organization shall conduct an AI system impact assessment to identify
+      and evaluate the potential consequences of an AI system on individuals,
+      groups, and society.
+    severity: "mandatory"
+    applies_to: ["all"]
+    evidence_fields:
+      - field_path: "spans[].provider"
+        description: "Third-party AI provider dependencies documented"
+        required: true
+        check_type: "non_null"
+      - field_path: "spans[].operation"
+        description: "AI system capabilities documented by operation type"
+        required: true
+        check_type: "non_empty"
+
+  - id: "ISO-42001-9.1"
+    title: "Monitoring and measurement"
+    description: >
+      The organization shall determine what needs to be monitored and measured
+      for the AI management system, including monitoring methods, timing, and
+      responsible parties.
+    severity: "mandatory"
+    applies_to: ["all"]
+    evidence_fields:
+      - field_path: "spans[].latency_ms"
+        description: "Performance monitoring via latency measurement"
+        required: true
+        check_type: "non_null"
+      - field_path: "spans[].start_time"
+        description: "Temporal monitoring of AI operations"
+        required: true
+        check_type: "non_null"
+      - field_path: "spans[].end_time"
+        description: "Operation duration measurable"
+        required: true
+        check_type: "non_null"
+
+  - id: "ISO-42001-9.2"
+    title: "Internal audit"
+    description: >
+      The organization shall conduct internal audits at planned intervals
+      to determine whether the AI management system conforms to requirements
+      and is effectively implemented and maintained.
+    severity: "mandatory"
+    applies_to: ["all"]
+    evidence_fields:
+      - field_path: "spans[].trace_id"
+        description: "Operations are traceable for audit purposes"
+        required: true
+        check_type: "non_null"
+
+  - id: "ISO-42001-10.1"
+    title: "Continual improvement"
+    description: >
+      The organization shall continually improve the suitability, adequacy,
+      and effectiveness of the AI management system through corrective actions,
+      analysis of monitoring data, and management review outputs.
+    severity: "recommended"
+    applies_to: ["all"]
+    evidence_fields:
+      - field_path: "spans[].model_used"
+        description: "Model version tracking enables improvement measurement"
+        required: true
+        check_type: "non_null"
+      - field_path: "spans[].error_type"
+        description: "Error patterns tracked for corrective action"
+        required: false
+        check_type: "present"

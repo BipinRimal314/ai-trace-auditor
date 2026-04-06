@@ -223,6 +223,105 @@
             border: 1px solid var(--border);
             color: var(--muted);
         }
+
+        /* Pricing */
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin-top: 24px;
+        }
+        @media (max-width: 768px) { .pricing-grid { grid-template-columns: 1fr; } }
+        .price-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 28px 24px;
+            display: flex;
+            flex-direction: column;
+        }
+        .price-card.featured {
+            border: 2px solid var(--accent);
+            position: relative;
+        }
+        .price-card .tier-name {
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--accent);
+            margin-bottom: 8px;
+        }
+        .price-card .price {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--ink);
+            margin-bottom: 4px;
+        }
+        .price-card .price .period {
+            font-size: 15px;
+            font-weight: 400;
+            color: var(--muted);
+        }
+        .price-card .price-desc {
+            font-size: 13px;
+            color: var(--muted);
+            margin-bottom: 20px;
+            min-height: 36px;
+        }
+        .price-card .features {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 24px 0;
+            flex-grow: 1;
+        }
+        .price-card .features li {
+            font-size: 14px;
+            color: var(--ink);
+            padding: 6px 0;
+            padding-left: 22px;
+            position: relative;
+            line-height: 1.4;
+        }
+        .price-card .features li::before {
+            content: "\2713";
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+            font-weight: 700;
+        }
+        .price-card .cta {
+            display: block;
+            text-align: center;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background 0.15s;
+        }
+        .cta-primary {
+            background: var(--accent);
+            color: white;
+        }
+        .cta-primary:hover { background: #14472a; }
+        .cta-outline {
+            border: 2px solid var(--accent);
+            color: var(--accent);
+            background: transparent;
+        }
+        .cta-outline:hover { background: var(--accent-light); }
+        .coming-soon-badge {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 3px;
+            background: #fef3c7;
+            color: var(--amber);
+            margin-left: 8px;
+            vertical-align: middle;
+        }
     </style>
 </head>
 <body>
@@ -279,7 +378,7 @@
     <span class="key">runs-on:</span> <span class="val">ubuntu-latest</span>
     <span class="key">steps:</span>
       - <span class="key">uses:</span> <span class="val">actions/checkout@v4</span>
-      - <span class="key">uses:</span> <span class="val">BipinRimal314/ai-trace-auditor@v0.11.0</span>
+      - <span class="key">uses:</span> <span class="val">BipinRimal314/ai-trace-auditor@v0.14.0</span>
         <span class="key">with:</span>
           <span class="key">command:</span> <span class="val">comply</span>
           <span class="key">path:</span> <span class="val">.</span>
@@ -360,6 +459,54 @@
     </table>
 </div>
 
+<div class="section" style="padding-top: 60px;" id="pricing">
+    <h2>Pricing</h2>
+    <div class="pricing-grid">
+        <div class="price-card">
+            <div class="tier-name">Open Source</div>
+            <div class="price">Free</div>
+            <div class="price-desc">CLI + GitHub Action. Apache 2.0. Forever.</div>
+            <ul class="features">
+                <li>Full CLI: audit, comply, docs, flow</li>
+                <li>EU AI Act + NIST AI RMF requirements</li>
+                <li>GitHub Action for CI/CD</li>
+                <li>Evidence pack export (PDF, diagrams, checklists)</li>
+                <li>Multi-agent DAG auditing</li>
+                <li>100% local, no API keys</li>
+                <li>Community support (GitHub Issues)</li>
+            </ul>
+            <a href="#" class="cta cta-primary" onclick="navigator.clipboard.writeText('pip install ai-trace-auditor');this.textContent='Copied!';return false;">pip install ai-trace-auditor</a>
+        </div>
+        <div class="price-card featured">
+            <div class="tier-name">Continuous Compliance <span class="coming-soon-badge">Coming Soon</span></div>
+            <div class="price">$99 <span class="period">/month</span></div>
+            <div class="price-desc">Automated monitoring for teams shipping AI.</div>
+            <ul class="features">
+                <li>Everything in Free</li>
+                <li>Scheduled CI scans (weekly/daily)</li>
+                <li>Slack and email alerts on compliance drift</li>
+                <li>Custom requirement packs (ISO 42001, SOC 2 AI, internal policies)</li>
+                <li>Compliance score trends over time</li>
+                <li>Priority support</li>
+            </ul>
+            <a href="https://calendly.com/bipinrimal314/compliance-audit" class="cta cta-outline">Join the waitlist</a>
+        </div>
+        <div class="price-card">
+            <div class="tier-name">Compliance Audit</div>
+            <div class="price">$2,500 <span class="period">one-time</span></div>
+            <div class="price-desc">Evidence pack your compliance officer can hand to an auditor.</div>
+            <ul class="features">
+                <li>Full compliance evidence pack</li>
+                <li>EU AI Act Articles 11, 12, 13, 50 + GDPR 30</li>
+                <li>PDF report, data flow diagrams, checklists</li>
+                <li>Expert review and gap remediation guidance</li>
+                <li>Delivered within 2 weeks</li>
+            </ul>
+            <a href="https://calendly.com/bipinrimal314/compliance-audit" class="cta cta-outline">Book a call</a>
+        </div>
+    </div>
+</div>
+
 <div class="section">
     <h2>Validated on real projects</h2>
     <p style="color: var(--muted); font-size: 15px; margin-bottom: 16px;">Compliance guides generated by this tool have been submitted and reviewed on:</p>
@@ -377,7 +524,8 @@
     <p>
         <a href="https://github.com/BipinRimal314/ai-trace-auditor">GitHub</a> &middot;
         <a href="https://pypi.org/project/ai-trace-auditor/">PyPI</a> &middot;
-        <a href="https://github.com/BipinRimal314/ai-trace-auditor/releases/tag/v0.11.0">Latest Release</a>
+        <a href="#pricing">Pricing</a> &middot;
+        <a href="https://github.com/BipinRimal314/ai-trace-auditor/releases/tag/v0.14.0">Latest Release</a>
     </p>
     <p>Built by <a href="https://bipinrimal.com.np">Bipin Rimal</a>. Apache 2.0. No data leaves your machine.</p>
 </div>

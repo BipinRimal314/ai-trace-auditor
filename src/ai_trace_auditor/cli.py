@@ -15,6 +15,7 @@ from ai_trace_auditor.analysis.engine import ComplianceAnalyzer
 from ai_trace_auditor.ingest.detect import ingest_directory, ingest_file
 from ai_trace_auditor.models.gap import GapReport
 from ai_trace_auditor.regulations.registry import RequirementRegistry
+from ai_trace_auditor.config import load_config
 from ai_trace_auditor.reports.json_report import JSONReporter
 from ai_trace_auditor.reports.markdown import MarkdownReporter
 
@@ -139,6 +140,15 @@ def audit(
     if not path.exists():
         console.print(f"[red]Error:[/red] {path} does not exist")
         raise typer.Exit(code=2)
+
+    # Load project config (CLI flags override config values)
+    cfg = load_config(path.parent if path.is_file() else path)
+    if cfg is not None:
+        console.print("[dim]Loaded config from .aitrace.toml[/dim]")
+        if risk_level == "high_risk" and cfg.risk_level != "high_risk":
+            risk_level = cfg.risk_level
+        if report_format == "markdown" and cfg.report_format != "markdown":
+            report_format = cfg.report_format
 
     # Load traces
     console.print(f"Loading traces from [bold]{path}[/bold]...")
@@ -794,6 +804,13 @@ def docs(
         console.print(f"[red]Error:[/red] {path} is not a valid directory")
         raise typer.Exit(code=2)
 
+    # Load project config
+    cfg = load_config(path)
+    if cfg is not None:
+        console.print("[dim]Loaded config from .aitrace.toml[/dim]")
+        if risk_level == "high_risk" and cfg.risk_level != "high_risk":
+            risk_level = cfg.risk_level
+
     # Scan codebase
     from ai_trace_auditor.scanner import scan_codebase
 
@@ -1002,6 +1019,11 @@ def flow(
         console.print(f"[red]Error:[/red] {path} is not a valid directory")
         raise typer.Exit(code=2)
 
+    # Load project config
+    cfg = load_config(path)
+    if cfg is not None:
+        console.print("[dim]Loaded config from .aitrace.toml[/dim]")
+
     # First run the code scanner (needed for AI provider/vector DB detection)
     console.print(f"Scanning [bold]{path}[/bold] for data flows...")
     code_scan = scan_codebase(path)
@@ -1118,6 +1140,10 @@ def comply(
         str,
         typer.Option("--format", "-f", help="Output format: markdown, pdf, both"),
     ] = "markdown",
+    evidence_pack: Annotated[
+        Optional[Path],
+        typer.Option("--evidence-pack", help="Generate a compliance evidence pack in this directory"),
+    ] = None,
 ) -> None:
     """Run the full EU AI Act compliance suite in one command.
 
@@ -1135,6 +1161,21 @@ def comply(
         console.print(f"[red]Error:[/red] {path} is not a valid directory")
         raise typer.Exit(code=2)
 
+    # Load project config (CLI flags override config values)
+    cfg = load_config(path)
+    if cfg is not None:
+        console.print("[dim]Loaded config from .aitrace.toml[/dim]")
+        if trace_path is None and cfg.traces_path is not None:
+            trace_path = Path(cfg.traces_path)
+        if trace_format == "auto" and cfg.trace_format != "auto":
+            trace_format = cfg.trace_format
+        if risk_level == "high_risk" and cfg.risk_level != "high_risk":
+            risk_level = cfg.risk_level
+        if not split and cfg.split:
+            split = cfg.split
+        if report_format == "markdown" and cfg.report_format != "markdown":
+            report_format = cfg.report_format
+
     if trace_path and not trace_path.exists():
         console.print(f"[red]Error:[/red] {trace_path} does not exist")
         raise typer.Exit(code=2)
@@ -1142,15 +1183,39 @@ def comply(
     console.print(f"[bold]EU AI Act Compliance Suite[/bold]")
     console.print(f"Scanning [bold]{path}[/bold]...\n")
 
+    custom_reqs = cfg.custom_requirements if cfg is not None else None
     pkg = run_full_compliance(
         codebase_dir=path,
         trace_path=trace_path,
         trace_format=trace_format,
         risk_level=risk_level,
+        custom_requirements=custom_reqs,
     )
 
     # Print summary
     _print_comply_summary(pkg)
+
+    # Evidence pack mode
+    if evidence_pack is not None:
+        if output is not None:
+            console.print("[red]Error:[/red] Use --evidence-pack OR --output, not both")
+            raise typer.Exit(code=2)
+
+        from ai_trace_auditor.evidence.pack import generate_evidence_pack
+
+        created = generate_evidence_pack(pkg, evidence_pack)
+        console.print(f"\n[bold green]Evidence pack written to {evidence_pack}/[/bold green]")
+        for f in created:
+            console.print(f"  {f.name}")
+
+        for warning in pkg.warnings:
+            console.print(f"[yellow]Warning:[/yellow] {warning}")
+
+        has_gaps = (
+            pkg.gap_report is not None
+            and (pkg.gap_report.summary.missing > 0 or pkg.gap_report.summary.partial > 0)
+        )
+        raise typer.Exit(code=1 if has_gaps else 0)
 
     # Output
     reporter = ComplyReporter()
@@ -1364,7 +1429,7 @@ def import_traces(
 
     console.print(f"[bold]Auditing against {regulation}...[/bold]")
     registry = RequirementRegistry()
-    registry.load_builtin()
+    registry.load()
 
     analyzer = ComplianceAnalyzer(registry)
     report = analyzer.analyze(traces, regulation=regulation)
@@ -1434,6 +1499,96 @@ def lint_guide_cmd(
     )
 
     raise typer.Exit(code=1 if error_count > 0 else 0)
+
+
+def _validate_requirement_entry(req_data: dict, index: int) -> list[str]:
+    """Validate a single requirement dict. Returns list of error strings."""
+    errors: list[str] = []
+    for field in ("id", "title", "description"):
+        if field not in req_data or not req_data[field]:
+            errors.append(f"missing required field '{field}'")
+
+    for ef in req_data.get("evidence_fields", []):
+        if "field_path" not in ef:
+            errors.append("evidence_field missing 'field_path'")
+        if "description" not in ef:
+            errors.append("evidence_field missing 'description'")
+
+    sev = req_data.get("severity", "mandatory")
+    if sev not in ("mandatory", "recommended", "best_practice"):
+        errors.append(f"invalid severity '{sev}'")
+
+    return errors
+
+
+@app.command(name="validate-requirements")
+def validate_requirements_cmd(
+    path: Annotated[
+        Path, typer.Argument(help="YAML file or directory of requirement definitions")
+    ],
+) -> None:
+    """Validate custom requirement YAML files against the schema.
+
+    Checks that requirement definitions have valid IDs, titles, descriptions,
+    evidence fields, and severity levels. Use this to verify custom requirement
+    packs before running compliance checks with them.
+
+    Example:
+        aitrace validate-requirements ./internal-policies/
+    """
+    import yaml
+
+    if not path.exists():
+        console.print(f"[red]Error:[/red] {path} does not exist")
+        raise typer.Exit(code=2)
+
+    yaml_files = sorted(path.rglob("*.yaml")) if path.is_dir() else [path]
+
+    if not yaml_files:
+        console.print(f"[yellow]No YAML files found in {path}[/yellow]")
+        raise typer.Exit(code=0)
+
+    total_reqs = 0
+    total_errors = 0
+
+    for yaml_path in yaml_files:
+        console.print(f"\n[bold]{yaml_path.name}[/bold]")
+
+        try:
+            with open(yaml_path, encoding="utf-8") as f:
+                data = yaml.safe_load(f)
+        except yaml.YAMLError as e:
+            console.print(f"  [red]YAML parse error:[/red] {e}")
+            total_errors += 1
+            continue
+
+        if not data or "requirements" not in data:
+            console.print("  [yellow]Warning:[/yellow] No 'requirements' key found")
+            continue
+
+        status = data.get("status", "")
+        if status == "beta":
+            console.print("  [yellow]Status: beta[/yellow]")
+
+        for i, req_data in enumerate(data["requirements"]):
+            total_reqs += 1
+            errors = _validate_requirement_entry(req_data, i)
+            req_id = req_data.get("id", f"requirement[{i}]")
+
+            if errors:
+                total_errors += len(errors)
+                for err in errors:
+                    console.print(f"  [red]Error[/red] {req_id}: {err}")
+            else:
+                console.print(f"  [green]OK[/green] {req_id}: {req_data.get('title', '')}")
+
+    console.print(f"\n[bold]Validated {total_reqs} requirements across {len(yaml_files)} files.[/bold]")
+    if total_errors > 0:
+        console.print(f"[red]{total_errors} error(s) found.[/red]")
+        raise typer.Exit(code=1)
+    else:
+        console.print("[green]All requirements valid.[/green]")
+        raise typer.Exit(code=0)
 
 
 @app.command()

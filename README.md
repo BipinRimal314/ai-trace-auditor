@@ -1,89 +1,41 @@
 # AI Trace Auditor
 
-Audit LLM traces against regulatory compliance requirements. Open-source CLI that sits between your observability stack (Langfuse, Arize, OTel) and regulatory frameworks (EU AI Act, NIST AI RMF).
+**The EU AI Act takes effect August 2, 2026.** Your AI system needs compliance evidence. Your observability tools collect traces. Your GRC platform manages policies. Nothing translates traces into compliance evidence. This tool does.
 
-Your observability tools collect traces. Your GRC platform manages policies. **Nothing translates traces into compliance evidence.** This tool does.
+Open-source CLI that audits LLM traces against EU AI Act Articles 11, 12, 13, and 25, plus NIST AI RMF and GDPR Article 30. 301 tests. Zero LLM dependencies. Runs locally.
 
-## Install
+## The Problem
 
-```bash
-pip install ai-trace-auditor
-```
+Companies have traces from Langfuse, Arize, or OpenTelemetry, but no automated way to answer: "Do our traces satisfy the regulatory requirements?" 67% of AI teams discover quality regressions from user complaints despite having tracing infrastructure. The gap isn't data collection; it's interpretation.
 
-Or from source:
+Consultants charge $30K-$500K per compliance engagement. CEPS estimates EUR 29K per AI model for Annex IV documentation alone. This tool automates the gap analysis for free.
 
-```bash
-git clone https://github.com/BipinRimal314/ai-trace-auditor.git
-cd ai-trace-auditor
-pip install -e .
-```
+## What It Covers
 
-## Quick Start
+| Regulation | Scope |
+|---|---|
+| EU AI Act Article 11 | Technical documentation (Annex IV). Auto-generates 60-70% of required sections from code scanning |
+| EU AI Act Article 12 | Record-keeping. Audits trace data against 15+ discrete requirements |
+| EU AI Act Article 13 | Transparency (provider to deployer). Data flow mapping with GDPR role classification |
+| EU AI Act Article 25 | Value chain accountability. Multi-agent DAG auditing with per-agent penalty propagation |
+| NIST AI RMF | GOVERN, MAP, MEASURE, MANAGE subcategories (~15 requirements) |
+| GDPR Article 30 | Records of Processing Activities. Auto-generated from detected data flows |
 
-```bash
-# Audit traces against all regulations
-aitrace audit traces.json
+## Multi-Agent Compliance (v0.14.0)
 
-# Audit against a specific regulation
-aitrace audit traces.json -r "EU AI Act" -o report.md
+Automatically audits multi-agent systems (LangGraph, CrewAI, AutoGen, Google ADK):
+- Reconstructs execution DAGs from parent-child span relationships
+- Per-agent compliance scores with bottom-up penalty propagation
+- Article 25 "value chain accountability" checks
+- Liability shift detection (deployer becoming provider)
+- Mermaid DAG visualizations
 
-# Audit your Claude Code conversation traces
-aitrace audit ~/.claude/projects/*/session-id.jsonl
-
-# Inspect what requirements exist
-aitrace requirements --show EU-AIA-12.1
-
-# Just ingest and summarize traces
-aitrace ingest traces.json --summary
-```
-
-## GitHub Action
-
-Add compliance checks to your CI pipeline:
-
-```yaml
-- name: Audit AI traces
-  uses: BipinRimal314/ai-trace-auditor@v0.13.0
-  with:
-    path: traces/exported.json
-    regulation: "EU AI Act"
-    output: compliance-report.md
-    fail-on-gaps: "true"
-```
-
-The action fails if compliance gaps are found. Set `fail-on-gaps: "false"` to report without blocking.
-
-## What It Checks
-
-**EU AI Act Article 12 (Record-Keeping):**
-- Event timestamps, operation identification
-- Risk situation logging (errors, failure modes)
-- Model version tracking for post-market monitoring
-- Resource consumption (tokens, latency)
-- Content recording (opt-in)
-- Tool/function call audit trails
-- Trace linkage for multi-step operations
-
-**EU AI Act Article 25 (Value Chain Accountability) -- NEW in v0.13.0:**
-- Agent identity traceability across multi-agent systems
-- Delegation chain documentation (who delegated what to whom)
-- MCP boundary transparency (cross-boundary tool calls)
-- Substantial modification detection (deployer-to-provider liability shift)
-- Bottom-up penalty propagation: downstream agent failures cascade to upstream delegators
-- Per-agent compliance scores with system-level aggregation
-
-**NIST AI RMF:**
-- Production monitoring (MEASURE 2.4)
-- Transparency documentation (MEASURE 2.8)
-- Model explainability (MEASURE 2.9)
-- Risk tracking (MEASURE 3.1)
-- Post-deployment monitoring (MANAGE 4.1)
-- Incident communication (MANAGE 4.3)
+No other open-source tool does multi-agent compliance auditing.
 
 ## Supported Trace Formats
 
 | Format | Source |
-|--------|--------|
+|---|---|
 | OTel OTLP JSON | OpenTelemetry GenAI semantic conventions |
 | Langfuse JSON | Langfuse trace exports |
 | Claude Code | `~/.claude/projects/` conversation traces |
@@ -91,28 +43,30 @@ The action fails if compliance gaps are found. Set `fail-on-gaps: "false"` to re
 
 Auto-detected. Use `--format` to override.
 
-## Multi-Agent Support (v0.13.0)
-
-Automatically detects multi-agent traces from LangGraph, CrewAI, AutoGen, and Google ADK. When multiple agents are detected:
-
-- Reconstructs the execution DAG from parent-child span relationships
-- Computes per-agent compliance scores with bottom-up penalty propagation
-- Checks Article 25 "value chain accountability" requirements
-- Detects liability shifts when deployers may become providers
-- Generates Mermaid DAG visualizations with `--show-dag`
+## Install
 
 ```bash
-# Audit a multi-agent trace with DAG visualization
-aitrace audit multi_agent_traces.json --show-dag
-
-# Output includes per-agent scores:
-# Per-Agent Compliance Scores
-# | orchestrator-1 | 33.0% |  (red: penalized for downstream failures)
-# | researcher-1   | 66.4% |  (amber: own gaps + some coverage)
-# | writer-1       | 66.4% |  (amber: own gaps + some coverage)
+pip install ai-trace-auditor
 ```
 
-Single-agent traces continue to work identically. Article 25 requirements are only checked when multiple agents are detected.
+## Quick Start
+
+```bash
+# Audit traces against EU AI Act
+aitrace audit traces.json -r "EU AI Act" -o report.md
+
+# Full compliance package: Articles 11 + 12 + 13 + GDPR in one run
+aitrace comply ./my-ai-project/ --traces traces.json
+
+# Generate Annex IV technical documentation from code
+aitrace docs ./my-ai-project/
+
+# Map data flows for Article 13 + GDPR Article 30
+aitrace flow ./my-ai-project/
+
+# Multi-agent audit with DAG visualization
+aitrace audit multi_agent_traces.json --show-dag
+```
 
 ## Example Output
 
@@ -135,17 +89,21 @@ Top gaps:
   5. Not logging: Operation latency in milliseconds
 ```
 
-## CI Integration
+## GitHub Action
 
-Exit code 0 = all satisfied, 1 = gaps found:
-
-```bash
-aitrace audit traces.json -r "EU AI Act" || echo "Compliance gaps detected"
+```yaml
+- name: Audit AI traces
+  uses: BipinRimal314/ai-trace-auditor@v0.14.0
+  with:
+    path: traces/exported.json
+    regulation: "EU AI Act"
+    output: compliance-report.md
+    fail-on-gaps: "true"
 ```
 
-## Library API
+Exit code 0 = all requirements satisfied, 1 = gaps found. CI-friendly.
 
-Use programmatically in your own tools:
+## Library API
 
 ```python
 from ai_trace_auditor.ingest import ingest_file
@@ -153,7 +111,6 @@ from ai_trace_auditor.analysis.engine import ComplianceAnalyzer
 from ai_trace_auditor.regulations.registry import RequirementRegistry
 
 traces = ingest_file(Path("traces.json"))
-
 registry = RequirementRegistry()
 registry.load()
 
@@ -163,14 +120,47 @@ report = ComplianceAnalyzer(registry).analyze(
 )
 
 print(f"Score: {report.overall_score:.1%}")
-for result in report.requirement_results:
-    if result.gaps:
-        print(f"  {result.requirement.id}: {result.gaps[0].recommendation}")
 ```
+
+## Architecture
+
+```
+ai-trace-auditor/
+├── src/ai_trace_auditor/
+│   ├── cli.py              # 7 commands: audit, docs, flow, comply, ingest, requirements, health
+│   ├── ingest/             # Trace ingestion (OTel, Langfuse, Claude Code, raw JSONL)
+│   ├── analysis/           # Gap analysis engine + multi-agent DAG auditing
+│   ├── models/             # Pydantic v2 data models
+│   ├── regulations/        # YAML requirement definitions (extensible)
+│   ├── docs/               # Article 11 Annex IV generator
+│   ├── flow/               # Article 13 data flow mapper + GDPR RoPA
+│   ├── comply/             # Full compliance package runner
+│   ├── evidence/           # Auditor-ready evidence pack generator
+│   ├── reports/            # Markdown, JSON, PDF report generation
+│   ├── scanner/            # Code scanner (AI framework detection)
+│   └── guide_linter/       # Lints compliance guides for accuracy
+├── requirements/           # YAML regulatory requirement definitions
+│   ├── eu_ai_act/          # Articles 12, 19
+│   └── nist_ai_rmf/       # GOVERN, MAP, MEASURE, MANAGE
+└── tests/                  # 301 tests
+```
+
+No dependency on any LLM framework. Intentionally framework-agnostic.
+
+## Competitive Landscape
+
+| Tool | What It Does | How We Differ |
+|---|---|---|
+| Langfuse / Arize | Collect and visualize traces | We interpret traces against regulations |
+| Credo AI ($41M raised) | Enterprise AI governance platform | Free, open-source, runs locally |
+| OneTrust / Vanta | GRC policy management | We ingest AI-specific traces, not generic policy docs |
+| Holistic AI | AI risk management (consulting) | CLI + CI integration, no sales call required |
+
+The competition is consultants, not software.
 
 ## Disclaimer
 
-This tool provides automated compliance assessments based on its interpretation of regulatory requirements. It is **not legal advice**. Consult qualified legal counsel for compliance decisions.
+This tool provides automated compliance analysis. It is not legal advice. Risk classification under Annex III requires legal review. Consult qualified counsel for compliance decisions.
 
 ## License
 

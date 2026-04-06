@@ -53,7 +53,7 @@ class TestRunFullCompliance:
     def test_articles_covered_without_traces(self):
         pkg = run_full_compliance(SAMPLE_CODEBASE)
         assert "Article 11 (Technical Documentation)" in pkg.articles_covered
-        assert "Article 13 (Transparency)" in pkg.articles_covered
+        assert any("Article 13" in a for a in pkg.articles_covered)
         assert "GDPR Article 30 (RoPA)" in pkg.articles_covered
         # No Article 12 without traces
         assert "Article 12 (Record-Keeping)" not in pkg.articles_covered

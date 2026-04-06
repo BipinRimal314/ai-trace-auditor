@@ -1,5 +1,5 @@
 name: "AI Trace Auditor — EU AI Act Compliance Suite"
-description: "Audit LLM traces and codebases against EU AI Act Articles 11, 12, 13 and GDPR Article 30. One command, three articles."
+description: "EU AI Act compliance for AI codebases. Audits Articles 11, 12, 13, 50 + GDPR 30. Runs locally in CI."
 author: "Bipin Rimal"
 
 branding:
@@ -43,6 +43,18 @@ inputs:
     description: "Report output format (markdown, json, both) — audit only"
     required: false
     default: "markdown"
+  evidence-pack:
+    description: "Generate evidence pack in this directory (comply only, replaces --output)"
+    required: false
+    default: ""
+  slack-webhook:
+    description: "Slack webhook URL for compliance notifications"
+    required: false
+    default: ""
+  email-to:
+    description: "Email address for compliance report delivery"
+    required: false
+    default: ""
   fail-on-gaps:
     description: "Fail the action if compliance gaps are found"
     required: false
@@ -80,54 +92,64 @@ runs:
       shell: bash
       run: |
         set +e
+        echo "::group::AI Trace Auditor"
 
         COMMAND="${{ inputs.command }}"
-        CMD="aitrace $COMMAND"
 
         if [ "$COMMAND" = "audit" ]; then
-          # Audit mode: path is the trace file
-          CMD="$CMD ${{ inputs.path }}"
+          ARGS=("${{ inputs.path }}" --format "${{ inputs.format }}" --report-format "${{ inputs.report-format }}" -o "${{ inputs.output }}" --risk-level "${{ inputs.risk-level }}")
           if [ -n "${{ inputs.regulation }}" ]; then
-            CMD="$CMD -r '${{ inputs.regulation }}'"
+            ARGS+=(-r "${{ inputs.regulation }}")
           fi
-          CMD="$CMD --format ${{ inputs.format }}"
-          CMD="$CMD --report-format ${{ inputs.report-format }}"
-          CMD="$CMD -o ${{ inputs.output }}"
-          CMD="$CMD --risk-level ${{ inputs.risk-level }}"
+          aitrace audit "${ARGS[@]}"
         elif [ "$COMMAND" = "comply" ]; then
-          # Comply mode: full suite
-          CMD="$CMD ${{ inputs.path }}"
-          CMD="$CMD -o ${{ inputs.output }}"
+          ARGS=("${{ inputs.path }}" --risk-level "${{ inputs.risk-level }}")
+          if [ -n "${{ inputs.evidence-pack }}" ]; then
+            ARGS+=(--evidence-pack "${{ inputs.evidence-pack }}")
+          else
+            ARGS+=(-o "${{ inputs.output }}")
+          fi
           if [ -n "${{ inputs.traces }}" ]; then
-            CMD="$CMD --traces ${{ inputs.traces }}"
+            ARGS+=(--traces "${{ inputs.traces }}")
           fi
           if [ "${{ inputs.split }}" = "true" ]; then
-            CMD="$CMD --split"
+            ARGS+=(--split)
           fi
-          CMD="$CMD --risk-level ${{ inputs.risk-level }}"
+          aitrace comply "${ARGS[@]}"
         elif [ "$COMMAND" = "docs" ]; then
-          CMD="$CMD ${{ inputs.path }}"
-          CMD="$CMD -o ${{ inputs.output }}"
+          ARGS=("${{ inputs.path }}" -o "${{ inputs.output }}")
           if [ -n "${{ inputs.traces }}" ]; then
-            CMD="$CMD --traces ${{ inputs.traces }}"
+            ARGS+=(--traces "${{ inputs.traces }}")
           fi
+          aitrace docs "${ARGS[@]}"
         elif [ "$COMMAND" = "flow" ]; then
-          CMD="$CMD ${{ inputs.path }}"
-          CMD="$CMD -o ${{ inputs.output }}"
+          aitrace flow "${{ inputs.path }}" -o "${{ inputs.output }}"
         fi
 
-        echo "::group::AI Trace Auditor"
-        echo "Running: $CMD"
-        eval $CMD
         EXIT_CODE=$?
         echo "::endgroup::"
-
         echo "exit_code=$EXIT_CODE" >> $GITHUB_OUTPUT
 
-        # Fail if gaps found and fail-on-gaps is true
         if [ "${{ inputs.fail-on-gaps }}" = "true" ] && [ "$EXIT_CODE" -eq 1 ]; then
           echo "::error::EU AI Act compliance gaps detected. See report at ${{ inputs.output }}"
           exit 1
         fi
 
         exit 0
+
+    - name: Send Slack notification
+      if: ${{ inputs.slack-webhook != '' }}
+      shell: bash
+      env:
+        SLACK_WEBHOOK: ${{ inputs.slack-webhook }}
+        SCAN_PATH: ${{ inputs.path }}
+      run: |
+        pip install ai-trace-auditor[notify] -q
+        python3 -c "
+import os, pathlib
+from ai_trace_auditor.comply.runner import run_full_compliance
+from ai_trace_auditor.notify.slack import send_slack_notification
+pkg = run_full_compliance(pathlib.Path(os.environ['SCAN_PATH']))
+ok = send_slack_notification(os.environ['SLACK_WEBHOOK'], pkg)
+print('Slack notification sent' if ok else 'Slack notification failed')
+"

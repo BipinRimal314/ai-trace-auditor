@@ -19,7 +19,10 @@
 | Article 12 — Record-Keeping | ⚠️ No traces | Provide `--traces` for audit |
 {% endif %}
 | Article 11 — Technical Documentation | ✅ Generated | {{ '%.0f' | format(pkg.docs_completion_pct) }}% auto-populated |
-| Article 13 — Transparency | ✅ Mapped | {{ pkg.service_count }} services, {{ pkg.flow_count }} flows |
+| Article 13 — Transparency (provider → deployer) | ✅ Mapped | {{ pkg.service_count }} services, {{ pkg.flow_count }} flows |
+{% if pkg.code_scan.ai_endpoints %}
+| Article 50 — Transparency (deployer → end user) | ⚠️ Review needed | User-facing AI endpoints detected |
+{% endif %}
 | GDPR Article 30 — RoPA | ✅ Generated | {{ pkg.ropa.entries | length }} processing activities |
 
 **Articles covered:** {{ pkg.articles_covered | join(', ') }}
@@ -111,7 +114,10 @@ Please [open an issue](https://github.com/BipinRimal314/ai-trace-auditor/issues)
 
 {% endfor %}
 
-# Part 3: Article 13 — Data Flow Transparency
+# Part 3: Article 13 — Data Flow Transparency (Provider → Deployer)
+
+> **Article 13** requires providers to document data flows, accuracy metrics, and known limitations for deployers.
+> **Article 50** (deployer → end user) is a separate obligation: deployers must inform users they are interacting with AI. That is a UI/UX requirement, not a data flow issue.
 
 **External services:** {{ pkg.service_count }}
 **Data flows:** {{ pkg.flow_count }}

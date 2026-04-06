@@ -1,4 +1,4 @@
-## Outreach Emails — Ready to Send (March 24, 2026)
+## Outreach Emails — Ready to Send (Updated April 3, 2026 for v0.14.0)
 
 Where to send: GitHub Discussions, maintainer emails (from their profiles),
 or as comments on the merged/open PRs. LinkedIn DMs also work.
@@ -23,7 +23,7 @@ The guide was generated using AI Trace Auditor, a tool I built that
 scans AI codebases against EU AI Act Articles 11, 12, 13, 50 and
 GDPR Article 30. It's available as a GitHub Action:
 
-    - uses: BipinRimal314/ai-trace-auditor@v0.11.0
+    - uses: BipinRimal314/ai-trace-auditor@v0.14.0
       with:
         command: comply
         path: .
@@ -32,6 +32,10 @@ For LiteLLM specifically, this catches:
 - Which AI providers are in the codebase and their GDPR transfer status
 - Whether logging callbacks satisfy Article 12 record-keeping
 - Data flow diagrams with cross-border transfer warnings
+
+New in v0.14: `--evidence-pack` generates a zip-ready audit folder
+(PDF, diagrams, checklists) for your compliance team. Plus project-level
+config via `.aitrace.toml` so teams don't need to memorize CLI flags.
 
 Open source, Apache 2.0, runs entirely in CI. No data leaves GitHub.
 
@@ -60,7 +64,7 @@ they've crossed the regulatory threshold.
 
 The tool that generated the guide is now a GitHub Action:
 
-    - uses: BipinRimal314/ai-trace-auditor@v0.11.0
+    - uses: BipinRimal314/ai-trace-auditor@v0.14.0
       with:
         command: comply
         path: .
@@ -68,6 +72,9 @@ The tool that generated the guide is now a GitHub Action:
 It flags when n8n's codebase adds new AI provider integrations
 that create GDPR transfer obligations, and tracks compliance gaps
 as the codebase evolves toward August 2026.
+
+New in v0.14: `--evidence-pack` generates an audit-ready folder (PDF,
+diagrams, checklists) and `.aitrace.toml` config for team-level defaults.
 
 Open source, Apache 2.0. Would be happy to discuss integration.
 
@@ -97,7 +104,10 @@ it auto-detects:
 It generates Annex IV documentation skeletons and GDPR Article 30
 Records of Processing Activities from code scanning alone.
 
-    - uses: BipinRimal314/ai-trace-auditor@v0.11.0
+    - uses: BipinRimal314/ai-trace-auditor@v0.14.0
+
+New in v0.14: `--evidence-pack` bundles PDF reports, data flow diagrams,
+and requirement checklists into an auditor-ready folder.
 
 Running this in Dify's CI would keep the compliance docs current as
 the codebase evolves. Open source, Apache 2.0. Happy to submit a
@@ -126,13 +136,17 @@ the guide auto-detects these from the codebase.
 
 It's now a GitHub Action:
 
-    - uses: BipinRimal314/ai-trace-auditor@v0.11.0
+    - uses: BipinRimal314/ai-trace-auditor@v0.14.0
       with:
         command: comply
         path: .
 
 Would flag new provider integrations, track GDPR transfer obligations,
-and generate updated Annex IV docs on every PR. Open source, Apache 2.0.
+and generate updated Annex IV docs on every PR. New in v0.14:
+`--evidence-pack` creates auditor-ready folders (PDF + diagrams +
+checklists) and `.aitrace.toml` for project-level config.
+
+Open source, Apache 2.0.
 
 Bipin Rimal
 https://bipinrimal314.github.io/ai-trace-auditor/
@@ -157,12 +171,15 @@ logging for audit trails.
 
 The tool behind the guide is now a GitHub Action that can run in CI:
 
-    - uses: BipinRimal314/ai-trace-auditor@v0.11.0
+    - uses: BipinRimal314/ai-trace-auditor@v0.14.0
 
 It auto-detects AI providers, generates data flow diagrams, and
-flags cross-border GDPR transfers. Open source, Apache 2.0.
+flags cross-border GDPR transfers. New in v0.14: `--evidence-pack`
+bundles everything into an auditor-ready folder (PDF, diagrams,
+per-requirement checklists).
 
-Happy to open a workflow PR if you'd like to try it.
+Open source, Apache 2.0. Happy to open a workflow PR if you'd like
+to try it.
 
 Bipin Rimal
 https://bipinrimal314.github.io/ai-trace-auditor/

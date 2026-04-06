@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ai-trace-auditor"
-version = "0.13.0"
+version = "0.14.0"
 description = "EU AI Act compliance suite: Articles 11, 12, 13, 25 + GDPR Article 30. Multi-agent DAG auditing with per-agent compliance scoring."
 readme = "README.md"
 license = "Apache-2.0"
@@ -36,6 +36,7 @@ langfuse = ["httpx>=0.27"]
 arize = ["httpx>=0.27"]
 importers = ["httpx>=0.27"]
 mcp = ["mcp>=1.0"]
+notify = ["httpx>=0.27"]
 
 [project.scripts]
 aitrace = "ai_trace_auditor.cli:app"

@@ -1,0 +1,39 @@
+# .aitrace.toml — Project-level AI Trace Auditor configuration
+#
+# Place this file in your project root. All CLI flags can be set here.
+# CLI arguments always override config file values.
+
+# Filter to specific regulations (e.g., ["EU AI Act"], ["NIST AI RMF"])
+# regulation = ["EU AI Act"]
+
+# Risk classification: "high_risk", "limited_risk", "minimal_risk"
+risk_level = "high_risk"
+
+# Output format for reports: "markdown", "pdf", "both"
+report_format = "markdown"
+
+# Trace file or directory for Article 12 audit
+# traces_path = "./traces"
+
+# Trace format: "auto", "otel", "langfuse", "raw"
+trace_format = "auto"
+
+# Write individual report files to a directory
+split = false
+
+# Additional YAML requirement directories (beyond built-in EU AI Act + NIST)
+# custom_requirements = ["./internal-policies/", "./requirements/iso_42001/"]
+
+# CI/CD settings
+[ci]
+# Fail the build if compliance gaps are found
+fail_on_gaps = true
+
+# Slack webhook for compliance notifications (Phase 3)
+# slack_webhook = "https://hooks.slack.com/services/..."
+
+# Email recipient for compliance reports (Phase 3)
+# email_to = "compliance@yourcompany.com"
+
+# Cron schedule for recurring scans (informational, used by GitHub Action)
+# schedule = "0 9 * * 1"

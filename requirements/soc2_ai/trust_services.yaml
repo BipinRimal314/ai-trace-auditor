@@ -1,0 +1,125 @@
+regulation: "SOC 2 AI Addendum"
+article: "Trust Services Criteria"
+title: "SOC 2 Trust Services Criteria for AI Systems"
+status: "beta"
+
+requirements:
+  - id: "SOC2-AI-CC6.1"
+    title: "Logical access to AI systems"
+    description: >
+      The entity implements logical access security software, infrastructure,
+      and architectures over AI systems to protect them from unauthorized access.
+      AI model invocations must be attributable to authenticated principals.
+    severity: "mandatory"
+    applies_to: ["all"]
+    evidence_fields:
+      - field_path: "spans[].provider"
+        description: "AI provider access is documented"
+        required: true
+        check_type: "non_null"
+      - field_path: "spans[].trace_id"
+        description: "Operations are uniquely identifiable"
+        required: true
+        check_type: "non_null"
+
+  - id: "SOC2-AI-CC7.2"
+    title: "AI system monitoring"
+    description: >
+      The entity monitors AI system components and operations to detect
+      anomalies, misuse, and potential security events. Includes tracking
+      model performance degradation and unexpected outputs.
+    severity: "mandatory"
+    applies_to: ["all"]
+    evidence_fields:
+      - field_path: "spans[].error_type"
+        description: "Error events captured for anomaly detection"
+        required: true
+        check_type: "present"
+      - field_path: "spans[].latency_ms"
+        description: "Performance metrics for degradation detection"
+        required: true
+        check_type: "non_null"
+      - field_path: "spans[].finish_reasons"
+        description: "Output completion status monitored"
+        required: false
+        check_type: "present"
+
+  - id: "SOC2-AI-CC8.1"
+    title: "AI system change management"
+    description: >
+      Changes to AI systems (model updates, configuration changes, provider
+      switches) are authorized, tested, and documented before deployment.
+      Model version tracking provides evidence of controlled changes.
+    severity: "mandatory"
+    applies_to: ["all"]
+    evidence_fields:
+      - field_path: "spans[].model_used"
+        description: "Active model version is recorded per operation"
+        required: true
+        check_type: "non_null"
+      - field_path: "spans[].model_requested"
+        description: "Requested vs actual model tracked (routing changes)"
+        required: false
+        check_type: "non_null"
+
+  - id: "SOC2-AI-A1.2"
+    title: "AI system availability"
+    description: >
+      The entity maintains AI system availability consistent with service
+      commitments. Includes monitoring response times, error rates, and
+      implementing failover procedures.
+    severity: "mandatory"
+    applies_to: ["all"]
+    evidence_fields:
+      - field_path: "spans[].start_time"
+        description: "Operation timing for availability measurement"
+        required: true
+        check_type: "non_null"
+      - field_path: "spans[].end_time"
+        description: "Operation completion for uptime tracking"
+        required: true
+        check_type: "non_null"
+      - field_path: "spans[].error_type"
+        description: "Failure events for availability reporting"
+        required: true
+        check_type: "present"
+
+  - id: "SOC2-AI-PI1.1"
+    title: "AI processing integrity"
+    description: >
+      AI system processing is complete, valid, accurate, and timely.
+      Input/output token counts verify processing completeness. Finish
+      reasons confirm valid completion.
+    severity: "mandatory"
+    applies_to: ["all"]
+    evidence_fields:
+      - field_path: "spans[].input_tokens"
+        description: "Input processing completeness"
+        required: true
+        check_type: "non_null"
+      - field_path: "spans[].output_tokens"
+        description: "Output generation completeness"
+        required: true
+        check_type: "non_null"
+      - field_path: "spans[].finish_reasons"
+        description: "Processing completed with expected termination"
+        required: true
+        check_type: "non_empty"
+
+  - id: "SOC2-AI-C1.1"
+    title: "AI data confidentiality"
+    description: >
+      Confidential information processed by AI systems is protected during
+      collection, processing, and disposal. Includes awareness of data
+      sent to third-party AI providers.
+    severity: "mandatory"
+    applies_to: ["all"]
+    evidence_fields:
+      - field_path: "spans[].provider"
+        description: "Third-party data recipients identified"
+        required: true
+        check_type: "non_null"
+      - field_path: "spans[].operation"
+        description: "Data processing purposes documented"
+        required: true
+        check_type: "non_empty"

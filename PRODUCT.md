@@ -99,7 +99,7 @@ No dependency on any LLM framework. Intentionally framework-agnostic.
 - Art 12(2)(b): Post-market monitoring data
 - Art 12(2)(c): Operational monitoring per Art 26(5)
 - Art 12(3): Biometric-specific (period, database, match data, human verifier)
-- Art 19: Retention (>= 6 months)
+- Art 18/19: Retention (10yr providers / 6mo+ deployers — role-dependent)
 
 **Evidence fields mapped to trace data:**
 - `spans[].start_time` / `end_time` — event timestamps

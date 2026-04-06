@@ -74,6 +74,7 @@ def run_full_compliance(
     trace_path: Path | None = None,
     trace_format: str = "auto",
     risk_level: str = "high_risk",
+    custom_requirements: list[str] | None = None,
 ) -> CompliancePackage:
     """Run the full EU AI Act compliance suite in one pass.
 
@@ -122,8 +123,9 @@ def run_full_compliance(
             else ingest_file(trace_path, trace_format)
         )
         if traces:
+            extra_dirs = [Path(p) for p in (custom_requirements or [])]
             registry = RequirementRegistry()
-            registry.load()
+            registry.load(extra_dirs=extra_dirs or None)
             analyzer = ComplianceAnalyzer(registry)
             gap_report = analyzer.analyze(
                 traces=traces,

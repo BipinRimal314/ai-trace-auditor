@@ -1,0 +1,32 @@
+# Weekly EU AI Act compliance scan with Slack notifications
+#
+# Copy this file to .github/workflows/compliance-scheduled.yml
+# Set SLACK_WEBHOOK as a repository secret
+
+name: Weekly Compliance Scan
+
+on:
+  schedule:
+    - cron: '0 9 * * 1'  # Every Monday at 9 AM UTC
+  workflow_dispatch:       # Manual trigger
+
+jobs:
+  comply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: BipinRimal314/ai-trace-auditor@v0.14.0
+        with:
+          command: comply
+          path: .
+          evidence-pack: compliance-evidence/
+          slack-webhook: ${{ secrets.SLACK_WEBHOOK }}
+          fail-on-gaps: false  # Don't fail scheduled runs
+
+      - name: Upload evidence pack
+        uses: actions/upload-artifact@v4
+        with:
+          name: compliance-evidence-${{ github.run_number }}
+          path: compliance-evidence/
+          retention-days: 90

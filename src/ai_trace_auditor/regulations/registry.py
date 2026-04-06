@@ -24,13 +24,33 @@ class RequirementRegistry:
     def __init__(self) -> None:
         self._requirements: list[Requirement] = []
 
-    def load(self, requirements_dir: Path | None = None) -> None:
-        """Load all YAML requirement files from a directory tree."""
+    def load(
+        self,
+        requirements_dir: Path | None = None,
+        extra_dirs: list[Path] | None = None,
+    ) -> None:
+        """Load all YAML requirement files from a directory tree.
+
+        Args:
+            requirements_dir: Primary requirements directory (defaults to bundled).
+            extra_dirs: Additional directories to load (custom requirement packs).
+        """
         if requirements_dir is None:
             requirements_dir = _get_bundled_requirements_dir()
 
         self._requirements = []
         for yaml_path in sorted(requirements_dir.rglob("*.yaml")):
+            self._load_file(yaml_path)
+
+        if extra_dirs:
+            for extra in extra_dirs:
+                self.load_additional(extra)
+
+    def load_additional(self, extra_dir: Path) -> None:
+        """Load requirements from an additional directory without clearing existing ones."""
+        if not extra_dir.is_dir():
+            return
+        for yaml_path in sorted(extra_dir.rglob("*.yaml")):
             self._load_file(yaml_path)
 
     def _load_file(self, path: Path) -> None:
