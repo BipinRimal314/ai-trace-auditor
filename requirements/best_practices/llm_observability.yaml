@@ -1,0 +1,174 @@
+regulation: "LLM Observability Best Practices"
+article: "Trace Quality"
+title: "Recommended trace fields for LLM-based AI systems"
+framework_nature: "best_practice"
+verified_against_primary: false
+verification_note: >
+  These are industry best practices for LLM observability, NOT legal or
+  regulatory requirements. No law, standard, or framework mandates these
+  specific fields. They represent reasonable implementation choices that
+  help satisfy the general logging and monitoring obligations found in the
+  EU AI Act (Art 12), NIST AI RMF (MEASURE 2.4), and ISO 42001 (Clause 9.1).
+
+requirements:
+  - id: "BP-LLM-01"
+    title: "Operation identification"
+    description: >
+      Each LLM operation should be identifiable by type (chat, embeddings,
+      completion, image generation), provider (openai, anthropic, google),
+      and model (gpt-4, claude-3-opus, gemini-pro). This enables filtering,
+      cost attribution, and behavior analysis.
+    severity: "recommended"
+    applies_to: ["all"]
+    evidence_fields:
+      - field_path: "spans[].operation"
+        description: "Type of AI operation (chat, embeddings, text_completion, image_generation)"
+        required: true
+        check_type: "non_empty"
+      - field_path: "spans[].provider"
+        description: "AI provider name (openai, anthropic, google, etc.)"
+        required: true
+        check_type: "non_null"
+      - field_path: "spans[].model_used"
+        description: "Actual model version used (from API response)"
+        required: true
+        check_type: "non_null"
+      - field_path: "spans[].model_requested"
+        description: "Model version requested (from API request, may differ from actual)"
+        required: false
+        check_type: "non_null"
+
+  - id: "BP-LLM-02"
+    title: "Token consumption tracking"
+    description: >
+      Input and output token counts should be logged for cost monitoring,
+      usage analysis, and anomaly detection. Token counts enable budget
+      alerts, per-user cost attribution, and detection of prompt injection
+      attempts (abnormally high token counts).
+    severity: "recommended"
+    applies_to: ["all"]
+    evidence_fields:
+      - field_path: "spans[].input_tokens"
+        description: "Input/prompt token count per operation"
+        required: true
+        check_type: "non_null"
+      - field_path: "spans[].output_tokens"
+        description: "Output/completion token count per operation"
+        required: true
+        check_type: "non_null"
+
+  - id: "BP-LLM-03"
+    title: "Latency monitoring"
+    description: >
+      Operation duration should be tracked to detect performance degradation,
+      identify slow providers, and establish baseline response times. Latency
+      spikes often precede outages or indicate rate limiting.
+    severity: "recommended"
+    applies_to: ["all"]
+    evidence_fields:
+      - field_path: "spans[].duration_ms"
+        description: "Operation latency in milliseconds"
+        required: true
+        check_type: "non_null"
+
+  - id: "BP-LLM-04"
+    title: "Error classification"
+    description: >
+      When operations fail, the error type and message should be recorded
+      for root cause analysis, alerting, and reliability measurement. Error
+      classification enables tracking of failure patterns across providers
+      and models.
+    severity: "recommended"
+    applies_to: ["all"]
+    evidence_fields:
+      - field_path: "spans[].error_type"
+        description: "Error classification (rate_limit, timeout, auth, content_filter, etc.)"
+        required: true
+        check_type: "present"
+      - field_path: "spans[].error_message"
+        description: "Error details for debugging"
+        required: false
+        check_type: "present"
+      - field_path: "spans[].finish_reasons"
+        description: "Completion status (stop, length, content_filter, tool_calls, error)"
+        required: true
+        check_type: "non_empty"
+
+  - id: "BP-LLM-05"
+    title: "Request parameter logging"
+    description: >
+      Configuration parameters that influence output (temperature, top_p,
+      max_tokens, etc.) should be recorded to support reproducibility
+      analysis and behavior explanation.
+    severity: "best_practice"
+    applies_to: ["all"]
+    evidence_fields:
+      - field_path: "spans[].temperature"
+        description: "Temperature parameter controlling output randomness"
+        required: false
+        check_type: "non_null"
+      - field_path: "spans[].max_tokens"
+        description: "Maximum token limit for output generation"
+        required: false
+        check_type: "non_null"
+
+  - id: "BP-LLM-06"
+    title: "Input/output content recording"
+    description: >
+      For systems that require auditability, the actual prompts and responses
+      should be recorded. This enables post-hoc review, bias detection, and
+      incident investigation. Must be balanced against privacy requirements
+      (GDPR, HIPAA) — opt-in with appropriate data protection.
+    severity: "best_practice"
+    applies_to: ["all"]
+    evidence_fields:
+      - field_path: "spans[].input_messages"
+        description: "Input prompts/messages sent to the AI model"
+        required: false
+        check_type: "non_empty"
+      - field_path: "spans[].output_messages"
+        description: "Output responses generated by the AI model"
+        required: false
+        check_type: "non_empty"
+
+  - id: "BP-LLM-07"
+    title: "Tool and function call logging"
+    description: >
+      When AI systems use tools or function calls, these interactions should
+      be logged to maintain a complete audit trail of the decision-making
+      process. Critical for agent systems where tool use drives real-world
+      actions.
+    severity: "recommended"
+    applies_to: ["all"]
+    evidence_fields:
+      - field_path: "spans[].tool_calls"
+        description: "Tool/function calls made by the AI model"
+        required: false
+        check_type: "present"
+      - field_path: "spans[].tools_defined"
+        description: "Tools/functions available to the AI model"
+        required: false
+        check_type: "present"
+
+  - id: "BP-LLM-08"
+    title: "Trace linkage and causality"
+    description: >
+      Multi-step AI operations should maintain trace linkage (span IDs,
+      parent-child relationships) so that the causal chain of decisions
+      can be reconstructed. Essential for agent workflows, RAG pipelines,
+      and any system with sequential LLM calls.
+    severity: "recommended"
+    applies_to: ["all"]
+    evidence_fields:
+      - field_path: "spans[].span_id"
+        description: "Unique identifier for each operation span"
+        required: true
+        check_type: "non_null"
+      - field_path: "spans[].parent_span_id"
+        description: "Parent span ID for hierarchical trace reconstruction"
+        required: false
+        check_type: "present"
+      - field_path: "spans[].trace_id"
+        description: "Trace-level identifier grouping related operations"
+        required: true
+        check_type: "non_null"
