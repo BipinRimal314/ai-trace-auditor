@@ -49,19 +49,23 @@ def identify_gaps(
         if record.coverage_pct >= 0.95:
             continue
 
-        # Generate human-readable gap description
+        # Generate human-readable gap description with legal citation
+        cite = requirement.legal_text or f"{requirement.article}"
+        source = f"{requirement.regulation} {cite}"
+        guidance_note = " (implementation guidance)" if ef.note else ""
+
         if record.coverage_pct == 0.0:
             description = f"Not logging: {ef.description}"
             impact = (
-                f"{requirement.regulation} {requirement.article} requires this data. "
-                f"Your traces contain zero values for `{ef.field_path}`."
+                f"{source} — your traces contain zero values for "
+                f"`{ef.field_path}`.{guidance_note}"
             )
         else:
             pct = round(record.coverage_pct * 100, 1)
             description = f"Incomplete: {ef.description} ({pct}% coverage)"
             impact = (
-                f"{requirement.regulation} {requirement.article} requires this data. "
-                f"Only {record.present_count}/{record.population} spans have `{ef.field_path}`."
+                f"{source} — only {record.present_count}/{record.population} "
+                f"spans have `{ef.field_path}`.{guidance_note}"
             )
 
         recommendation = _generate_recommendation(ef.field_path, record)

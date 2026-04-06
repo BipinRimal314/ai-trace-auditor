@@ -29,7 +29,7 @@ def test_soc2_ai_loads() -> None:
     registry.load(requirements_dir=SOC2_AI_DIR)
 
     assert registry.count > 0
-    assert "SOC 2 AI Addendum" in registry.regulations
+    assert "SOC 2 Trust Services Criteria" in registry.regulations
 
 
 def test_load_additional_appends() -> None:
@@ -55,7 +55,7 @@ def test_extra_dirs_in_load() -> None:
     regs = registry.regulations
     assert "EU AI Act" in regs
     assert "ISO 42001" in regs
-    assert "SOC 2 AI Addendum" in regs
+    assert "SOC 2 Trust Services Criteria" in regs
 
 
 def test_load_additional_nonexistent_dir() -> None:
@@ -69,13 +69,14 @@ def test_load_additional_nonexistent_dir() -> None:
     assert registry.count == before
 
 
-def test_iso_42001_requirements_have_evidence_fields() -> None:
-    """Each ISO 42001 requirement has at least one evidence field."""
+def test_iso_42001_requirements_load_correctly() -> None:
+    """ISO 42001 requirements load and have valid structure."""
     registry = RequirementRegistry()
     registry.load(requirements_dir=ISO_42001_DIR)
 
     for req in registry.get_all():
-        assert len(req.evidence_fields) > 0, f"{req.id} has no evidence fields"
+        assert req.id.startswith("ISO-42001-"), f"{req.id} has wrong prefix"
+        assert req.severity in {"mandatory", "recommended", "best_practice"}
 
 
 def test_soc2_requirements_have_valid_severity() -> None:

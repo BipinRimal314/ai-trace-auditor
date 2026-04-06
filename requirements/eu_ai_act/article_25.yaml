@@ -1,74 +1,100 @@
 regulation: "EU AI Act"
 article: "Article 25"
-title: "Value Chain Accountability"
+title: "Responsibilities along the AI value chain"
+legal_reference: "Regulation (EU) 2024/1689, Article 25, pp. 67-68"
+framework_nature: "law"
+verified_against_primary: true
+verified_date: "2026-04-06"
+
+# NOTE: Article 25 defines legal responsibilities — when third parties become
+# providers under the law. It is NOT about multi-agent AI system logging or
+# technical tracing. These requirements are organizational/legal compliance
+# checks, not automated trace inspection checks.
 
 requirements:
-  - id: "EU-AIA-25.1"
-    title: "Agent identity traceability"
+  - id: "EU-AIA-25.1a"
+    title: "Name/trademark provider assumption"
     description: >
-      In multi-agent AI systems, each agent acting within the system
-      must be uniquely identifiable in the audit trail. This enables
-      attribution of outputs and decisions to specific agents along
-      the AI value chain.
+      Any distributor, importer, deployer or other third-party that puts their
+      name or trademark on a high-risk AI system already placed on the market
+      or put into service shall be considered a provider and subject to provider
+      obligations under Article 16. This applies without prejudice to contractual
+      arrangements stipulating that obligations are otherwise allocated.
+    legal_text: "Article 25(1)(a)"
     severity: "mandatory"
-    applies_to: ["high_risk", "multi_agent_only"]
-    evidence_fields:
-      - field_path: "spans[].agent_id"
-        description: "Unique identifier for each agent in the system"
-        required: true
-        check_type: "non_null"
-      - field_path: "spans[].agent_name"
-        description: "Human-readable agent name for audit clarity"
-        required: false
-        check_type: "non_null"
+    applies_to: ["high_risk"]
+    check_type: "organizational"
+    evidence_fields: []
+    note: >
+      Cannot be verified by automated trace inspection. Requires organizational
+      assessment of whether the entity has placed their name/trademark on a
+      third-party AI system.
+
+  - id: "EU-AIA-25.1b"
+    title: "Substantial modification provider assumption"
+    description: >
+      Any third party that makes a substantial modification to a high-risk AI
+      system that has already been placed on the market or put into service, in
+      such a way that it remains high-risk pursuant to Article 6, shall be
+      considered a provider and subject to provider obligations under Article 16.
+    legal_text: "Article 25(1)(b)"
+    severity: "mandatory"
+    applies_to: ["high_risk"]
+    check_type: "organizational"
+    evidence_fields: []
+    note: >
+      Cannot be verified by automated trace inspection. Requires legal
+      assessment of whether a substantial modification was made. Tracking
+      model version changes (spans[].model_used) may help detect potential
+      substantial modifications but is not a legal requirement.
+
+  - id: "EU-AIA-25.1c"
+    title: "Intended purpose modification"
+    description: >
+      Any third party that modifies the intended purpose of an AI system,
+      including a general-purpose AI system, which has not been classified as
+      high-risk and has already been placed on the market or put into service,
+      in such a way that the system becomes high-risk per Article 6, shall be
+      considered a provider.
+    legal_text: "Article 25(1)(c)"
+    severity: "mandatory"
+    applies_to: ["all"]
+    check_type: "organizational"
+    evidence_fields: []
+    note: >
+      Cannot be verified by automated trace inspection. Requires assessment of
+      whether the intended purpose has been changed to trigger high-risk
+      classification.
 
   - id: "EU-AIA-25.2"
-    title: "Delegation chain documentation"
+    title: "Original provider cooperation"
     description: >
-      When one AI agent delegates a task to another, the delegation
-      chain must be documented to enable reconstruction of the
-      decision path and attribution of responsibility per Article 25(1).
+      Where paragraph 1 applies, the original provider ceases to be a provider
+      for that specific AI system. The initial provider shall closely cooperate
+      with new providers, make available necessary information, and provide
+      reasonably expected technical access and other assistance for compliance,
+      in particular regarding conformity assessment of high-risk AI systems.
+    legal_text: "Article 25(2)"
     severity: "mandatory"
-    applies_to: ["high_risk", "multi_agent_only"]
-    evidence_fields:
-      - field_path: "spans[].delegation_path"
-        description: "Ordered chain of agent IDs from root to this span"
-        required: true
-        check_type: "non_empty"
-      - field_path: "spans[].parent_span_id"
-        description: "Parent span establishing the delegation relationship"
-        required: true
-        check_type: "non_null"
-
-  - id: "EU-AIA-25.3"
-    title: "MCP boundary transparency"
-    description: >
-      When agents interact with external tools via the Model Context
-      Protocol (MCP), the MCP server endpoint must be recorded to
-      maintain cross-boundary accountability per Article 25.
-    severity: "recommended"
-    applies_to: ["high_risk", "multi_agent_only"]
-    evidence_fields:
-      - field_path: "spans[].mcp_server_uri"
-        description: "MCP server endpoint for cross-boundary tool calls"
-        required: false
-        check_type: "non_null"
+    applies_to: ["high_risk"]
+    check_type: "organizational"
+    evidence_fields: []
+    note: >
+      Organizational obligation. Not verifiable by trace inspection.
 
   - id: "EU-AIA-25.4"
-    title: "Substantial modification detection"
+    title: "Third-party written agreements"
     description: >
-      Article 25(1)(c) states a deployer becomes a provider when making
-      a substantial modification. Agent framework and model identity must
-      be tracked to detect when orchestration logic substantially alters
-      system behavior.
+      The provider of a high-risk AI system and any third party that supplies
+      tools, services, components, or processes used or integrated in the system
+      shall, by written agreement, specify the necessary information, capabilities,
+      technical access and other assistance to enable full compliance with the
+      obligations set out in this Regulation.
+    legal_text: "Article 25(4)"
     severity: "mandatory"
-    applies_to: ["high_risk", "multi_agent_only"]
-    evidence_fields:
-      - field_path: "spans[].agent_framework"
-        description: "Agent framework identifier for detecting orchestration changes"
-        required: false
-        check_type: "non_null"
-      - field_path: "spans[].model_used"
-        description: "Model version per agent for detecting substantial changes"
-        required: true
-        check_type: "non_null"
+    applies_to: ["high_risk"]
+    check_type: "organizational"
+    evidence_fields: []
+    note: >
+      Contractual obligation. The AI Office may develop voluntary model contract
+      terms for this purpose. Not verifiable by trace inspection.

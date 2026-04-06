@@ -13,6 +13,7 @@ class EvidenceField(BaseModel):
     required: bool = True
     check_type: str = "non_null"  # "present", "non_null", "non_empty", "retention"
     check_params: dict[str, int | float | str] | None = None
+    note: str | None = None  # e.g., "Implementation guidance — not a legal requirement"
 
 
 class Requirement(BaseModel):
@@ -26,3 +27,7 @@ class Requirement(BaseModel):
     evidence_fields: list[EvidenceField]
     severity: str = "mandatory"  # "mandatory", "recommended", "best_practice"
     applies_to: list[str] | None = None  # ["high_risk", "all", "biometric"]
+    legal_text: str | None = None  # exact clause ref, e.g. "Article 12(2)(a)"
+    framework_nature: str | None = None  # "law", "voluntary", "certifiable_standard", "audit_framework"
+    check_type: str | None = None  # "deterministic", "organizational" — organizational can't be trace-verified
+    verified_against_primary: bool = False

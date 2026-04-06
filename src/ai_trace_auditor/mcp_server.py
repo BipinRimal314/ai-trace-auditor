@@ -391,6 +391,10 @@ def aitrace_requirements(regulation: str | None = None) -> str:
                     "title": r.title,
                     "description": r.description,
                     "severity": r.severity,
+                    "legal_text": r.legal_text,
+                    "framework_nature": r.framework_nature,
+                    "check_type": r.check_type,
+                    "verified_against_primary": r.verified_against_primary,
                     "evidence_field_count": len(r.evidence_fields),
                     "applies_to": r.applies_to,
                 }

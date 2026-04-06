@@ -28,7 +28,7 @@ def test_full_audit_otel(otel_trace_path: Path, requirements_dir: Path) -> None:
 
     # Timestamps should be satisfied (all spans have them)
     timestamp_req = next(
-        (r for r in report.requirement_results if r.requirement.id == "EU-AIA-12.1a"),
+        (r for r in report.requirement_results if r.requirement.id == "EU-AIA-12.1"),
         None,
     )
     assert timestamp_req is not None

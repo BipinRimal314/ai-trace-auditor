@@ -1,14 +1,24 @@
 regulation: "NIST AI RMF"
 article: "MEASURE"
 title: "Measurement and Monitoring"
+legal_reference: "NIST AI 100-1, AI Risk Management Framework 1.0, January 2023, Table 3 (pp. 29-30)"
+framework_nature: "voluntary"
+verified_against_primary: true
+verified_date: "2026-04-06"
+
+# NOTE: The NIST AI RMF is a VOLUNTARY framework, not a law or regulation.
+# All subcategories describe organizational practices, not technical field
+# requirements. Evidence fields below are implementation guidance for how
+# a trace auditor can help satisfy these practices — they are NOT prescribed
+# by NIST.
 
 requirements:
   - id: "NIST-MEASURE-2.1"
-    title: "Test and evaluation documentation"
+    title: "TEVV documentation"
     description: >
-      AI system testing, metrics, and TEVV (Test, Evaluation, Verification,
-      and Validation) tools shall be documented and traceable. Test sets,
-      evaluation metrics, and methodology must be recorded.
+      Test sets, metrics, and details about the tools used during test,
+      evaluation, validation, and verification (TEVV) are documented.
+    legal_text: "MEASURE 2.1"
     severity: "recommended"
     applies_to: ["all"]
     evidence_fields:
@@ -16,98 +26,101 @@ requirements:
         description: "Evaluation scores or quality assessments attached to operations"
         required: false
         check_type: "present"
+        note: "Implementation guidance — NIST does not prescribe specific trace fields"
 
   - id: "NIST-MEASURE-2.4"
     title: "Production monitoring"
     description: >
-      AI system functionality and behavior shall be monitored in deployed
-      or operational environments. Operational data must be logged to detect
-      performance degradation, drift, or unexpected behavior.
-    severity: "mandatory"
+      The functionality and behavior of the AI system and its components,
+      as identified in the MAP function, are monitored when in production.
+    legal_text: "MEASURE 2.4"
+    severity: "recommended"
     applies_to: ["all"]
     evidence_fields:
-      - field_path: "spans[].model_used"
-        description: "Model version tracking for detecting behavior changes across updates"
-        required: true
-        check_type: "non_null"
-      - field_path: "spans[].input_tokens"
-        description: "Token consumption for monitoring resource usage patterns"
-        required: true
-        check_type: "non_null"
-      - field_path: "spans[].output_tokens"
-        description: "Output token count for monitoring generation patterns"
-        required: true
-        check_type: "non_null"
-      - field_path: "spans[].duration_ms"
-        description: "Latency monitoring for performance degradation detection"
+      - field_path: "spans[].start_time"
+        description: "Timestamps prove monitoring is occurring in production"
         required: false
         check_type: "non_null"
-      - field_path: "spans[].finish_reasons"
-        description: "Completion status monitoring (content filters, length limits, errors)"
-        required: true
-        check_type: "non_empty"
+        note: "Implementation guidance — reasonable proxy for production monitoring"
+      - field_path: "spans[].model_used"
+        description: "Model tracking helps monitor behavior changes"
+        required: false
+        check_type: "non_null"
+        note: "Implementation guidance — not a NIST requirement"
+      - field_path: "spans[].error_type"
+        description: "Error tracking helps detect anomalous behavior"
+        required: false
+        check_type: "present"
+        note: "Implementation guidance — not a NIST requirement"
+
+  - id: "NIST-MEASURE-2.5"
+    title: "Validity and reliability demonstration"
+    description: >
+      The AI system to be deployed is demonstrated to be valid and reliable.
+      Limitations of the generalizability beyond the conditions under which
+      the technology was developed are documented.
+    legal_text: "MEASURE 2.5"
+    severity: "recommended"
+    applies_to: ["all"]
+    evidence_fields: []
+    note: >
+      Organizational/documentation requirement. Cannot be verified by
+      automated trace inspection alone.
 
   - id: "NIST-MEASURE-2.8"
-    title: "Transparency documentation"
+    title: "Transparency and accountability risks"
     description: >
-      Risks related to transparency and accountability are documented and
-      monitored. The system must log sufficient data to explain its behavior
-      to stakeholders.
+      Risks associated with transparency and accountability, as identified
+      in the MAP function, are examined and documented.
+    legal_text: "MEASURE 2.8"
     severity: "recommended"
     applies_to: ["all"]
     evidence_fields:
       - field_path: "spans[].operation"
-        description: "Operation type for understanding what the system did"
-        required: true
+        description: "Operation type aids transparency about system behavior"
+        required: false
         check_type: "non_empty"
+        note: "Implementation guidance — NIST does not prescribe specific fields"
       - field_path: "spans[].provider"
-        description: "Provider identification for accountability"
-        required: true
+        description: "Provider identification aids accountability"
+        required: false
         check_type: "non_null"
-      - field_path: "spans[].model_used"
-        description: "Model identification for reproducibility"
-        required: true
-        check_type: "non_null"
+        note: "Implementation guidance — not a NIST requirement"
 
   - id: "NIST-MEASURE-2.9"
-    title: "Model explainability"
+    title: "Model explanation and validation"
     description: >
-      AI model decisions shall be explainable, validated, and documented.
-      Sufficient operational data must be logged to support post-hoc
-      explanation of system outputs.
+      The AI model is explained, validated, and documented, and AI system
+      output is interpreted within its context, as identified in the MAP
+      function, and to inform responsible use and governance.
+    legal_text: "MEASURE 2.9"
     severity: "recommended"
     applies_to: ["all"]
     evidence_fields:
       - field_path: "spans[].input_messages"
-        description: "Input data for reproducing and explaining model decisions"
+        description: "Input data supports reproducing and explaining decisions"
         required: false
         check_type: "non_empty"
+        note: "Implementation guidance — supports explainability but not a NIST requirement"
       - field_path: "spans[].output_messages"
-        description: "Output data for reviewing model decisions"
+        description: "Output data supports reviewing decisions"
         required: false
         check_type: "non_empty"
-      - field_path: "spans[].temperature"
-        description: "Randomness parameter for explaining output variability"
-        required: false
-        check_type: "non_null"
+        note: "Implementation guidance — not a NIST requirement"
 
   - id: "NIST-MEASURE-3.1"
-    title: "Risk tracking"
+    title: "Risk tracking mechanisms"
     description: >
-      Approaches for tracking existing and emergent AI risks are documented
-      and applied. Error tracking and anomaly detection must be in place.
-    severity: "mandatory"
+      Approaches, personnel, and documentation are in place to regularly
+      identify and track existing, unanticipated, and emergent AI risks
+      based on factors such as intended and actual performance in deployed
+      contexts.
+    legal_text: "MEASURE 3.1"
+    severity: "recommended"
     applies_to: ["all"]
     evidence_fields:
       - field_path: "spans[].error_type"
-        description: "Error classification for tracking failure patterns"
-        required: true
-        check_type: "present"
-      - field_path: "spans[].error_message"
-        description: "Error details for root cause analysis"
+        description: "Error classification supports risk tracking"
         required: false
         check_type: "present"
-      - field_path: "spans[].finish_reasons"
-        description: "Completion status for detecting content filtering or truncation"
-        required: true
-        check_type: "non_empty"
+        note: "Implementation guidance — a proxy for tracking risks, not a NIST requirement"

@@ -1,125 +1,136 @@
-regulation: "SOC 2 AI Addendum"
+regulation: "SOC 2 Trust Services Criteria"
 article: "Trust Services Criteria"
-title: "SOC 2 Trust Services Criteria for AI Systems"
+title: "SOC 2 Trust Services Criteria — AI System Considerations"
+legal_reference: "AICPA Trust Services Criteria (2017), with AI implementation guidance"
+framework_nature: "audit_framework"
 status: "beta"
+verified_against_primary: false
+verification_note: >
+  There is no official "SOC 2 AI Addendum" published by AICPA. The TSC criterion
+  IDs (CC6.1, CC7.2, CC8.1, A1.2, PI1.1, C1.1) are real Trust Services Criteria,
+  but their application to AI systems is our interpretation, not an AICPA
+  requirement. AICPA has published guidance on AI considerations but not a
+  formal addendum. This file should be labeled as "AI implementation guidance
+  for SOC 2" rather than a standalone standard.
+
+# NOTE: SOC 2 audits are attestation engagements where an auditor evaluates
+# controls. The criteria below are real TSC points, but SOC 2 does not prescribe
+# specific technical implementations. Evidence fields are implementation guidance
+# for how trace data can support a SOC 2 audit, not SOC 2 requirements.
 
 requirements:
   - id: "SOC2-AI-CC6.1"
     title: "Logical access to AI systems"
     description: >
       The entity implements logical access security software, infrastructure,
-      and architectures over AI systems to protect them from unauthorized access.
-      AI model invocations must be attributable to authenticated principals.
+      and architectures over protected information assets to protect them
+      from security events.
+    legal_text: "CC6.1 — Logical and Physical Access Controls"
     severity: "mandatory"
     applies_to: ["all"]
     evidence_fields:
       - field_path: "spans[].provider"
-        description: "AI provider access is documented"
-        required: true
+        description: "AI provider access points are documented"
+        required: false
         check_type: "non_null"
+        note: "Implementation guidance — provider tracking helps document third-party access, but SOC 2 access controls require organizational controls beyond traces"
       - field_path: "spans[].trace_id"
         description: "Operations are uniquely identifiable"
-        required: true
+        required: false
         check_type: "non_null"
+        note: "Implementation guidance — traceability supports access control auditing"
 
   - id: "SOC2-AI-CC7.2"
     title: "AI system monitoring"
     description: >
-      The entity monitors AI system components and operations to detect
-      anomalies, misuse, and potential security events. Includes tracking
-      model performance degradation and unexpected outputs.
+      The entity monitors system components and the operation of those
+      components for anomalies that are indicative of malicious acts,
+      natural disasters, and errors affecting the entity's ability to
+      meet its objectives.
+    legal_text: "CC7.2 — System Monitoring"
     severity: "mandatory"
     applies_to: ["all"]
     evidence_fields:
       - field_path: "spans[].error_type"
         description: "Error events captured for anomaly detection"
-        required: true
+        required: false
         check_type: "present"
-      - field_path: "spans[].latency_ms"
-        description: "Performance metrics for degradation detection"
-        required: true
-        check_type: "non_null"
+        note: "Implementation guidance — supports monitoring objective"
       - field_path: "spans[].finish_reasons"
         description: "Output completion status monitored"
         required: false
         check_type: "present"
+        note: "Implementation guidance — unexpected termination may indicate anomalies"
 
   - id: "SOC2-AI-CC8.1"
     title: "AI system change management"
     description: >
-      Changes to AI systems (model updates, configuration changes, provider
-      switches) are authorized, tested, and documented before deployment.
-      Model version tracking provides evidence of controlled changes.
+      The entity authorizes, designs, develops or acquires, configures,
+      documents, tests, approves, and implements changes to infrastructure,
+      data, software, and procedures to meet its objectives.
+    legal_text: "CC8.1 — Change Management"
     severity: "mandatory"
     applies_to: ["all"]
     evidence_fields:
       - field_path: "spans[].model_used"
-        description: "Active model version is recorded per operation"
-        required: true
-        check_type: "non_null"
-      - field_path: "spans[].model_requested"
-        description: "Requested vs actual model tracked (routing changes)"
+        description: "Active model version recorded per operation"
         required: false
         check_type: "non_null"
+        note: "Implementation guidance — model version tracking helps detect unauthorized changes"
+      - field_path: "spans[].model_requested"
+        description: "Requested vs actual model tracked"
+        required: false
+        check_type: "non_null"
+        note: "Implementation guidance — discrepancies may indicate routing changes"
 
   - id: "SOC2-AI-A1.2"
     title: "AI system availability"
     description: >
-      The entity maintains AI system availability consistent with service
-      commitments. Includes monitoring response times, error rates, and
-      implementing failover procedures.
+      The entity authorizes, designs, develops or acquires, implements,
+      operates, approves, maintains, and monitors environmental protections,
+      software, data backup, and recovery infrastructure to meet its objectives.
+    legal_text: "A1.2 — Recovery and Continuity"
     severity: "mandatory"
     applies_to: ["all"]
     evidence_fields:
       - field_path: "spans[].start_time"
         description: "Operation timing for availability measurement"
-        required: true
+        required: false
         check_type: "non_null"
-      - field_path: "spans[].end_time"
-        description: "Operation completion for uptime tracking"
-        required: true
-        check_type: "non_null"
+        note: "Implementation guidance — timestamps support availability reporting"
       - field_path: "spans[].error_type"
         description: "Failure events for availability reporting"
-        required: true
+        required: false
         check_type: "present"
+        note: "Implementation guidance — error rates help measure availability"
 
   - id: "SOC2-AI-PI1.1"
     title: "AI processing integrity"
     description: >
-      AI system processing is complete, valid, accurate, and timely.
-      Input/output token counts verify processing completeness. Finish
-      reasons confirm valid completion.
+      The entity implements policies and procedures over system processing
+      to result in products, services, and reporting to meet the entity's
+      objectives.
+    legal_text: "PI1.1 — Processing Integrity"
     severity: "mandatory"
     applies_to: ["all"]
     evidence_fields:
-      - field_path: "spans[].input_tokens"
-        description: "Input processing completeness"
-        required: true
-        check_type: "non_null"
-      - field_path: "spans[].output_tokens"
-        description: "Output generation completeness"
-        required: true
-        check_type: "non_null"
       - field_path: "spans[].finish_reasons"
         description: "Processing completed with expected termination"
-        required: true
+        required: false
         check_type: "non_empty"
+        note: "Implementation guidance — completion status indicates processing integrity"
 
   - id: "SOC2-AI-C1.1"
     title: "AI data confidentiality"
     description: >
-      Confidential information processed by AI systems is protected during
-      collection, processing, and disposal. Includes awareness of data
-      sent to third-party AI providers.
+      The entity identifies and maintains confidential information to meet
+      the entity's objectives related to confidentiality.
+    legal_text: "C1.1 — Confidentiality"
     severity: "mandatory"
     applies_to: ["all"]
     evidence_fields:
       - field_path: "spans[].provider"
         description: "Third-party data recipients identified"
-        required: true
+        required: false
         check_type: "non_null"
-      - field_path: "spans[].operation"
-        description: "Data processing purposes documented"
-        required: true
-        check_type: "non_empty"
+        note: "Implementation guidance — knowing which providers receive data supports confidentiality controls"

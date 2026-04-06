@@ -63,11 +63,12 @@ class RequirementRegistry:
 
         regulation = data.get("regulation", "Unknown")
         article = data.get("article", "Unknown")
+        framework_nature = data.get("framework_nature")
+        file_verified = data.get("verified_against_primary", False)
 
         for req_data in data["requirements"]:
-            evidence_fields = [
-                EvidenceField(**ef) for ef in req_data.get("evidence_fields", [])
-            ]
+            ef_raw = req_data.get("evidence_fields", [])
+            evidence_fields = [EvidenceField(**ef) for ef in ef_raw] if ef_raw else []
             self._requirements.append(
                 Requirement(
                     id=req_data["id"],
@@ -78,6 +79,12 @@ class RequirementRegistry:
                     evidence_fields=evidence_fields,
                     severity=req_data.get("severity", "mandatory"),
                     applies_to=req_data.get("applies_to"),
+                    legal_text=req_data.get("legal_text"),
+                    framework_nature=framework_nature,
+                    check_type=req_data.get("check_type"),
+                    verified_against_primary=req_data.get(
+                        "verified_against_primary", file_verified
+                    ),
                 )
             )
 

@@ -1,22 +1,38 @@
 regulation: "ISO 42001"
 article: "AI Management System"
 title: "AI Management System Requirements"
+legal_reference: "ISO/IEC 42001:2023, Artificial intelligence — Management system"
+framework_nature: "certifiable_standard"
 status: "beta"
+verified_against_primary: false
+verification_note: >
+  ISO 42001 is a paid standard. Clause numbers and titles follow the standard
+  ISO management system structure (clauses 4-10). Descriptions are based on
+  the publicly available clause titles and the general ISO management system
+  pattern. Full text verification requires access to the purchased standard.
+
+# NOTE: ISO 42001 follows the Annex SL management system structure. Most clauses
+# describe ORGANIZATIONAL requirements (policies, leadership, resources, audits).
+# These cannot be verified by automated trace inspection. Only clauses 9.1
+# (monitoring) and 8.x (operations) have partial connection to technical data.
+# Evidence fields below are implementation guidance, not ISO requirements.
 
 requirements:
+  # --- Organizational requirements (cannot be verified by trace inspection) ---
+
   - id: "ISO-42001-4.1"
     title: "Context of the organization"
     description: >
       The organization shall determine external and internal issues that are
       relevant to its purpose and that affect its ability to achieve the intended
       outcomes of its AI management system.
+    legal_text: "Clause 4.1"
     severity: "mandatory"
     applies_to: ["all"]
-    evidence_fields:
-      - field_path: "spans[].provider"
-        description: "AI providers in use (external context)"
-        required: true
-        check_type: "non_null"
+    check_type: "organizational"
+    evidence_fields: []
+    note: >
+      Organizational planning requirement. Cannot be verified by trace inspection.
 
   - id: "ISO-42001-5.1"
     title: "Leadership commitment"
@@ -24,13 +40,13 @@ requirements:
       Top management shall demonstrate leadership and commitment with respect
       to the AI management system by ensuring AI policies and objectives are
       established and compatible with strategic direction.
+    legal_text: "Clause 5.1"
     severity: "mandatory"
     applies_to: ["all"]
-    evidence_fields:
-      - field_path: "spans[].operation"
-        description: "AI operations are categorized and documented"
-        required: true
-        check_type: "non_empty"
+    check_type: "organizational"
+    evidence_fields: []
+    note: >
+      Leadership/governance requirement. Cannot be verified by trace inspection.
 
   - id: "ISO-42001-6.1"
     title: "Risk assessment for AI systems"
@@ -38,17 +54,15 @@ requirements:
       The organization shall plan actions to address risks and opportunities
       related to AI systems, including assessing potential impacts on
       individuals and groups of individuals.
+    legal_text: "Clause 6.1"
     severity: "mandatory"
     applies_to: ["all"]
-    evidence_fields:
-      - field_path: "spans[].error_type"
-        description: "Error classification enables risk assessment"
-        required: true
-        check_type: "present"
-      - field_path: "spans[].finish_reasons"
-        description: "Operation outcomes tracked for risk patterns"
-        required: false
-        check_type: "present"
+    check_type: "organizational"
+    evidence_fields: []
+    note: >
+      Risk planning requirement. Cannot be verified by trace inspection.
+      Runtime error logging may support risk assessment but is not the
+      assessment itself.
 
   - id: "ISO-42001-7.1"
     title: "Resources for AI management"
@@ -56,17 +70,16 @@ requirements:
       The organization shall determine and provide resources needed for the
       establishment, implementation, maintenance, and continual improvement
       of the AI management system.
+    legal_text: "Clause 7.1"
     severity: "mandatory"
     applies_to: ["all"]
-    evidence_fields:
-      - field_path: "spans[].input_tokens"
-        description: "Resource consumption tracking (input)"
-        required: true
-        check_type: "non_null"
-      - field_path: "spans[].output_tokens"
-        description: "Resource consumption tracking (output)"
-        required: true
-        check_type: "non_null"
+    check_type: "organizational"
+    evidence_fields: []
+    note: >
+      Resource allocation requirement. "Resources" means people, budget,
+      infrastructure — not token counts.
+
+  # --- Partially technical requirements ---
 
   - id: "ISO-42001-8.1"
     title: "Operational planning and control"
@@ -74,17 +87,15 @@ requirements:
       The organization shall plan, implement, and control processes needed
       to meet AI management system requirements, including determining criteria
       for AI processes.
+    legal_text: "Clause 8.1"
     severity: "mandatory"
     applies_to: ["all"]
     evidence_fields:
-      - field_path: "spans[].model_used"
-        description: "Model selection is documented per operation"
-        required: true
-        check_type: "non_null"
       - field_path: "spans[].start_time"
         description: "Operations are timestamped for process control"
-        required: true
+        required: false
         check_type: "non_null"
+        note: "Implementation guidance — traces can demonstrate operational control"
 
   - id: "ISO-42001-8.4"
     title: "AI system impact assessment"
@@ -92,17 +103,14 @@ requirements:
       The organization shall conduct an AI system impact assessment to identify
       and evaluate the potential consequences of an AI system on individuals,
       groups, and society.
+    legal_text: "Clause 8.4"
     severity: "mandatory"
     applies_to: ["all"]
-    evidence_fields:
-      - field_path: "spans[].provider"
-        description: "Third-party AI provider dependencies documented"
-        required: true
-        check_type: "non_null"
-      - field_path: "spans[].operation"
-        description: "AI system capabilities documented by operation type"
-        required: true
-        check_type: "non_empty"
+    check_type: "organizational"
+    evidence_fields: []
+    note: >
+      Impact assessment is a systematic evaluation process, not a trace-level
+      check. Requires organizational documentation beyond trace data.
 
   - id: "ISO-42001-9.1"
     title: "Monitoring and measurement"
@@ -110,21 +118,20 @@ requirements:
       The organization shall determine what needs to be monitored and measured
       for the AI management system, including monitoring methods, timing, and
       responsible parties.
+    legal_text: "Clause 9.1"
     severity: "mandatory"
     applies_to: ["all"]
     evidence_fields:
-      - field_path: "spans[].latency_ms"
-        description: "Performance monitoring via latency measurement"
-        required: true
-        check_type: "non_null"
       - field_path: "spans[].start_time"
         description: "Temporal monitoring of AI operations"
-        required: true
+        required: false
         check_type: "non_null"
+        note: "Implementation guidance — traces provide evidence of monitoring capability"
       - field_path: "spans[].end_time"
-        description: "Operation duration measurable"
-        required: true
+        description: "Operation duration enables performance measurement"
+        required: false
         check_type: "non_null"
+        note: "Implementation guidance — not an ISO requirement"
 
   - id: "ISO-42001-9.2"
     title: "Internal audit"
@@ -132,13 +139,15 @@ requirements:
       The organization shall conduct internal audits at planned intervals
       to determine whether the AI management system conforms to requirements
       and is effectively implemented and maintained.
+    legal_text: "Clause 9.2"
     severity: "mandatory"
     applies_to: ["all"]
     evidence_fields:
       - field_path: "spans[].trace_id"
         description: "Operations are traceable for audit purposes"
-        required: true
+        required: false
         check_type: "non_null"
+        note: "Implementation guidance — traceability supports auditability"
 
   - id: "ISO-42001-10.1"
     title: "Continual improvement"
@@ -146,14 +155,12 @@ requirements:
       The organization shall continually improve the suitability, adequacy,
       and effectiveness of the AI management system through corrective actions,
       analysis of monitoring data, and management review outputs.
+    legal_text: "Clause 10.1"
     severity: "recommended"
     applies_to: ["all"]
-    evidence_fields:
-      - field_path: "spans[].model_used"
-        description: "Model version tracking enables improvement measurement"
-        required: true
-        check_type: "non_null"
-      - field_path: "spans[].error_type"
-        description: "Error patterns tracked for corrective action"
-        required: false
-        check_type: "present"
+    check_type: "organizational"
+    evidence_fields: []
+    note: >
+      Organizational improvement process. Monitoring data from traces may
+      inform improvement decisions, but the improvement process itself is
+      organizational.

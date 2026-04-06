@@ -1,48 +1,49 @@
 regulation: "NIST AI RMF"
 article: "MANAGE"
 title: "Risk Management"
+legal_reference: "NIST AI 100-1, AI Risk Management Framework 1.0, January 2023, Table 4 (pp. 32-33)"
+framework_nature: "voluntary"
+verified_against_primary: true
+verified_date: "2026-04-06"
+
+# NOTE: The NIST AI RMF is a VOLUNTARY framework. These subcategories describe
+# organizational practices. Evidence fields are implementation guidance.
 
 requirements:
   - id: "NIST-MANAGE-4.1"
-    title: "Post-deployment monitoring"
+    title: "Post-deployment monitoring plans"
     description: >
       Post-deployment AI system monitoring plans are implemented, including
-      mechanisms for capturing and evaluating system performance, user
-      feedback, and potential incidents.
-    severity: "mandatory"
+      mechanisms for capturing and evaluating input from users and other
+      relevant AI actors, appeal and override, decommissioning, incident
+      response, recovery, and change management.
+    legal_text: "MANAGE 4.1"
+    severity: "recommended"
     applies_to: ["all"]
     evidence_fields:
       - field_path: "spans[].start_time"
-        description: "Timestamped operations for monitoring continuity verification"
-        required: true
-        check_type: "non_null"
-      - field_path: "spans[].model_used"
-        description: "Model tracking for correlating performance with model changes"
-        required: true
-        check_type: "non_null"
-      - field_path: "spans[].duration_ms"
-        description: "Latency data for performance monitoring"
+        description: "Timestamped operations indicate monitoring is active"
         required: false
         check_type: "non_null"
+        note: "Implementation guidance — proxy for active monitoring, not a NIST requirement"
 
   - id: "NIST-MANAGE-4.3"
-    title: "Incident communication"
+    title: "Incident and error communication"
     description: >
-      AI system incidents and errors are communicated to relevant AI actors,
-      including upstream providers. Error logging must capture sufficient
-      detail for incident reports.
+      Incidents and errors are communicated to relevant AI actors including
+      affected communities. Processes for tracking, responding to, and
+      recovering from incidents and errors are followed and documented.
+    legal_text: "MANAGE 4.3"
     severity: "recommended"
     applies_to: ["all"]
     evidence_fields:
       - field_path: "spans[].error_type"
-        description: "Error classification for incident categorization"
-        required: true
+        description: "Error classification supports incident categorization"
+        required: false
         check_type: "present"
+        note: "Implementation guidance — supports incident communication but not a NIST requirement"
       - field_path: "spans[].error_message"
-        description: "Error details for incident reports"
-        required: true
+        description: "Error details support incident reports"
+        required: false
         check_type: "present"
-      - field_path: "spans[].provider"
-        description: "Provider identification for upstream communication"
-        required: true
-        check_type: "non_null"
+        note: "Implementation guidance — not a NIST requirement"

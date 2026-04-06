@@ -73,7 +73,7 @@ class TestCrewAILinearDelegation:
             for r in report.requirement_results
             if "25" in r.requirement.article
         }
-        assert "EU-AIA-25.1" in art25_ids
+        assert any(aid.startswith("EU-AIA-25.1") for aid in art25_ids)
         assert "EU-AIA-25.2" in art25_ids
 
     def test_dag_built(self, analyzer):
@@ -160,13 +160,19 @@ class TestSingleAgentBackwardCompatibility:
         report = analyzer.analyze(traces, trace_source="single-agent")
         assert report.agent_scores is None
 
-    def test_no_article_25(self, analyzer):
+    def test_article_25_organizational_only(self, analyzer):
+        """Article 25 is about legal liability in the value chain, not
+        multi-agent logging. It applies to all high-risk systems but its
+        requirements are organizational (empty evidence_fields), so they
+        appear as 'satisfied' with no trace-level gaps."""
         traces = _load_otel("otel_chat_trace.json")
         report = analyzer.analyze(traces, trace_source="single-agent")
         art25 = [
             r for r in report.requirement_results if "25" in r.requirement.article
         ]
-        assert art25 == []
+        for result in art25:
+            assert result.status == "satisfied"
+            assert result.gaps == []
 
     def test_is_not_multi_agent(self):
         traces = _load_otel("otel_chat_trace.json")

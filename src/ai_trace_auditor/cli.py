@@ -291,9 +291,17 @@ def list_requirements(
 
         console.print(f"\n[bold]{req.id}:[/bold] {req.title}")
         console.print(f"[dim]Regulation:[/dim] {req.regulation} {req.article}")
+        if req.legal_text:
+            console.print(f"[dim]Legal text:[/dim] {req.legal_text}")
         console.print(f"[dim]Severity:[/dim] {req.severity}")
+        if req.framework_nature:
+            console.print(f"[dim]Framework:[/dim] {req.framework_nature}")
+        if req.check_type:
+            console.print(f"[dim]Check type:[/dim] {req.check_type}")
         if req.applies_to:
             console.print(f"[dim]Applies to:[/dim] {', '.join(req.applies_to)}")
+        verified = "Yes" if req.verified_against_primary else "No"
+        console.print(f"[dim]Verified against primary source:[/dim] {verified}")
         console.print(f"\n{req.description}\n")
 
         if req.evidence_fields:
