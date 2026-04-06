@@ -45,7 +45,7 @@ This codebase does not import any known AI SDKs (OpenAI, Anthropic, Google GenAI
 **What this means for EU AI Act compliance:**
 
 - **Articles 9-15** (high-risk obligations including technical documentation, record-keeping, and transparency) **do not apply via the Annex III pathway** since no AI system components were detected.
-- **Article 50** may still apply if your application presents AI-generated content to users (e.g., content from an external AI API called at runtime without an SDK import, or embedded AI widgets).
+- **Article 50** may still apply if your application presents AI-generated content to users (e.g., content from an external AI API called at runtime without an SDK import, or embedded AI widgets). Note: disclosure is not required where AI interaction is obvious from context (Article 50(1)).
 - **GDPR** obligations apply independently if your application processes personal data.
 
 **If you believe this is incorrect**, your codebase may use AI through:
@@ -117,7 +117,7 @@ Please [open an issue](https://github.com/BipinRimal314/ai-trace-auditor/issues)
 # Part 3: Article 13 — Data Flow Transparency (Provider → Deployer)
 
 > **Article 13** requires providers to document data flows, accuracy metrics, and known limitations for deployers.
-> **Article 50** (deployer → end user) is a separate obligation: deployers must inform users they are interacting with AI. That is a UI/UX requirement, not a data flow issue.
+> **Article 50** (deployer → end user) is a separate obligation: deployers must inform users they are interacting with AI, unless this is obvious from the circumstances and context of use (Article 50(1)). Dedicated AI platforms may satisfy this inherently; embedded AI features in non-AI products require explicit disclosure. This is a UI/UX requirement, not a data flow issue.
 
 **External services:** {{ pkg.service_count }}
 **Data flows:** {{ pkg.flow_count }}

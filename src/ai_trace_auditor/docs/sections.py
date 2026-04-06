@@ -68,7 +68,7 @@ def build_scope_check(scan: CodeScanResult) -> AnnexIVSection:
         "change as your system evolves. **Do not self-classify without legal "
         "review.** You may still have obligations under:\n"
     )
-    parts.append("- **Article 50** — transparency for chatbots and systems interacting directly with users")
+    parts.append("- **Article 50** — transparency for systems interacting directly with users (note: disclosure is not required where AI interaction is obvious from context, e.g., dedicated AI chatbot platforms)")
     parts.append("- **GDPR** — if processing personal data through AI providers")
     parts.append("")
     parts.append(

@@ -165,7 +165,10 @@ def run_full_compliance(
         articles.append("Article 50 (Transparency — deployer→user disclosure)")
         warnings.append(
             "Article 50: User-facing AI endpoints detected. Deployers must "
-            "inform end users that they are interacting with an AI system. "
+            "inform end users that they are interacting with an AI system, "
+            "unless this is obvious from the circumstances and context of use "
+            "(e.g., a platform whose sole purpose is AI interaction). "
+            "For embedded AI features within non-AI products, explicit disclosure is required. "
             "This is a UI/UX obligation that cannot be satisfied by logging alone."
         )
 

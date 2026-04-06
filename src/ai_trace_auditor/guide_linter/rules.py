@@ -25,7 +25,8 @@ def lint_article_13_50_conflation(lines: list[str]) -> list[LintIssue]:
     """Rule CG-001: Article 13 vs Article 50 conflation.
 
     Article 13 = provider→deployer documentation (technical docs).
-    Article 50 = deployer→user disclosure (tell users they're talking to AI).
+    Article 50 = deployer→user disclosure (tell users they're talking to AI),
+    unless obvious from circumstances and context (Article 50(1) exemption).
     Mixing these is the #1 recurring error across all PR reviews.
     """
     issues: list[LintIssue] = []
