@@ -42,14 +42,14 @@
 
 ### Tier 2: Strengthens Pitch (parallel with outreach)
 
-- [ ] **Buyer list** — 10-15 companies with specific contacts and personalized angles
-- [ ] **Outreach emails** — templates per buyer type (observability, GRC, governance)
-- [ ] **Demo script** — 2-minute terminal walkthrough a buyer can run after `pip install`
-- [ ] **GitHub Action on Marketplace** — action.yml exists, needs release tag + listing
+- [x] **Buyer list** — 12 companies across 4 categories, contacts + angles (sale/buyer-list.md, 2026-04-06)
+- [x] **Outreach emails** — 3 templates + personalization notes (sale/outreach-emails.md, 2026-04-06)
+- [x] **Demo script** — sale/demo-script.md, 4 demos covering audit/multi-agent/comply/requirements (2026-04-06)
+- [x] **GitHub Action** — v0.14.0 tag pushed, Release created. To publish to Marketplace: edit release in GitHub UI, check "Publish this Action"
 
 ### Tier 3: Nice to Have
 
-- [ ] **Landing page** (GitHub Pages) — one-page site with deadline urgency
+- [x] **Landing page** — docs/index.html exists (534 lines, mentions Aug 2026 deadline). Enable GitHub Pages in repo settings -> docs/ folder
 - [ ] **GitHub stars** — any organic growth helps credibility
 - [ ] **Demo video** — recorded walkthrough for async sharing
 
