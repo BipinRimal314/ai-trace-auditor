@@ -20,6 +20,7 @@ requirements:
     legal_text: "MANAGE 4.1"
     severity: "recommended"
     applies_to: ["all"]
+    compliance_tier: "structural"
     evidence_fields:
       - field_path: "spans[].start_time"
         description: "Timestamped operations indicate monitoring is active"
@@ -36,6 +37,7 @@ requirements:
     legal_text: "MANAGE 4.3"
     severity: "recommended"
     applies_to: ["all"]
+    compliance_tier: "structural"
     evidence_fields:
       - field_path: "spans[].error_type"
         description: "Error classification supports incident categorization"

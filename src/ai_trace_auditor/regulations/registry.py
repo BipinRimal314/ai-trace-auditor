@@ -85,6 +85,7 @@ class RequirementRegistry:
                     verified_against_primary=req_data.get(
                         "verified_against_primary", file_verified
                     ),
+                    compliance_tier=req_data.get("compliance_tier"),
                 )
             )
 

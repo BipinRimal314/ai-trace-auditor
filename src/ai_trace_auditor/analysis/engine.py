@@ -26,7 +26,7 @@ from ai_trace_auditor.analysis.scorer import (
     determine_status,
     identify_gaps,
 )
-from ai_trace_auditor.models.gap import GapReport, GapSummary, RequirementResult
+from ai_trace_auditor.models.gap import GapReport, GapSummary, RequirementResult, TieredScore
 from ai_trace_auditor.models.trace import NormalizedTrace
 from ai_trace_auditor.regulations.registry import RequirementRegistry
 
@@ -98,6 +98,8 @@ class ComplianceAnalyzer:
         if is_multi_agent:
             agent_scores_dict = self._compute_agent_scores(traces, results)
 
+        tiered = self._compute_tiered_scores(results)
+
         return GapReport(
             generated_at=datetime.now(timezone.utc),
             trace_source=trace_source,
@@ -107,6 +109,7 @@ class ComplianceAnalyzer:
             overall_score=overall,
             requirement_results=results,
             summary=summary,
+            tiered_scores=tiered,
             agent_scores=agent_scores_dict,
         )
 
@@ -141,6 +144,42 @@ class ComplianceAnalyzer:
                 all_agent_scores[agent_id] = score.final_score
 
         return all_agent_scores if all_agent_scores else None
+
+    def _compute_tiered_scores(
+        self, results: list[RequirementResult]
+    ) -> list[TieredScore]:
+        """Compute separate scores per compliance tier."""
+        tier_config = {
+            "deterministic": "Legal Compliance",
+            "structural": "Structural Evidence",
+            "quality": "Quality",
+        }
+        tier_results: dict[str, list[RequirementResult]] = {t: [] for t in tier_config}
+
+        for r in results:
+            tier = r.requirement.compliance_tier
+            if tier in tier_results:
+                tier_results[tier].append(r)
+
+        tiered: list[TieredScore] = []
+        for tier_name, label in tier_config.items():
+            rr = tier_results[tier_name]
+            if not rr:
+                continue
+            active = [r for r in rr if r.status != "not_applicable"]
+            scores = [r.coverage_score for r in active]
+            avg = sum(scores) / len(scores) if scores else 0.0
+            tiered.append(
+                TieredScore(
+                    tier=tier_name,
+                    label=label,
+                    score=avg,
+                    requirement_count=len(rr),
+                    satisfied=sum(1 for r in rr if r.status == "satisfied"),
+                    gaps=sum(1 for r in rr if r.status in ("partial", "missing")),
+                )
+            )
+        return tiered
 
     def _extract_top_gaps(
         self, results: list[RequirementResult], max_gaps: int = 5

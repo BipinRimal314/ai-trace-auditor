@@ -20,6 +20,7 @@ requirements:
     legal_text: "Article 19(1)"
     severity: "mandatory"
     applies_to: ["high_risk"]
+    compliance_tier: "deterministic"
     evidence_fields:
       - field_path: "spans[].start_time"
         description: "Timestamps must be present to verify retention period compliance"

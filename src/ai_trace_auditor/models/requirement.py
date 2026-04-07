@@ -31,3 +31,4 @@ class Requirement(BaseModel):
     framework_nature: str | None = None  # "law", "voluntary", "certifiable_standard", "audit_framework"
     check_type: str | None = None  # "deterministic", "organizational" — organizational can't be trace-verified
     verified_against_primary: bool = False
+    compliance_tier: str | None = None  # "deterministic" | "structural" | "quality"

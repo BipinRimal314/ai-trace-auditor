@@ -21,6 +21,7 @@ requirements:
     legal_text: "MEASURE 2.1"
     severity: "recommended"
     applies_to: ["all"]
+    compliance_tier: "structural"
     evidence_fields:
       - field_path: "spans[].evaluations"
         description: "Evaluation scores or quality assessments attached to operations"
@@ -36,6 +37,7 @@ requirements:
     legal_text: "MEASURE 2.4"
     severity: "recommended"
     applies_to: ["all"]
+    compliance_tier: "structural"
     evidence_fields:
       - field_path: "spans[].start_time"
         description: "Timestamps prove monitoring is occurring in production"
@@ -62,6 +64,7 @@ requirements:
     legal_text: "MEASURE 2.5"
     severity: "recommended"
     applies_to: ["all"]
+    compliance_tier: "structural"
     evidence_fields: []
     note: >
       Organizational/documentation requirement. Cannot be verified by
@@ -75,6 +78,7 @@ requirements:
     legal_text: "MEASURE 2.8"
     severity: "recommended"
     applies_to: ["all"]
+    compliance_tier: "structural"
     evidence_fields:
       - field_path: "spans[].operation"
         description: "Operation type aids transparency about system behavior"
@@ -96,6 +100,7 @@ requirements:
     legal_text: "MEASURE 2.9"
     severity: "recommended"
     applies_to: ["all"]
+    compliance_tier: "structural"
     evidence_fields:
       - field_path: "spans[].input_messages"
         description: "Input data supports reproducing and explaining decisions"
@@ -118,6 +123,7 @@ requirements:
     legal_text: "MEASURE 3.1"
     severity: "recommended"
     applies_to: ["all"]
+    compliance_tier: "structural"
     evidence_fields:
       - field_path: "spans[].error_type"
         description: "Error classification supports risk tracking"

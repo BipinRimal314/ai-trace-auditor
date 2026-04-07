@@ -20,6 +20,7 @@ requirements:
       cost attribution, and behavior analysis.
     severity: "recommended"
     applies_to: ["all"]
+    compliance_tier: "quality"
     evidence_fields:
       - field_path: "spans[].operation"
         description: "Type of AI operation (chat, embeddings, text_completion, image_generation)"
@@ -47,6 +48,7 @@ requirements:
       attempts (abnormally high token counts).
     severity: "recommended"
     applies_to: ["all"]
+    compliance_tier: "quality"
     evidence_fields:
       - field_path: "spans[].input_tokens"
         description: "Input/prompt token count per operation"
@@ -65,6 +67,7 @@ requirements:
       spikes often precede outages or indicate rate limiting.
     severity: "recommended"
     applies_to: ["all"]
+    compliance_tier: "quality"
     evidence_fields:
       - field_path: "spans[].duration_ms"
         description: "Operation latency in milliseconds"
@@ -80,6 +83,7 @@ requirements:
       and models.
     severity: "recommended"
     applies_to: ["all"]
+    compliance_tier: "quality"
     evidence_fields:
       - field_path: "spans[].error_type"
         description: "Error classification (rate_limit, timeout, auth, content_filter, etc.)"
@@ -102,6 +106,7 @@ requirements:
       analysis and behavior explanation.
     severity: "best_practice"
     applies_to: ["all"]
+    compliance_tier: "quality"
     evidence_fields:
       - field_path: "spans[].temperature"
         description: "Temperature parameter controlling output randomness"
@@ -121,6 +126,7 @@ requirements:
       (GDPR, HIPAA) — opt-in with appropriate data protection.
     severity: "best_practice"
     applies_to: ["all"]
+    compliance_tier: "quality"
     evidence_fields:
       - field_path: "spans[].input_messages"
         description: "Input prompts/messages sent to the AI model"
@@ -140,6 +146,7 @@ requirements:
       actions.
     severity: "recommended"
     applies_to: ["all"]
+    compliance_tier: "quality"
     evidence_fields:
       - field_path: "spans[].tool_calls"
         description: "Tool/function calls made by the AI model"
@@ -159,6 +166,7 @@ requirements:
       and any system with sequential LLM calls.
     severity: "recommended"
     applies_to: ["all"]
+    compliance_tier: "quality"
     evidence_fields:
       - field_path: "spans[].span_id"
         description: "Unique identifier for each operation span"

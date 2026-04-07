@@ -90,6 +90,7 @@ requirements:
     legal_text: "Clause 8.1"
     severity: "mandatory"
     applies_to: ["all"]
+    compliance_tier: "structural"
     evidence_fields:
       - field_path: "spans[].start_time"
         description: "Operations are timestamped for process control"
@@ -121,6 +122,7 @@ requirements:
     legal_text: "Clause 9.1"
     severity: "mandatory"
     applies_to: ["all"]
+    compliance_tier: "structural"
     evidence_fields:
       - field_path: "spans[].start_time"
         description: "Temporal monitoring of AI operations"
@@ -142,6 +144,7 @@ requirements:
     legal_text: "Clause 9.2"
     severity: "mandatory"
     applies_to: ["all"]
+    compliance_tier: "structural"
     evidence_fields:
       - field_path: "spans[].trace_id"
         description: "Operations are traceable for audit purposes"

@@ -17,6 +17,7 @@ requirements:
     legal_text: "Article 12(1)"
     severity: "mandatory"
     applies_to: ["high_risk"]
+    compliance_tier: "structural"
     evidence_fields:
       - field_path: "spans[].start_time"
         description: "Timestamp proving automatic logging is occurring"
@@ -33,6 +34,7 @@ requirements:
     legal_text: "Article 12(2)(a)"
     severity: "mandatory"
     applies_to: ["high_risk"]
+    compliance_tier: "structural"
     evidence_fields:
       - field_path: "spans[].error_type"
         description: "Error classification when operations fail"
@@ -53,6 +55,7 @@ requirements:
     legal_text: "Article 12(2)(b)"
     severity: "mandatory"
     applies_to: ["high_risk"]
+    compliance_tier: "structural"
     evidence_fields:
       - field_path: "spans[].model_used"
         description: "Model version used — useful for correlating behavior changes"
@@ -68,6 +71,7 @@ requirements:
     legal_text: "Article 12(2)(c)"
     severity: "mandatory"
     applies_to: ["high_risk"]
+    compliance_tier: "structural"
     evidence_fields:
       - field_path: "spans[].operation"
         description: "Type of operation performed"
@@ -87,6 +91,7 @@ requirements:
     legal_text: "Article 12(3)(a)"
     severity: "mandatory"
     applies_to: ["annex_iii_1a_biometric"]
+    compliance_tier: "deterministic"
     evidence_fields:
       - field_path: "spans[].start_time"
         description: "Start date and time of each use"
@@ -105,6 +110,7 @@ requirements:
     legal_text: "Article 12(3)(b)"
     severity: "mandatory"
     applies_to: ["annex_iii_1a_biometric"]
+    compliance_tier: "deterministic"
     evidence_fields:
       - field_path: "spans[].reference_database"
         description: "Reference database identifier checked by the system"
@@ -119,6 +125,7 @@ requirements:
     legal_text: "Article 12(3)(c)"
     severity: "mandatory"
     applies_to: ["annex_iii_1a_biometric"]
+    compliance_tier: "deterministic"
     evidence_fields:
       - field_path: "spans[].matched_input_data"
         description: "Input data that led to a match"
@@ -134,6 +141,7 @@ requirements:
     legal_text: "Article 12(3)(d)"
     severity: "mandatory"
     applies_to: ["annex_iii_1a_biometric"]
+    compliance_tier: "deterministic"
     evidence_fields:
       - field_path: "spans[].verification_personnel"
         description: "Identity of natural persons who verified results"

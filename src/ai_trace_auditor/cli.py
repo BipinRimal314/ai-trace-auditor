@@ -92,6 +92,24 @@ def _print_report_summary(report: GapReport) -> None:
 
     console.print(table)
 
+    if report.tiered_scores:
+        console.print()
+        tier_table = Table(title="Tiered Compliance Scores")
+        tier_table.add_column("Tier")
+        tier_table.add_column("Score", justify="right")
+        tier_table.add_column("Satisfied", justify="right")
+        tier_table.add_column("Gaps", justify="right")
+        for ts in report.tiered_scores:
+            pct = ts.score * 100
+            tc = "green" if pct >= 90 else "yellow" if pct >= 50 else "red"
+            tier_table.add_row(
+                ts.label,
+                f"[{tc}]{pct:.0f}%[/{tc}]",
+                str(ts.satisfied),
+                str(ts.gaps),
+            )
+        console.print(tier_table)
+
     if report.summary.top_gaps:
         console.print()
         console.print("[bold]Top gaps:[/bold]")

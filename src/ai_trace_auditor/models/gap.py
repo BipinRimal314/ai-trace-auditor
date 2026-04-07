@@ -29,6 +29,17 @@ class RequirementResult(BaseModel):
     coverage_score: float = 0.0  # 0.0 - 1.0
 
 
+class TieredScore(BaseModel):
+    """Score for a single compliance tier."""
+
+    tier: str  # "deterministic", "structural", "quality"
+    label: str  # human-readable: "Legal Compliance", "Structural Evidence", "Quality"
+    score: float = 0.0  # 0.0 - 1.0
+    requirement_count: int = 0
+    satisfied: int = 0
+    gaps: int = 0
+
+
 class GapSummary(BaseModel):
     """High-level summary of gap analysis results."""
 
@@ -50,6 +61,9 @@ class GapReport(BaseModel):
     overall_score: float  # 0.0 - 1.0
     requirement_results: list[RequirementResult]
     summary: GapSummary
+
+    # Tiered scoring
+    tiered_scores: list[TieredScore] = []
 
     # Multi-agent extensions
     agent_scores: dict[str, float] | None = None  # agent_id -> compliance score

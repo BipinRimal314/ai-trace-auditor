@@ -28,6 +28,7 @@ requirements:
     legal_text: "CC6.1 — Logical and Physical Access Controls"
     severity: "mandatory"
     applies_to: ["all"]
+    compliance_tier: "structural"
     evidence_fields:
       - field_path: "spans[].provider"
         description: "AI provider access points are documented"
@@ -50,6 +51,7 @@ requirements:
     legal_text: "CC7.2 — System Monitoring"
     severity: "mandatory"
     applies_to: ["all"]
+    compliance_tier: "structural"
     evidence_fields:
       - field_path: "spans[].error_type"
         description: "Error events captured for anomaly detection"
@@ -71,6 +73,7 @@ requirements:
     legal_text: "CC8.1 — Change Management"
     severity: "mandatory"
     applies_to: ["all"]
+    compliance_tier: "structural"
     evidence_fields:
       - field_path: "spans[].model_used"
         description: "Active model version recorded per operation"
@@ -92,6 +95,7 @@ requirements:
     legal_text: "A1.2 — Recovery and Continuity"
     severity: "mandatory"
     applies_to: ["all"]
+    compliance_tier: "structural"
     evidence_fields:
       - field_path: "spans[].start_time"
         description: "Operation timing for availability measurement"
@@ -113,6 +117,7 @@ requirements:
     legal_text: "PI1.1 — Processing Integrity"
     severity: "mandatory"
     applies_to: ["all"]
+    compliance_tier: "structural"
     evidence_fields:
       - field_path: "spans[].finish_reasons"
         description: "Processing completed with expected termination"
@@ -128,6 +133,7 @@ requirements:
     legal_text: "C1.1 — Confidentiality"
     severity: "mandatory"
     applies_to: ["all"]
+    compliance_tier: "structural"
     evidence_fields:
       - field_path: "spans[].provider"
         description: "Third-party data recipients identified"
