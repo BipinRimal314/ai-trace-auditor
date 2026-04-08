@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ai-trace-auditor"
-version = "0.15.0"
+version = "0.16.0"
 description = "AI compliance auditor: EU AI Act, NIST AI RMF, ISO 42001, SOC 2. Every requirement verified against primary legal text with exact clause citations."
 readme = "README.md"
 license = "Apache-2.0"

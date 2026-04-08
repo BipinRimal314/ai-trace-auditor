@@ -1,6 +1,6 @@
 # AI Trace Auditor
 
-Compliance auditor for AI systems. Audits LLM traces against EU AI Act, NIST AI RMF, ISO 42001, and SOC 2. Every requirement verified against primary legal text with exact clause citations. v0.15.0 on PyPI.
+Compliance auditor for AI systems. Audits LLM traces against EU AI Act, NIST AI RMF, ISO 42001, and SOC 2. Every requirement verified against primary legal text with exact clause citations. v0.16.0 on PyPI.
 
 ## Critical Rules
 

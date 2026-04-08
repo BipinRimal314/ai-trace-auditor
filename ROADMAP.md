@@ -1,12 +1,24 @@
 # AI Trace Auditor — Product Roadmap
 
-**Updated:** 2026-04-07
-**Current version:** v0.15.0 (PyPI)
+**Updated:** 2026-04-08
+**Current version:** v0.16.0 (PyPI)
 **Core value prop:** Every requirement verified against primary legal text with exact clause citations. No competitor does this.
 
 ---
 
-## Current State (v0.15.0)
+## v0.16.0 — Bug Fixes (Released 2026-04-08)
+
+Fixed 5 bugs found during real-world OSS PR testing (Haystack, CrewAI, LiteLLM, n8n, Dify):
+
+1. **GDPR entity language** — Controller/processor roles clarified as organizational designations, not software labels. "ChromaDB: controller" replaced with "organization operating ChromaDB."
+2. **Art 13 / Art 50 separation** — Article 13 (provider-to-deployer transparency) and Article 50 (deployer-to-user transparency) are now separate sections. Previously conflated into one.
+3. **Compliance score renamed** — "Compliance score" renamed to "trace field coverage" with disclaimer that coverage does not equal compliance. Removed unverifiable percentage claims.
+4. **Retention period distinction** — Provider retention is 10 years (Article 18). Deployer retention is 6 months minimum (Article 26(5)). Previously hardcoded as "6 months" for all roles.
+5. **Scope verification step** — Added Annex III classification check before generating compliance documentation. Non-high-risk systems are directed to Article 50 and GDPR sections only.
+
+---
+
+## Current State (v0.16.0)
 
 - 61 requirements across 5 frameworks (EU AI Act, NIST AI RMF, ISO 42001, SOC 2, Best Practices)
 - `legal_text`, `framework_nature`, `check_type`, `verified_against_primary`, `compliance_tier` on every requirement
@@ -19,7 +31,7 @@
 
 ---
 
-## Phase 1: Make It Useful (v0.16.0) — NEXT
+## Phase 1: Make It Useful (v0.17.0) — NEXT
 
 ### "What applies to me?" Intake
 Right now the tool dumps all requirements. A chatbot deployer doesn't need biometric logging rules. Build a questionnaire:
@@ -42,7 +54,7 @@ Your technical documentation package needs:
 
 ---
 
-## Phase 2: Make It Better (v0.17.0)
+## Phase 2: Make It Better (v0.18.0)
 
 ### Severity Weighting
 Currently all requirements have equal weight. Weight by severity:
@@ -68,7 +80,7 @@ aitrace diff report-v1.json report-v2.json
 
 ---
 
-## Phase 3: Make It Sellable (v0.18.0+)
+## Phase 3: Make It Sellable (v0.19.0+)
 
 ### Redline Integration
 Redline lints documents, Trace Auditor lints traces. Combined view:
