@@ -10,7 +10,9 @@
 
 ---
 
-## Overall Compliance Score: {{ (report.overall_score * 100) | round(1) }}%
+## Trace Field Coverage: {{ (report.overall_score * 100) | round(1) }}%
+
+> This score measures what percentage of required trace data fields are present in your logs. It is **not** a legal compliance determination. Full compliance requires organizational measures, documentation, and legal review beyond trace inspection.
 
 | Status | Count |
 |--------|-------|

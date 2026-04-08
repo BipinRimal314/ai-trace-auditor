@@ -18,7 +18,7 @@ def test_markdown_report_renders(otel_trace_path: Path, requirements_dir: Path) 
     md = MarkdownReporter().render(report)
 
     assert "# AI Trace Compliance Report" in md
-    assert "Overall Compliance Score" in md
+    assert "Trace Field Coverage" in md
     assert "Requirement Details" in md
     assert "EU-AIA-" in md
     assert "Methodology" in md

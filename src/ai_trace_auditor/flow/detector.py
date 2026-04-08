@@ -398,6 +398,10 @@ def _build_database_services(
             data_type="user_data",
             purpose="storage",
             gdpr_role="controller",
+            gdpr_role_note=(
+                "your organization is typically the controller when operating "
+                "this database; verify per your data processing agreements"
+            ),
             file_path=db.file_path,
             line_number=db.line_number,
             contains_pii="likely",
@@ -432,6 +436,10 @@ def _build_cloud_services(
             data_type="user_data",
             purpose="storage",
             gdpr_role="processor",
+            gdpr_role_note=(
+                "the cloud service operator typically acts as processor; "
+                "verify per provider's DPA"
+            ),
             file_path=cs.file_path,
             line_number=cs.line_number,
             contains_pii="unknown",
@@ -468,6 +476,10 @@ def _build_http_services(
             data_type="user_data",
             purpose="api_call",
             gdpr_role="processor",
+            gdpr_role_note=(
+                "the service operator typically acts as processor; "
+                "verify per provider's DPA"
+            ),
             file_path=hc.file_path,
             line_number=hc.line_number,
             contains_pii="unknown",

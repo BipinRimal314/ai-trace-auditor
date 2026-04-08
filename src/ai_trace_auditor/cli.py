@@ -1310,7 +1310,7 @@ def _print_comply_summary(pkg: "CompliancePackage") -> None:
         table.add_row(
             "Art. 12 — Record-Keeping",
             "[green]Audited[/green]",
-            f"[{color}]{score:.1f}%[/{color}] compliance",
+            f"[{color}]{score:.1f}%[/{color}] trace field coverage",
         )
     else:
         table.add_row(
@@ -1327,12 +1327,20 @@ def _print_comply_summary(pkg: "CompliancePackage") -> None:
         f"{pct:.0f}% auto-populated",
     )
 
-    # Article 13
+    # Article 13 (provider → deployer documentation, distinct from Art. 50 user disclosure)
     table.add_row(
-        "Art. 13 — Transparency",
+        "Art. 13 — Transparency (provider → deployer)",
         "[green]Mapped[/green]",
         f"{pkg.service_count} services, {pkg.flow_count} flows",
     )
+
+    # Article 50 (deployer → user disclosure, separate from Art. 13)
+    if pkg.code_scan.ai_endpoints:
+        table.add_row(
+            "Art. 50 — Transparency (deployer → user)",
+            "[yellow]Review needed[/yellow]",
+            "User-facing AI endpoints detected",
+        )
 
     # GDPR
     ropa_count = len(pkg.ropa.entries) if pkg.ropa else 0

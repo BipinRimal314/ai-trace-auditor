@@ -14,7 +14,7 @@
 | Article | Status | Key Metric |
 |---------|--------|------------|
 {% if pkg.gap_report %}
-| Article 12 — Record-Keeping | ✅ Audited | {{ '%.1f' | format(pkg.gap_report.overall_score * 100) }}% compliance |
+| Article 12 — Record-Keeping | ✅ Audited | {{ '%.1f' | format(pkg.gap_report.overall_score * 100) }}% trace field coverage |
 {% else %}
 | Article 12 — Record-Keeping | ⚠️ No traces | Provide `--traces` for audit |
 {% endif %}
@@ -63,7 +63,7 @@ Please [open an issue](https://github.com/BipinRimal314/ai-trace-auditor/issues)
 {% if pkg.gap_report %}
 # Part 1: Article 12 — Record-Keeping Audit
 
-**Compliance Score:** {{ '%.1f' | format(pkg.gap_report.overall_score * 100) }}%
+**Trace Field Coverage:** {{ '%.1f' | format(pkg.gap_report.overall_score * 100) }}% (measures presence of required data fields in logs, not legal compliance)
 **Traces analyzed:** {{ pkg.gap_report.trace_count }} traces, {{ pkg.gap_report.span_count }} spans
 **Regulations:** {{ pkg.gap_report.regulations_checked | join(', ') }}
 
@@ -160,14 +160,15 @@ Please [open an issue](https://github.com/BipinRimal314/ai-trace-auditor/issues)
 
 ## Next Steps
 
-1. Complete all `[MANUAL INPUT REQUIRED]` fields in the Annex IV sections
-2. Run `aitrace audit` with production traces for Article 12 compliance scoring
-3. Verify PII classifications — flows marked "likely" need DPIA
-4. Add GDPR Article 6 legal basis for each processing activity
-5. Draft Data Processing Agreements (Article 28) for each "processor" service
-6. Set data retention periods for all processing activities
-7. Store this package in version control — Article 11 requires it to be kept current
-8. Have the package reviewed by a legal/compliance professional
+1. **Verify scope** — Determine if your system is high-risk under Annex III before completing documentation. Articles 9-15 only apply to high-risk systems. Consult Section 0 above and seek legal review
+2. Complete all `[MANUAL INPUT REQUIRED]` fields in the Annex IV sections
+3. Run `aitrace audit` with production traces for Article 12 trace field coverage scoring
+4. Verify PII classifications — flows marked "likely" need DPIA
+5. Add GDPR Article 6 legal basis for each processing activity
+6. Draft Data Processing Agreements (Article 28) for each "processor" service
+7. Set data retention periods: providers must retain for 10 years (Article 18), deployers for at least 6 months (Article 26(5))
+8. Store this package in version control — Article 11 requires it to be kept current
+9. Have the package reviewed by a legal/compliance professional
 
 ---
 
