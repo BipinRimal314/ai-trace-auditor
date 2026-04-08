@@ -16,3 +16,4 @@ venv/
 htmlcov/
 blog-draft.txt
 ai-traceability-deep-research.txt
+.env

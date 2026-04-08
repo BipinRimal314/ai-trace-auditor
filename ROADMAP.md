@@ -1,24 +1,101 @@
 # AI Trace Auditor — Product Roadmap
 
-Based on the full Claude Code data pipeline available at `~/.claude/`:
+**Updated:** 2026-04-07
+**Current version:** v0.15.0 (PyPI)
+**Core value prop:** Every requirement verified against primary legal text with exact clause citations. No competitor does this.
 
+---
+
+## Current State (v0.15.0)
+
+- 61 requirements across 5 frameworks (EU AI Act, NIST AI RMF, ISO 42001, SOC 2, Best Practices)
+- `legal_text`, `framework_nature`, `check_type`, `verified_against_primary`, `compliance_tier` on every requirement
+- Tiered scoring: Legal Compliance (deterministic), Structural Evidence, Quality — three separate scores per audit
+- Article 50 transparency obligations (6 deterministic requirements)
+- Multi-agent DAG auditing with per-agent compliance scoring
+- CLI + MCP server + GitHub Action
+- 301 tests passing
+- Zero users
+
+---
+
+## Phase 1: Make It Useful (v0.16.0) — NEXT
+
+### "What applies to me?" Intake
+Right now the tool dumps all requirements. A chatbot deployer doesn't need biometric logging rules. Build a questionnaire:
+- Provider or deployer?
+- High-risk (Annex III) or not?
+- Biometric? Financial institution?
+- General-purpose AI model?
+
+Output: filtered requirement set with only what applies.
+
+### Documentation Checklist Mode
+Annex IV + organizational requirements → generate a documentation checklist instead of trace gaps:
 ```
-~/.claude/
-├── projects/          # 44 project directories, 877 .jsonl conversation files (427 MB)
-├── debug/             # 94 debug trace files (118 MB) — timestamped system logs
-├── telemetry/         # Failed telemetry events (27 MB)
-├── sessions/          # Active session metadata (PID, cwd, startedAt)
-├── history.jsonl      # Global command history across all sessions
-├── file-history/      # File modification snapshots per session
-├── plans/             # 10+ implementation plans (Markdown)
-├── teams/             # Team configs + agent inboxes
-├── tasks/             # Task state per team
-├── shell-snapshots/   # Shell environment captures
-├── plugins/           # Installed plugin registry
-└── settings/          # Permission rules, allowed tools, domain whitelists
+Your technical documentation package needs:
+☐ Intended purpose and provider identification (Annex IV, 1(a))
+☐ System interaction description (Annex IV, 1(b))
+☐ Risk management system description (Annex IV, 5)
+...
 ```
 
-We're currently ingesting only `projects/*.jsonl` (conversation traces). The roadmap below covers both new data sources and analytical capabilities.
+---
+
+## Phase 2: Make It Better (v0.17.0)
+
+### Severity Weighting
+Currently all requirements have equal weight. Weight by severity:
+- Mandatory: 3x weight
+- Recommended: 1x
+- Best practice: 0.5x
+
+### Requirement Profiles
+```
+aitrace audit traces.json --profile chatbot
+aitrace audit traces.json --profile agent
+aitrace audit traces.json --profile rag-pipeline
+```
+
+### Delta Reports
+```
+aitrace diff report-v1.json report-v2.json
+```
+"3 requirements improved, 1 regressed, 14 unchanged."
+
+### Fix Known Bugs
+5 bugs from OSS PR testing (GDPR entity language, Art 13 vs 50 conflation, retention period hardcoding, missing scope check, unverifiable percentage claims).
+
+---
+
+## Phase 3: Make It Sellable (v0.18.0+)
+
+### Redline Integration
+Redline lints documents, Trace Auditor lints traces. Combined view:
+"Your BSA policy has 3 issues (Redline) and your AI traces have 2 gaps (Trace Auditor)."
+
+### Hosted Dashboard
+- $99/month single repo
+- $499/month org (multi-repo, evidence packs)
+- Connect GitHub, get compliance dashboard
+
+### Integrations
+Pull traces from Langfuse, Arize, Datadog — where teams already store them.
+
+### PDF Report Output
+Compliance officers email PDFs to lawyers. Markdown means nothing to them.
+
+---
+
+## Parked Features
+
+The Claude Code analytics suite (insights, workflow, predict, agents, health) serves a different buyer with no deadline urgency. Parked as potential future `aitrace-insights` package.
+
+---
+
+## LEGACY ROADMAP (Claude Code Analytics)
+
+The following was the original analytics-focused roadmap. Preserved for reference but not actively pursued.
 
 ---
 
