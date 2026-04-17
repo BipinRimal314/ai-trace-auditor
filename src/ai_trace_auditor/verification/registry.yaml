@@ -1,0 +1,43 @@
+# Primary-source registry for AI Trace Auditor.
+#
+# Every entry is a legal or regulatory document pinned by SHA-256 of the file
+# bytes on disk. Any change to the file content (amendment, reformat, or
+# silent re-encoding) invalidates the pin and every requirement verified
+# against that source is flagged "needs re-verification" until a human
+# reviews the diff and refreshes the hash intentionally.
+#
+# This is the foundation of the quote-validation gate: requirement YAMLs
+# reference a source by its ``name`` here, and the validator loads the text
+# of the pinned document and substring-matches every ``exact_quote``.
+#
+# Rules for edits:
+#   1. Do NOT edit the ``sha256`` field by hand. Regenerate it via:
+#          sha256sum docs/eu-ai-act-full-text.pdf
+#      Then review the full text diff and update any affected ``exact_quote``
+#      values before re-pinning.
+#   2. ``verified_date`` is when a human last compared the file against the
+#      canonical EUR-Lex / NIST / AICPA / ISO publication. LLMs cannot flip
+#      this field.
+#   3. ``source_url`` must point to the canonical publisher's URL. If the
+#      publisher moves the document, update the URL but keep the same hash
+#      until the bytes change.
+
+sources:
+  eu-ai-act-2024-1689:
+    description: >
+      Regulation (EU) 2024/1689 of the European Parliament and of the Council
+      of 13 June 2024 laying down harmonised rules on artificial intelligence
+      and amending Regulations (EC) No 300/2008, (EU) No 167/2013, (EU)
+      No 168/2013, (EU) 2018/858, (EU) 2018/1139 and (EU) 2019/2144 and
+      Directives 2014/90/EU, (EU) 2016/797 and (EU) 2020/1828 (Artificial
+      Intelligence Act). Published in OJ L, 12 July 2024.
+    path: "docs/eu-ai-act-full-text.pdf"
+    sha256: "bba630444b3278e881066774002a1d7824308934f49ccfa203e65be43692f55e"
+    citation: "Regulation (EU) 2024/1689"
+    source_url: "https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?uri=OJ:L_202401689"
+    verified_date: "2026-04-17"
+    verified_by: "bipin"
+    notes: >
+      On-disk copy of the official OJ PDF. The primary URL above resolves to
+      the canonical EUR-Lex landing; use that to obtain a fresh copy if the
+      hash ever changes.

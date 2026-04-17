@@ -1,0 +1,31 @@
+# Adversarial fixture: an evidence field claims `legal_basis: direct` but
+# provides no `source_quote`. The schema cannot prove directness without a
+# quotable clause; the validator MUST reject this.
+regulation: "EU AI Act"
+article: "Article 12"
+title: "Record-keeping"
+framework_nature: "law"
+
+source: "eu-ai-act-2024-1689"
+verified_against_primary: true
+verified_date: "2026-04-17"
+verified_by: "adversarial-fixture"
+
+requirements:
+  - id: "ADV-DIRECT-NO-QUOTE-1"
+    title: "Biometric period of use"
+    description: "Claims direct basis but gives no source_quote to prove it."
+    legal_text: "Article 12(3)(a)"
+    exact_quote: >-
+      recording of the period of each use of the system (start date and
+      time and end date and time of each use)
+    severity: "mandatory"
+    applies_to: ["annex_iii_1a_biometric"]
+    compliance_tier: "deterministic"
+    evidence_fields:
+      - field_path: "spans[].start_time"
+        description: "Start of each biometric system use"
+        required: true
+        check_type: "non_null"
+        legal_basis: "direct"
+        # source_quote deliberately omitted — must be rejected.

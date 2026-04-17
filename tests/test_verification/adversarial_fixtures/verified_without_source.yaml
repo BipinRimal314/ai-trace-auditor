@@ -1,0 +1,26 @@
+# Adversarial fixture: YAML claims `verified_against_primary: true` but
+# declares no `source:` field. The header validator MUST reject this —
+# a verification claim without a pinned source is trust-based, the exact
+# failure mode this sprint eliminates.
+regulation: "EU AI Act"
+article: "Article 12"
+title: "Record-keeping"
+framework_nature: "law"
+
+# NOTE: `source:` deliberately missing.
+verified_against_primary: true
+verified_date: "2026-04-17"
+verified_by: "adversarial-fixture"
+
+requirements:
+  - id: "ADV-NO-SOURCE-1"
+    title: "Automatic event logging"
+    description: "Trust-based verification claim."
+    legal_text: "Article 12(1)"
+    exact_quote: >-
+      High-risk AI systems shall technically allow for the automatic
+      recording of events (logs) over the lifetime of the system.
+    severity: "mandatory"
+    applies_to: ["high_risk"]
+    compliance_tier: "structural"
+    evidence_fields: []

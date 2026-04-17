@@ -1,0 +1,25 @@
+# Adversarial fixture: YAML claims `verified_against_primary: true` but
+# a requirement has no `exact_quote`. The file-level claim flags every
+# requirement as verified; without a quote, the claim is unprovable. The
+# validator MUST reject this.
+regulation: "EU AI Act"
+article: "Article 12"
+title: "Record-keeping"
+framework_nature: "law"
+
+source: "eu-ai-act-2024-1689"
+verified_against_primary: true
+verified_date: "2026-04-17"
+verified_by: "adversarial-fixture"
+
+requirements:
+  - id: "ADV-NO-EXACT-QUOTE-1"
+    title: "Automatic event logging"
+    description: >
+      Legitimate requirement but no exact_quote — cannot be verified.
+    legal_text: "Article 12(1)"
+    # exact_quote deliberately omitted.
+    severity: "mandatory"
+    applies_to: ["high_risk"]
+    compliance_tier: "structural"
+    evidence_fields: []

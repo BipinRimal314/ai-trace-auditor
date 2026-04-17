@@ -1,167 +1,236 @@
 regulation: "EU AI Act"
 article: "Article 12"
 title: "Record-keeping"
-legal_reference: "Regulation (EU) 2024/1689, Article 12, pp. 59"
+legal_reference: "Regulation (EU) 2024/1689, Article 12"
 framework_nature: "law"
+
+# Verification gate.
+# `source` names the pinned primary-source document in
+# verification/registry.yaml. Every `exact_quote` below is substring-matched
+# against that document at CI time; see verification/quote_validator.py.
+source: "eu-ai-act-2024-1689"
 verified_against_primary: true
-verified_date: "2026-04-06"
+verified_date: "2026-04-17"
+verified_by: "bipin"
 
 requirements:
-  # --- General requirements (all high-risk AI systems) ---
+  # =========================================================================
+  # General requirements — 12(1) and 12(2) apply to ALL high-risk AI systems.
+  # =========================================================================
+  #
+  # Legal text prescribes a *capability* (logging that enables identifying
+  # risk situations, facilitates post-market monitoring, and supports
+  # deployer monitoring). It does NOT prescribe specific trace fields.
+  # Every evidence field below is therefore `legal_basis: structural`
+  # (reasonable proxy) and `required: false` — the law is satisfied by a
+  # logging implementation that produces equivalent information by any
+  # mechanism.
 
   - id: "EU-AIA-12.1"
     title: "Automatic event logging"
     description: >
-      High-risk AI systems shall technically allow for the automatic recording
+      High-risk AI systems must technically allow for the automatic recording
       of events (logs) over the lifetime of the system.
     legal_text: "Article 12(1)"
+    exact_quote: >-
+      High-risk AI systems shall technically allow for the automatic
+      recording of events (logs) over the lifetime of the system.
     severity: "mandatory"
     applies_to: ["high_risk"]
     compliance_tier: "structural"
     evidence_fields:
       - field_path: "spans[].start_time"
-        description: "Timestamp proving automatic logging is occurring"
-        required: true
+        description: "A timestamp on each span is a defensible proxy for automatic event logging."
+        required: false
         check_type: "non_null"
-        note: "Implementation guidance — law requires automatic logging but does not prescribe specific fields"
+        legal_basis: "structural"
+        note: >
+          Article 12(1) requires automatic event logging but does not
+          prescribe timestamps specifically. Presence of span timestamps
+          demonstrates the capability; absence is not a statutory failure
+          if the system logs events by another mechanism.
 
   - id: "EU-AIA-12.2a"
     title: "Risk situation identification"
     description: >
-      Logging capabilities shall enable the recording of events relevant for
-      identifying situations that may result in the high-risk AI system presenting
-      a risk within the meaning of Article 79(1) or in a substantial modification.
+      Logging capabilities must enable recording of events relevant for
+      identifying situations that may result in the high-risk AI system
+      presenting a risk within the meaning of Article 79(1) or in a
+      substantial modification.
     legal_text: "Article 12(2)(a)"
+    exact_quote: >-
+      identifying situations that may result in the high-risk AI system
+      presenting a risk within the meaning of Article 79(1) or in a
+      substantial modification
     severity: "mandatory"
     applies_to: ["high_risk"]
     compliance_tier: "structural"
     evidence_fields:
       - field_path: "spans[].error_type"
-        description: "Error classification when operations fail"
+        description: "Error classification when operations fail — a proxy for risk-relevant events."
         required: false
         check_type: "present"
-        note: "Implementation guidance — law requires risk-relevant event capture but does not prescribe specific fields"
+        legal_basis: "structural"
+        note: >
+          Not a statutory field. Error classes are one of several valid
+          signals for risk-relevant events; the law does not mandate any
+          specific field.
       - field_path: "spans[].finish_reasons"
-        description: "Operation completion status"
+        description: "Operation completion status — a proxy for risk-relevant events."
         required: false
         check_type: "present"
-        note: "Implementation guidance — not a legal requirement, but a reasonable proxy for risk detection"
+        legal_basis: "structural"
+        note: >
+          Not a statutory field. Completion status can signal risky
+          outcomes (content filter trips, refusals) but Article 12(2)(a)
+          does not prescribe it.
 
   - id: "EU-AIA-12.2b"
     title: "Post-market monitoring facilitation"
     description: >
-      Logging capabilities shall enable the recording of events relevant for
+      Logging capabilities must enable recording of events relevant for
       facilitating the post-market monitoring referred to in Article 72.
     legal_text: "Article 12(2)(b)"
+    exact_quote: "facilitating the post-market monitoring referred to in Article 72"
     severity: "mandatory"
     applies_to: ["high_risk"]
     compliance_tier: "structural"
     evidence_fields:
       - field_path: "spans[].model_used"
-        description: "Model version used — useful for correlating behavior changes"
+        description: "Model version identifier — useful for correlating post-deployment behavior changes."
         required: false
         check_type: "non_null"
-        note: "Implementation guidance — law requires post-market monitoring support but does not specify model tracking"
+        legal_basis: "structural"
+        note: >
+          Not a statutory field. Article 12(2)(b) requires the capability
+          to support post-market monitoring (Article 72); version tracking
+          is one reasonable implementation, not the mandated one.
 
   - id: "EU-AIA-12.2c"
     title: "Deployer operation monitoring"
     description: >
-      Logging capabilities shall enable the recording of events relevant for
-      monitoring the operation of high-risk AI systems referred to in Article 26(5).
+      Logging capabilities must enable recording of events relevant for
+      monitoring the operation of high-risk AI systems referred to in
+      Article 26(5).
     legal_text: "Article 12(2)(c)"
+    exact_quote: "monitoring the operation of high-risk AI systems referred to in Article 26(5)"
     severity: "mandatory"
     applies_to: ["high_risk"]
     compliance_tier: "structural"
     evidence_fields:
       - field_path: "spans[].operation"
-        description: "Type of operation performed"
+        description: "Operation type label — a proxy for deployer operation monitoring."
         required: false
         check_type: "non_empty"
-        note: "Implementation guidance — law requires deployer monitoring support but does not prescribe specific fields"
+        legal_basis: "structural"
+        note: >
+          Not a statutory field. Article 12(2)(c) requires capability to
+          support deployer monitoring under Article 26(5); the specific
+          fields are implementation choice.
 
-  # --- Biometric-specific requirements (Annex III, point 1(a) only) ---
+  # =========================================================================
+  # Biometric-identification-specific requirements.
+  # =========================================================================
+  #
+  # 12(3) applies ONLY to systems listed in Annex III point 1(a) — biometric
+  # identification. These clauses literally name specific fields ("start
+  # date and time", "reference database", "input data for which the search
+  # led to a match", "identification of natural persons"). Evidence fields
+  # below are therefore `legal_basis: direct` with `source_quote` copied
+  # verbatim from 12(3)(a)–(d).
 
   - id: "EU-AIA-12.3a"
     title: "Period of use recording (biometric)"
     description: >
-      For high-risk AI systems referred to in point 1(a) of Annex III (biometric
-      identification), the logging capabilities shall provide, at a minimum,
-      recording of the period of each use of the system (start date and time
-      and end date and time of each use).
+      For biometric identification systems (Annex III, point 1(a)), the
+      logging capabilities must record the period of each use — start date
+      and time, and end date and time.
     legal_text: "Article 12(3)(a)"
+    exact_quote: >-
+      recording of the period of each use of the system (start date and
+      time and end date and time of each use)
     severity: "mandatory"
     applies_to: ["annex_iii_1a_biometric"]
     compliance_tier: "deterministic"
     evidence_fields:
       - field_path: "spans[].start_time"
-        description: "Start date and time of each use"
+        description: "Start date and time of each use."
         required: true
         check_type: "non_null"
+        legal_basis: "direct"
+        source_quote: "start date and time and end date and time of each use"
       - field_path: "spans[].end_time"
-        description: "End date and time of each use"
+        description: "End date and time of each use."
         required: true
         check_type: "non_null"
+        legal_basis: "direct"
+        source_quote: "start date and time and end date and time of each use"
 
   - id: "EU-AIA-12.3b"
     title: "Reference database identification (biometric)"
     description: >
-      For biometric identification systems, the reference database against which
-      input data has been checked by the system must be logged.
+      For biometric identification systems, the reference database against
+      which input data has been checked must be logged.
     legal_text: "Article 12(3)(b)"
+    exact_quote: "the reference database against which input data has been checked by the system"
     severity: "mandatory"
     applies_to: ["annex_iii_1a_biometric"]
     compliance_tier: "deterministic"
     evidence_fields:
       - field_path: "spans[].reference_database"
-        description: "Reference database identifier checked by the system"
+        description: "Identifier of the reference database checked by the system."
         required: true
         check_type: "non_empty"
+        legal_basis: "direct"
+        source_quote: "the reference database against which input data has been checked by the system"
 
   - id: "EU-AIA-12.3c"
     title: "Matching input data recording (biometric)"
     description: >
-      For biometric identification systems, the input data for which the search
-      has led to a match must be logged.
+      For biometric identification systems, the input data for which the
+      search has led to a match must be logged.
     legal_text: "Article 12(3)(c)"
+    exact_quote: "the input data for which the search has led to a match"
     severity: "mandatory"
     applies_to: ["annex_iii_1a_biometric"]
     compliance_tier: "deterministic"
     evidence_fields:
       - field_path: "spans[].matched_input_data"
-        description: "Input data that led to a match"
+        description: "The specific input data that led to a positive match."
         required: true
         check_type: "non_empty"
+        legal_basis: "direct"
+        source_quote: "the input data for which the search has led to a match"
 
   - id: "EU-AIA-12.3d"
     title: "Verification personnel identification (biometric)"
     description: >
-      For biometric identification systems, the identification of the natural
-      persons involved in the verification of the results, as referred to in
-      Article 14(5), must be logged.
+      For biometric identification systems, the identification of natural
+      persons involved in verifying the results (as referred to in Article
+      14(5)) must be logged.
     legal_text: "Article 12(3)(d)"
+    exact_quote: >-
+      the identification of the natural persons involved in the verification
+      of the results, as referred to in Article 14(5)
     severity: "mandatory"
     applies_to: ["annex_iii_1a_biometric"]
     compliance_tier: "deterministic"
     evidence_fields:
       - field_path: "spans[].verification_personnel"
-        description: "Identity of natural persons who verified results"
+        description: "Identity of natural persons who verified the match result."
         required: true
         check_type: "non_empty"
+        legal_basis: "direct"
+        source_quote: "the identification of the natural persons involved in the verification of the results"
 
-# --- Implementation guidance (not legal requirements) ---
-# The following are best practices for LLM-based AI systems that help satisfy
-# the general logging obligations in 12(1) and 12(2). They are NOT mandated
-# by Article 12 but represent reasonable implementation choices.
-#
-# Recommended fields for LLM systems:
-#   - operation type (chat, embeddings, completion)
-#   - provider name (openai, anthropic, etc.)
-#   - model requested vs model used
-#   - input/output token counts
-#   - latency/duration
-#   - temperature, max_tokens, top_p
-#   - tool/function calls
-#   - span IDs and parent-child relationships
-#   - input/output content (with privacy controls)
-#
-# These should be presented as "recommended" not "mandatory per EU AI Act"
+# ---------------------------------------------------------------------------
+# Note on LLM-observability fields deliberately NOT added here.
+# ---------------------------------------------------------------------------
+# Article 12 does not mention any of the following, despite their appearance
+# in LLM observability frameworks: token counts, temperature, top_p, tool
+# calls, function calls, model_requested, span IDs, parent-child trace
+# linkage, provider name, latency, resource consumption. The v0.14.0 YAML
+# mapped many of these to 12(1)/12(2) as "required" fields; the Open WebUI
+# audit flagged them as fabrications. They are intentionally absent here.
+# If a deployer wants to track them for their own operational reasons,
+# those are product choices — not EU AI Act Article 12 obligations.

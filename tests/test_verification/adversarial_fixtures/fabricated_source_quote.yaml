@@ -1,0 +1,32 @@
+# Adversarial fixture: an evidence field's `source_quote` is fabricated
+# (not in the pinned source). The direct-quote subcheck MUST catch this,
+# separately from any exact_quote check on the requirement itself.
+regulation: "EU AI Act"
+article: "Article 12"
+title: "Record-keeping"
+framework_nature: "law"
+
+source: "eu-ai-act-2024-1689"
+verified_against_primary: true
+verified_date: "2026-04-17"
+verified_by: "adversarial-fixture"
+
+requirements:
+  - id: "ADV-FAB-SOURCE-QUOTE-1"
+    title: "Biometric reference database"
+    description: "Real article, real requirement, but the source_quote is fabricated."
+    legal_text: "Article 12(3)(b)"
+    exact_quote: "the reference database against which input data has been checked by the system"
+    severity: "mandatory"
+    applies_to: ["annex_iii_1a_biometric"]
+    compliance_tier: "deterministic"
+    evidence_fields:
+      - field_path: "spans[].reference_database"
+        description: "Database identifier"
+        required: true
+        check_type: "non_empty"
+        legal_basis: "direct"
+        # This quote sounds plausible but is not in the law — fabricated.
+        source_quote: >-
+          the unique identifier of the reference database, including its
+          version and schema, shall be logged with each biometric query

@@ -1,0 +1,30 @@
+# Adversarial fixture: the exact_quote paraphrases the law instead of
+# quoting it verbatim. A common LLM failure mode — the paraphrase sounds
+# right but is not a substring of the actual statute. The quote validator
+# MUST reject this.
+regulation: "EU AI Act"
+article: "Article 12"
+title: "Record-keeping"
+framework_nature: "law"
+
+source: "eu-ai-act-2024-1689"
+verified_against_primary: true
+verified_date: "2026-04-17"
+verified_by: "adversarial-fixture"
+
+requirements:
+  - id: "ADV-PARAPHRASE-1"
+    title: "Logging (paraphrased quote)"
+    description: "Paraphrases Article 12(1) instead of quoting it."
+    legal_text: "Article 12(1)"
+    # Real Article 12(1) says: "High-risk AI systems shall technically allow
+    # for the automatic recording of events (logs) over the lifetime of the
+    # system." This quote is a paraphrase — same meaning, different words.
+    # Paraphrases hide the abstraction-fabrication curve; they must fail.
+    exact_quote: >-
+      High-risk AI systems are required to automatically record all events
+      over the entire operational lifetime of the system.
+    severity: "mandatory"
+    applies_to: ["high_risk"]
+    compliance_tier: "structural"
+    evidence_fields: []

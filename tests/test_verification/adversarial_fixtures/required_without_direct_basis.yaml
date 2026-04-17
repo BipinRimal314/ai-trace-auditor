@@ -1,0 +1,32 @@
+# Adversarial fixture: an evidence field claims `required: true` but its
+# `legal_basis` is `structural` (proxy) not `direct` (mandated by law).
+# This is the exact v0.14.0 failure mode for Article 12(2)(b) model_used.
+# The provenance validator MUST reject this.
+regulation: "EU AI Act"
+article: "Article 12"
+title: "Record-keeping"
+framework_nature: "law"
+
+source: "eu-ai-act-2024-1689"
+verified_against_primary: true
+verified_date: "2026-04-17"
+verified_by: "adversarial-fixture"
+
+requirements:
+  - id: "ADV-REQ-WITHOUT-BASIS-1"
+    title: "Post-market monitoring facilitation"
+    description: "Real article, but mandatory field without direct basis."
+    legal_text: "Article 12(2)(b)"
+    exact_quote: "facilitating the post-market monitoring referred to in Article 72"
+    severity: "mandatory"
+    applies_to: ["high_risk"]
+    compliance_tier: "structural"
+    evidence_fields:
+      # Model version is a reasonable proxy for post-market monitoring, but
+      # Article 12(2)(b) does not name it. Claiming `required: true` here
+      # is the fabrication.
+      - field_path: "spans[].model_used"
+        description: "Model version for post-market correlation"
+        required: true
+        check_type: "non_null"
+        legal_basis: "structural"

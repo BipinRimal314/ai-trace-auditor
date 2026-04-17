@@ -3,7 +3,12 @@ article: "MANAGE"
 title: "Risk Management"
 legal_reference: "NIST AI 100-1, AI Risk Management Framework 1.0, January 2023, Table 4 (pp. 32-33)"
 framework_nature: "voluntary"
-verified_against_primary: true
+
+# NOTE: downgraded to `verified_against_primary: false` pending migration
+# to the Sprint 1 exact_quote + source-pinning regime. See the matching
+# note in measure.yaml; both NIST files need the NIST AI 100-1 source
+# pinned and per-subcategory exact_quote fields populated.
+verified_against_primary: false
 verified_date: "2026-04-06"
 
 # NOTE: The NIST AI RMF is a VOLUNTARY framework. These subcategories describe

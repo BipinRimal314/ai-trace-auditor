@@ -1,0 +1,36 @@
+# Adversarial fixture: the exact_quote does not appear in the pinned source.
+#
+# This is the class of fabrication the Open WebUI maintainer caught: an
+# LLM invents plausible-sounding statute text that doesn't actually exist.
+# The quote validator MUST reject this.
+regulation: "EU AI Act"
+article: "Article 12"
+title: "Record-keeping"
+framework_nature: "law"
+
+source: "eu-ai-act-2024-1689"
+verified_against_primary: true
+verified_date: "2026-04-17"
+verified_by: "adversarial-fixture"
+
+requirements:
+  - id: "ADV-FAB-QUOTE-1"
+    title: "Token count logging (fabricated)"
+    description: >
+      Claims Article 12 requires token count recording.
+    legal_text: "Article 12(2)(b)"
+    # The EU AI Act says nothing about tokens, temperature, or top_p. This
+    # quote is plausible-sounding but fabricated.
+    exact_quote: >-
+      the token count of each inference shall be recorded to enable
+      post-market monitoring of resource consumption
+    severity: "mandatory"
+    applies_to: ["high_risk"]
+    compliance_tier: "structural"
+    evidence_fields:
+      - field_path: "spans[].input_tokens"
+        description: "Token count for billing and monitoring"
+        required: true
+        check_type: "non_null"
+        legal_basis: "direct"
+        source_quote: "the token count of each inference shall be recorded"

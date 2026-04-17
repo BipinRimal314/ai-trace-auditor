@@ -3,8 +3,23 @@ article: "Article 25"
 title: "Responsibilities along the AI value chain"
 legal_reference: "Regulation (EU) 2024/1689, Article 25, pp. 67-68"
 framework_nature: "law"
-verified_against_primary: true
+status: "organizational_only"
+
+# NOTE: downgraded to `verified_against_primary: false` pending migration
+# to the Sprint 1 exact_quote + source-pinning regime. Article 25 is an
+# organizational/legal-liability article — all requirements are check_type
+# "organizational" and cannot be satisfied by trace inspection. Even so,
+# the exact_quote fields should be populated so the file can be CI-gated
+# alongside the rest of the EU AI Act corpus.
+verified_against_primary: false
 verified_date: "2026-04-06"
+excluded_from_marketing_count: true
+exclusion_reason: >
+  All 5 requirements are organizational/legal liability checks that cannot be
+  verified by trace inspection. Article 25 governs when third parties become
+  "providers" under the law — this is a legal entity determination, not an AI
+  agent delegation chain. These requirements produce no actionable trace-level
+  output and are shown as a documentation checklist only.
 
 # NOTE: Article 25 defines legal responsibilities — when third parties become
 # providers under the law. It is NOT about multi-agent AI system logging or

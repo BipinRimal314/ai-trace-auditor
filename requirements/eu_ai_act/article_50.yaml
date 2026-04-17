@@ -3,7 +3,13 @@ article: "Article 50"
 title: "Transparency obligations for providers and deployers of certain AI systems"
 legal_reference: "Regulation (EU) 2024/1689, Article 50, pp. 82-83"
 framework_nature: "law"
-verified_against_primary: true
+
+# NOTE: downgraded to `verified_against_primary: false` pending migration to
+# the Sprint 1 exact_quote + source-pinning regime. Article 50's provisions
+# (chatbots, synthetic-content labelling, deepfakes, emotion recognition)
+# are high-value targets for the next migration wave — see Article 12
+# (requirements/eu_ai_act/article_12.yaml) for the template.
+verified_against_primary: false
 verified_date: "2026-04-07"
 
 # NOTE: Article 50 applies broadly — not just to high-risk systems. It covers:
