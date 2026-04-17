@@ -1,82 +1,105 @@
 regulation: "EU AI Act"
 article: "Annex IV"
 title: "Technical documentation referred to in Article 11(1)"
-legal_reference: "Regulation (EU) 2024/1689, Annex IV, pp. 130-131"
+legal_reference: "Regulation (EU) 2024/1689, Annex IV"
 framework_nature: "law"
 
-# NOTE: downgraded to `verified_against_primary: false` pending migration to
-# the Sprint 1 exact_quote + source-pinning regime. The post-v0.14 audit
-# (docs/requirement-audit-2026-04-06.md) fixed fabrications here, but the
-# per-requirement `exact_quote` fields and registry-pinned source are not
-# yet populated. Until they are, the file cannot be CI-gated. See
-# verification/quote_validator.py; Article 12 and Article 19 are the
-# migrated reference.
-verified_against_primary: false
-verified_date: "2026-04-07"
+source: "eu-ai-act-2024-1689"
+verified_against_primary: true
+verified_date: "2026-04-17"
+verified_by: "bipin"
 
-# NOTE: Annex IV defines what must be in the TECHNICAL DOCUMENTATION for
-# high-risk AI systems. Most items are documentation requirements (what must
-# exist in a document), not runtime trace requirements. Only a few sections
-# have direct connection to trace data. Items marked check_type: "organizational"
-# cannot be verified by trace inspection — they require reviewing the actual
-# technical documentation package.
+# Annex IV is a DOCUMENTATION requirement — it prescribes what the
+# technical documentation package for a high-risk AI system must contain.
+# Almost every item is a documentation obligation (what must exist in a
+# document), not a runtime trace obligation. A handful of items have
+# structural-level trace proxies (provider identity, model versions,
+# active monitoring activity); those are tagged `legal_basis: structural`
+# and `required: false`. The rest are `check_type: organizational` with
+# empty evidence_fields — they require review of the actual technical
+# documentation package, not trace inspection.
 
 requirements:
-  # --- Section 1: General description ---
-
+  # =========================================================================
+  # Section 1 — General description of the AI system
+  # =========================================================================
   - id: "EU-AIA-IV-1a"
-    title: "Intended purpose and provider identification"
+    title: "Intended purpose, provider name, and version"
     description: >
-      A general description of the AI system including its intended purpose,
-      the name of the provider and the version of the system reflecting its
-      relation to previous versions.
+      A general description of the AI system including its intended
+      purpose, the name of the provider, and the version of the system
+      reflecting its relation to previous versions.
     legal_text: "Annex IV, 1(a)"
+    exact_quote: >-
+      its intended purpose, the name of the provider and the version of
+      the system reflecting its relation to previous versions
     severity: "mandatory"
     applies_to: ["high_risk"]
     compliance_tier: "structural"
     evidence_fields:
       - field_path: "spans[].provider"
-        description: "Provider name present in traces supports documentation claim"
+        description: >
+          Provider name carried on each span is a defensible proxy for the
+          provider identity documented in the technical file.
         required: false
         check_type: "non_null"
-        note: "Implementation guidance — traces can corroborate provider identity documented in tech docs"
+        legal_basis: "structural"
+        note: >
+          The law requires this in the documentation, not in traces.
+          Presence in traces corroborates the documented identity.
 
   - id: "EU-AIA-IV-1b"
     title: "System interaction description"
     description: >
       How the AI system interacts with, or can be used to interact with,
-      hardware or software, including other AI systems, that are not part
+      hardware or software (including other AI systems) that are not part
       of the AI system itself, where applicable.
     legal_text: "Annex IV, 1(b)"
+    exact_quote: >-
+      how the AI system interacts with, or can be used to interact with,
+      hardware or software, including with other AI systems, that are not
+      part of the AI system itself, where applicable
     severity: "mandatory"
     applies_to: ["high_risk"]
     check_type: "organizational"
     evidence_fields: []
-    note: "Documentation requirement. Cannot be verified by trace inspection."
+    note: "Documentation requirement; cannot be verified by trace inspection."
 
   - id: "EU-AIA-IV-1c"
-    title: "Software and firmware versions"
+    title: "Software / firmware versions and update requirements"
     description: >
       The versions of relevant software or firmware, and any requirements
       related to version updates.
     legal_text: "Annex IV, 1(c)"
+    exact_quote: >-
+      the versions of relevant software or firmware, and any requirements
+      related to version updates
     severity: "mandatory"
     applies_to: ["high_risk"]
     compliance_tier: "structural"
     evidence_fields:
       - field_path: "spans[].model_used"
-        description: "Model version tracking supports version documentation"
+        description: >
+          Model version present in traces corroborates the version
+          information required in the technical documentation.
         required: false
         check_type: "non_null"
-        note: "Implementation guidance — model versions in traces corroborate version documentation"
+        legal_basis: "structural"
+        note: >
+          The law mandates this in documentation, not in traces. Trace
+          observation is a supporting evidence channel.
 
   - id: "EU-AIA-IV-1d"
-    title: "Distribution form description"
+    title: "Forms of market placement"
     description: >
-      The description of all the forms in which the AI system is placed on the
+      Description of all the forms in which the AI system is placed on the
       market or put into service, such as software packages embedded into
       hardware, downloads, or APIs.
     legal_text: "Annex IV, 1(d)"
+    exact_quote: >-
+      the description of all the forms in which the AI system is placed on
+      the market or put into service, such as software packages embedded
+      into hardware, downloads, or APIs
     severity: "mandatory"
     applies_to: ["high_risk"]
     check_type: "organizational"
@@ -86,8 +109,10 @@ requirements:
   - id: "EU-AIA-IV-1e"
     title: "Hardware description"
     description: >
-      The description of the hardware on which the AI system is intended to run.
+      The description of the hardware on which the AI system is intended
+      to run.
     legal_text: "Annex IV, 1(e)"
+    exact_quote: "the description of the hardware on which the AI system is intended to run"
     severity: "mandatory"
     applies_to: ["high_risk"]
     check_type: "organizational"
@@ -97,25 +122,34 @@ requirements:
   - id: "EU-AIA-IV-1h"
     title: "Instructions for use"
     description: >
-      Instructions for use for the deployer, and a basic description of the
-      user-interface provided to the deployer, where applicable.
+      Instructions for use for the deployer, and a basic description of
+      the user-interface provided to the deployer, where applicable.
     legal_text: "Annex IV, 1(h)"
+    exact_quote: >-
+      instructions for use for the deployer, and a basic description of
+      the user-interface provided to the deployer, where applicable
     severity: "mandatory"
     applies_to: ["high_risk"]
     check_type: "organizational"
     evidence_fields: []
     note: "Documentation requirement."
 
-  # --- Section 2: Development process ---
-
+  # =========================================================================
+  # Section 2 — Detailed description of the development process
+  # =========================================================================
   - id: "EU-AIA-IV-2a"
-    title: "Development methods documentation"
+    title: "Development methods and third-party components"
     description: >
-      The methods and steps performed for the development of the AI system,
-      including, where relevant, recourse to pre-trained systems or tools
-      provided by third parties and how those were used, integrated or
-      modified by the provider.
+      The methods and steps performed for the development of the AI
+      system, including, where relevant, recourse to pre-trained systems
+      or tools provided by third parties and how those were used,
+      integrated, or modified by the provider.
     legal_text: "Annex IV, 2(a)"
+    exact_quote: >-
+      the methods and steps performed for the development of the AI
+      system, including, where relevant, recourse to pre-trained systems
+      or tools provided by third parties and how those were used,
+      integrated or modified by the provider
     severity: "mandatory"
     applies_to: ["high_risk"]
     check_type: "organizational"
@@ -125,13 +159,17 @@ requirements:
   - id: "EU-AIA-IV-2b"
     title: "Design specifications and algorithms"
     description: >
-      The design specifications of the system, namely the general logic of
-      the AI system and of the algorithms; the key design choices including
-      the rationale and assumptions made; the main classification choices;
-      what the system is designed to optimise for; the description of the
-      expected output and output quality; the decisions about trade-offs
-      regarding technical solutions adopted to comply with Chapter III, Section 2.
+      The design specifications of the system — the general logic of the
+      AI system and of the algorithms, the key design choices with
+      rationale and assumptions (including regarding affected persons or
+      groups), the main classification choices, what the system is
+      designed to optimise for, expected output and output quality, and
+      trade-offs made regarding technical solutions for Chapter III,
+      Section 2 compliance.
     legal_text: "Annex IV, 2(b)"
+    exact_quote: >-
+      the design specifications of the system, namely the general logic
+      of the AI system and of the algorithms
     severity: "mandatory"
     applies_to: ["high_risk"]
     check_type: "organizational"
@@ -139,13 +177,18 @@ requirements:
     note: "Documentation requirement."
 
   - id: "EU-AIA-IV-2c"
-    title: "System architecture description"
+    title: "System architecture and compute resources"
     description: >
-      The description of the system architecture explaining how software
+      Description of the system architecture explaining how software
+      components build on or feed into each other and integrate into the
+      overall processing, and the computational resources used to
+      develop, train, test, and validate the AI system.
+    legal_text: "Annex IV, 2(c)"
+    exact_quote: >-
+      the description of the system architecture explaining how software
       components build on or feed into each other and integrate into the
       overall processing; the computational resources used to develop,
-      train, test and validate the AI system.
-    legal_text: "Annex IV, 2(c)"
+      train, test and validate the AI system
     severity: "mandatory"
     applies_to: ["high_risk"]
     check_type: "organizational"
@@ -153,14 +196,19 @@ requirements:
     note: "Documentation requirement."
 
   - id: "EU-AIA-IV-2d"
-    title: "Data requirements and training data"
+    title: "Training data requirements and datasheets"
     description: >
-      Where relevant, the data requirements in terms of datasheets describing
-      the training methodologies and techniques and the training data sets used,
-      including information about their provenance, scope and main characteristics;
-      how the data was obtained and selected; labelling procedures; data cleaning
+      Where relevant, the data requirements in terms of datasheets
+      describing the training methodologies and techniques and the
+      training data sets used — general description of data sets,
+      provenance, scope and main characteristics, how the data was
+      obtained and selected, labelling procedures, and data cleaning
       methodologies.
     legal_text: "Annex IV, 2(d)"
+    exact_quote: >-
+      where relevant, the data requirements in terms of datasheets
+      describing the training methodologies and techniques and the
+      training data sets used
     severity: "mandatory"
     applies_to: ["high_risk"]
     check_type: "organizational"
@@ -170,11 +218,17 @@ requirements:
   - id: "EU-AIA-IV-2e"
     title: "Human oversight assessment"
     description: >
-      Assessment of the human oversight measures needed in accordance with
-      Article 14, including an assessment of the technical measures needed
-      to facilitate the interpretation of the outputs of AI systems by
-      the deployers, in accordance with Article 13(3), point (d).
+      Assessment of the human oversight measures needed in accordance
+      with Article 14, including an assessment of the technical measures
+      needed to facilitate the interpretation of the outputs of AI
+      systems by the deployers (Article 13(3)(d)).
     legal_text: "Annex IV, 2(e)"
+    exact_quote: >-
+      assessment of the human oversight measures needed in accordance
+      with Article 14, including an assessment of the technical measures
+      needed to facilitate the interpretation of the outputs of AI
+      systems by the deployers, in accordance with Article 13(3), point
+      (d)
     severity: "mandatory"
     applies_to: ["high_risk"]
     check_type: "organizational"
@@ -182,120 +236,203 @@ requirements:
     note: "Documentation requirement."
 
   - id: "EU-AIA-IV-2g"
-    title: "Validation and testing procedures"
+    title: "Validation, testing procedures, and test logs"
     description: >
-      The validation and testing procedures used, including information about
-      the validation and testing data used and their main characteristics;
-      metrics used to measure accuracy, robustness and compliance with other
-      relevant requirements; potentially discriminatory impacts; test logs
-      and all test reports dated and signed by the responsible persons.
+      The validation and testing procedures used — information about the
+      validation and testing data, metrics used to measure accuracy,
+      robustness, and compliance with other Chapter III, Section 2
+      requirements (including potentially discriminatory impacts), and
+      test logs / test reports dated and signed by the responsible
+      persons.
     legal_text: "Annex IV, 2(g)"
+    exact_quote: >-
+      the validation and testing procedures used, including information
+      about the validation and testing data used and their main
+      characteristics
     severity: "mandatory"
     applies_to: ["high_risk"]
     check_type: "organizational"
     evidence_fields: []
-    note: "Documentation requirement. Test logs are organizational artifacts, not runtime traces."
+    note: >
+      Documentation requirement. "Test logs" here refers to development-
+      phase testing artefacts signed by responsible persons, not to
+      runtime OpenTelemetry traces. Organizational review is required.
 
   - id: "EU-AIA-IV-2h"
     title: "Cybersecurity measures"
-    description: >
-      Cybersecurity measures put in place.
+    description: "Cybersecurity measures put in place."
     legal_text: "Annex IV, 2(h)"
+    exact_quote: "cybersecurity measures put in place"
     severity: "mandatory"
     applies_to: ["high_risk"]
     check_type: "organizational"
     evidence_fields: []
     note: "Documentation requirement."
 
-  # --- Section 3: Monitoring and performance ---
-
+  # =========================================================================
+  # Section 3 — Monitoring, functioning, and control
+  # =========================================================================
   - id: "EU-AIA-IV-3"
-    title: "Monitoring, functioning and control information"
+    title: "Monitoring, functioning, and control information"
     description: >
-      Detailed information about the monitoring, functioning and control of
-      the AI system, in particular with regard to: its capabilities and
-      limitations in performance; the degrees of accuracy for specific
-      persons or groups; the foreseeable unintended outcomes and sources of
-      risks to health and safety, fundamental rights and discrimination;
-      the human oversight measures needed in accordance with Article 14;
-      specifications on input data, as appropriate.
+      Detailed information about the monitoring, functioning, and control
+      of the AI system — its capabilities and limitations in performance,
+      degrees of accuracy for specific persons or groups, foreseeable
+      unintended outcomes and sources of risks to health, safety,
+      fundamental rights, and discrimination, the human oversight
+      measures needed under Article 14, and specifications on input data
+      as appropriate.
     legal_text: "Annex IV, 3"
+    exact_quote: >-
+      Detailed information about the monitoring, functioning and control
+      of the AI system
     severity: "mandatory"
     applies_to: ["high_risk"]
     compliance_tier: "structural"
     evidence_fields:
       - field_path: "spans[].start_time"
-        description: "Monitoring activity is occurring (timestamped operations)"
+        description: >
+          Active traces demonstrate the monitoring capability the
+          documentation describes.
         required: false
         check_type: "non_null"
-        note: "Implementation guidance — active traces demonstrate monitoring capability"
+        legal_basis: "structural"
+        note: >
+          The law mandates documentation of monitoring capabilities, not
+          a specific trace field. Ongoing trace collection is evidence
+          that the documented capability is in force.
 
-  # --- Sections 4-9: Other documentation ---
-
+  # =========================================================================
+  # Section 4 — Performance metrics appropriateness
+  # =========================================================================
   - id: "EU-AIA-IV-4"
     title: "Performance metrics appropriateness"
     description: >
       A description of the appropriateness of the performance metrics for
       the specific AI system.
     legal_text: "Annex IV, 4"
+    exact_quote: >-
+      A description of the appropriateness of the performance metrics for
+      the specific AI system
     severity: "mandatory"
     applies_to: ["high_risk"]
     check_type: "organizational"
     evidence_fields: []
     note: "Documentation requirement."
 
+  # =========================================================================
+  # Section 5 — Risk management system
+  # =========================================================================
   - id: "EU-AIA-IV-5"
     title: "Risk management system description"
     description: >
       A detailed description of the risk management system in accordance
       with Article 9.
     legal_text: "Annex IV, 5"
+    exact_quote: >-
+      A detailed description of the risk management system in accordance
+      with Article 9
     severity: "mandatory"
     applies_to: ["high_risk"]
     check_type: "organizational"
     evidence_fields: []
-    note: "Documentation requirement."
+    note: "Documentation requirement; refers to the risk management system defined in Article 9."
 
+  # =========================================================================
+  # Section 6 — Lifecycle changes
+  # =========================================================================
   - id: "EU-AIA-IV-6"
     title: "Lifecycle changes description"
     description: >
-      A description of relevant changes made by the provider to the system
-      through its lifecycle.
+      A description of relevant changes made by the provider to the
+      system through its lifecycle.
     legal_text: "Annex IV, 6"
+    exact_quote: >-
+      A description of relevant changes made by the provider to the
+      system through its lifecycle
     severity: "mandatory"
     applies_to: ["high_risk"]
     compliance_tier: "structural"
     evidence_fields:
       - field_path: "spans[].model_used"
-        description: "Model version changes over time document lifecycle changes"
+        description: >
+          Model version drift across traces corroborates the lifecycle
+          change history described in the documentation.
         required: false
         check_type: "non_null"
-        note: "Implementation guidance — version drift in traces supports lifecycle change documentation"
+        legal_basis: "structural"
+        note: >
+          Version history documented in the technical file is the legal
+          obligation; version tracking in traces is a supporting signal
+          that changes have actually occurred in production.
 
-  - id: "EU-AIA-IV-8"
-    title: "EU declaration of conformity"
+  # =========================================================================
+  # Section 7 — Harmonised standards applied
+  # =========================================================================
+  - id: "EU-AIA-IV-7"
+    title: "Harmonised standards / alternative solutions"
     description: >
-      A copy of the EU declaration of conformity referred to in Article 47.
-    legal_text: "Annex IV, 8"
+      A list of the harmonised standards applied in full or in part whose
+      references have been published in the Official Journal; where no
+      such harmonised standards have been applied, a detailed description
+      of the solutions adopted to meet the Chapter III, Section 2
+      requirements, including a list of other relevant standards and
+      technical specifications applied.
+    legal_text: "Annex IV, 7"
+    exact_quote: >-
+      A list of the harmonised standards applied in full or in part the
+      references of which have been published in the Official Journal of
+      the European Union
     severity: "mandatory"
     applies_to: ["high_risk"]
     check_type: "organizational"
     evidence_fields: []
     note: "Documentation requirement."
 
+  # =========================================================================
+  # Section 8 — EU declaration of conformity
+  # =========================================================================
+  - id: "EU-AIA-IV-8"
+    title: "EU declaration of conformity"
+    description: >
+      A copy of the EU declaration of conformity referred to in Article
+      47.
+    legal_text: "Annex IV, 8"
+    exact_quote: "A copy of the EU declaration of conformity referred to in Article 47"
+    severity: "mandatory"
+    applies_to: ["high_risk"]
+    check_type: "organizational"
+    evidence_fields: []
+    note: "Documentation requirement."
+
+  # =========================================================================
+  # Section 9 — Post-market monitoring system
+  # =========================================================================
   - id: "EU-AIA-IV-9"
     title: "Post-market monitoring system"
     description: >
-      A detailed description of the system in place to evaluate the AI system
-      performance in the post-market phase in accordance with Article 72,
-      including the post-market monitoring plan referred to in Article 72(3).
+      A detailed description of the system in place to evaluate the AI
+      system's performance in the post-market phase in accordance with
+      Article 72, including the post-market monitoring plan referred to
+      in Article 72(3).
     legal_text: "Annex IV, 9"
+    exact_quote: >-
+      A detailed description of the system in place to evaluate the AI
+      system performance in the post-market phase in accordance with
+      Article 72, including the post-market monitoring plan referred to
+      in Article 72(3)
     severity: "mandatory"
     applies_to: ["high_risk"]
     compliance_tier: "structural"
     evidence_fields:
       - field_path: "spans[].start_time"
-        description: "Active post-market traces demonstrate monitoring is in place"
+        description: >
+          Active post-market traces demonstrate that the documented
+          post-market monitoring system is actually running.
         required: false
         check_type: "non_null"
-        note: "Implementation guidance — ongoing trace collection is evidence of post-market monitoring"
+        legal_basis: "structural"
+        note: >
+          The law mandates a documented post-market monitoring plan; the
+          existence of live traces is evidence that the plan is being
+          executed.

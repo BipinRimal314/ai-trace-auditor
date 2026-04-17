@@ -140,26 +140,35 @@ def _validate_requirement(
     *,
     file_claims_verified: bool,
 ) -> None:
-    """Validate a single :class:`Requirement` against *source*."""
+    """Validate a single :class:`Requirement` against *source*.
+
+    Two checks run regardless of ``check_type``:
+
+    - If the file claims verification, an ``exact_quote`` is mandatory.
+    - If an ``exact_quote`` is present, it must substring-match the pinned
+      source.
+
+    Organizational requirements (``check_type == "organizational"``) are
+    still subject to quote verification — their claim about what the law
+    says is just as much a fabrication surface as a technical requirement's.
+    Only the evidence-field provenance check is skipped for organizational
+    requirements, since they have no trace-level fields by definition.
+    """
     rid = req.id
 
-    # Organizational requirements cannot be trace-verified and need no quote.
-    if req.check_type == "organizational" or req.compliance_tier is None:
-        return
+    if file_claims_verified and not req.exact_quote:
+        report.add(
+            Severity.ERROR,
+            "missing-exact-quote",
+            f"{rid}: YAML claims primary-source verification but this "
+            "requirement has no `exact_quote`. Paste the verbatim clause "
+            "text from the pinned source PDF.",
+            requirement_id=rid,
+        )
+        # No quote to verify; the evidence-field checks are the only thing
+        # left to do and they run below.
 
-    if file_claims_verified:
-        if not req.exact_quote:
-            report.add(
-                Severity.ERROR,
-                "missing-exact-quote",
-                f"{rid}: YAML claims primary-source verification but this "
-                "requirement has no `exact_quote`. Paste the verbatim clause "
-                "text from the pinned source PDF.",
-                requirement_id=rid,
-            )
-            return  # Nothing more to check on this requirement.
-
-    if req.exact_quote:
+    if req.exact_quote is not None:
         if req.exact_quote.strip() == "":
             report.add(
                 Severity.ERROR,
@@ -179,6 +188,12 @@ def _validate_requirement(
                     "source hash is stale.",
                     requirement_id=rid,
                 )
+
+    # Organizational requirements have no trace-level evidence fields by
+    # definition; skip the provenance checks for them but keep the quote
+    # verification above in force.
+    if req.check_type == "organizational":
+        return
 
     _validate_evidence_fields(req, source, report)
 

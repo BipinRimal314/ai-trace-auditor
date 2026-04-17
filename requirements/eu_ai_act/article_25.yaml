@@ -1,115 +1,152 @@
 regulation: "EU AI Act"
 article: "Article 25"
 title: "Responsibilities along the AI value chain"
-legal_reference: "Regulation (EU) 2024/1689, Article 25, pp. 67-68"
+legal_reference: "Regulation (EU) 2024/1689, Article 25"
 framework_nature: "law"
 status: "organizational_only"
 
-# NOTE: downgraded to `verified_against_primary: false` pending migration
-# to the Sprint 1 exact_quote + source-pinning regime. Article 25 is an
-# organizational/legal-liability article — all requirements are check_type
-# "organizational" and cannot be satisfied by trace inspection. Even so,
-# the exact_quote fields should be populated so the file can be CI-gated
-# alongside the rest of the EU AI Act corpus.
-verified_against_primary: false
-verified_date: "2026-04-06"
+source: "eu-ai-act-2024-1689"
+verified_against_primary: true
+verified_date: "2026-04-17"
+verified_by: "bipin"
+
 excluded_from_marketing_count: true
 exclusion_reason: >
-  All 5 requirements are organizational/legal liability checks that cannot be
-  verified by trace inspection. Article 25 governs when third parties become
-  "providers" under the law — this is a legal entity determination, not an AI
-  agent delegation chain. These requirements produce no actionable trace-level
-  output and are shown as a documentation checklist only.
+  All requirements in Article 25 are organizational / legal-entity
+  determinations (when a distributor / importer / deployer / third party
+  becomes legally a "provider"), not trace-level obligations. They produce
+  documentation-checklist output, not pass/fail findings over trace data.
+  Even so, exact_quote fields are populated so the file participates in
+  the primary-source verification gate and is machine-checkable.
 
-# NOTE: Article 25 defines legal responsibilities — when third parties become
-# providers under the law. It is NOT about multi-agent AI system logging or
-# technical tracing. These requirements are organizational/legal compliance
-# checks, not automated trace inspection checks.
+# Article 25 allocates legal liability along the AI value chain. It
+# defines the circumstances under which a third party is deemed to take on
+# provider obligations under Article 16. None of these provisions can be
+# satisfied by a technical check against traces; they are all
+# organizational obligations and are surfaced as a documentation
+# checklist, not a trace audit finding.
 
 requirements:
   - id: "EU-AIA-25.1a"
-    title: "Name/trademark provider assumption"
+    title: "Name / trademark provider assumption"
     description: >
-      Any distributor, importer, deployer or other third-party that puts their
-      name or trademark on a high-risk AI system already placed on the market
-      or put into service shall be considered a provider and subject to provider
-      obligations under Article 16. This applies without prejudice to contractual
-      arrangements stipulating that obligations are otherwise allocated.
+      A distributor, importer, deployer, or other third party that puts
+      their name or trademark on a high-risk AI system already placed on
+      the market or put into service is considered a provider under the
+      Regulation and takes on the obligations of the provider under
+      Article 16 (subject to contractual allocation).
     legal_text: "Article 25(1)(a)"
+    exact_quote: >-
+      they put their name or trademark on a high-risk AI system already
+      placed on the market or put into service, without prejudice to
+      contractual arrangements stipulating that the obligations are
+      otherwise allocated
     severity: "mandatory"
     applies_to: ["high_risk"]
     check_type: "organizational"
     evidence_fields: []
     note: >
-      Cannot be verified by automated trace inspection. Requires organizational
-      assessment of whether the entity has placed their name/trademark on a
-      third-party AI system.
+      Requires an organizational assessment of whether the entity has
+      branded or re-branded a third-party AI system as its own.
 
   - id: "EU-AIA-25.1b"
-    title: "Substantial modification provider assumption"
+    title: "Substantial-modification provider assumption"
     description: >
-      Any third party that makes a substantial modification to a high-risk AI
-      system that has already been placed on the market or put into service, in
-      such a way that it remains high-risk pursuant to Article 6, shall be
-      considered a provider and subject to provider obligations under Article 16.
+      A third party that makes a substantial modification to a high-risk
+      AI system already on the market or in service, such that the system
+      remains high-risk under Article 6, is considered a provider and
+      takes on the obligations of the provider under Article 16.
     legal_text: "Article 25(1)(b)"
+    exact_quote: >-
+      they make a substantial modification to a high-risk AI system that
+      has already been placed on the market or has already been put into
+      service in such a way that it remains a high-risk AI system pursuant
+      to Article 6
     severity: "mandatory"
     applies_to: ["high_risk"]
     check_type: "organizational"
     evidence_fields: []
     note: >
-      Cannot be verified by automated trace inspection. Requires legal
-      assessment of whether a substantial modification was made. Tracking
-      model version changes (spans[].model_used) may help detect potential
-      substantial modifications but is not a legal requirement.
+      Requires legal assessment of whether the change qualifies as a
+      "substantial modification" in the Article 3 sense. Tracking model
+      version changes in traces (spans[].model_used) may surface potential
+      triggers, but is not a legal determination.
 
   - id: "EU-AIA-25.1c"
-    title: "Intended purpose modification"
+    title: "Intended-purpose modification"
     description: >
-      Any third party that modifies the intended purpose of an AI system,
-      including a general-purpose AI system, which has not been classified as
-      high-risk and has already been placed on the market or put into service,
-      in such a way that the system becomes high-risk per Article 6, shall be
+      A third party that modifies the intended purpose of an AI system
+      (including a general-purpose AI system) which has not been
+      classified as high-risk and is already on the market or in service,
+      in such a way that the system becomes high-risk under Article 6, is
       considered a provider.
     legal_text: "Article 25(1)(c)"
+    exact_quote: >-
+      they modify the intended purpose of an AI system, including a
+      general-purpose AI system, which has not been classified as
+      high-risk and has already been placed on the market or put into
+      service in such a way that the AI system concerned becomes a
+      high-risk AI system in accordance with Article 6
     severity: "mandatory"
     applies_to: ["all"]
     check_type: "organizational"
     evidence_fields: []
     note: >
-      Cannot be verified by automated trace inspection. Requires assessment of
-      whether the intended purpose has been changed to trigger high-risk
-      classification.
+      Requires assessment of whether the intended purpose has been
+      changed to trigger high-risk classification under Article 6.
 
   - id: "EU-AIA-25.2"
-    title: "Original provider cooperation"
+    title: "Initial provider cooperation with new providers"
     description: >
-      Where paragraph 1 applies, the original provider ceases to be a provider
-      for that specific AI system. The initial provider shall closely cooperate
-      with new providers, make available necessary information, and provide
-      reasonably expected technical access and other assistance for compliance,
-      in particular regarding conformity assessment of high-risk AI systems.
+      When paragraph 1 applies, the provider that initially placed the AI
+      system on the market or put it into service ceases to be the provider
+      for that specific system. The initial provider must closely
+      cooperate with the new providers, make available the necessary
+      information, and provide reasonably expected technical access and
+      other assistance to support compliance — particularly for the
+      conformity assessment. This paragraph does not apply where the
+      initial provider has clearly specified that the system is not to be
+      changed into a high-risk AI system.
     legal_text: "Article 25(2)"
+    exact_quote: >-
+      That initial provider shall closely cooperate with new providers and
+      shall make available the necessary information and provide the
+      reasonably expected technical access and other assistance that are
+      required for the fulfilment of the obligations set out in this
+      Regulation, in particular regarding the compliance with the
+      conformity assessment of high-risk AI systems.
     severity: "mandatory"
     applies_to: ["high_risk"]
     check_type: "organizational"
     evidence_fields: []
     note: >
-      Organizational obligation. Not verifiable by trace inspection.
+      Inter-organizational obligation. Not verifiable from traces.
 
   - id: "EU-AIA-25.4"
-    title: "Third-party written agreements"
+    title: "Third-party written agreement"
     description: >
-      The provider of a high-risk AI system and any third party that supplies
-      tools, services, components, or processes used or integrated in the system
-      shall, by written agreement, specify the necessary information, capabilities,
-      technical access and other assistance to enable full compliance with the
-      obligations set out in this Regulation.
+      The provider of a high-risk AI system and any third party supplying
+      tools, services, components, or processes used or integrated in the
+      system must, by written agreement, specify the information,
+      capabilities, technical access, and other assistance the provider
+      needs in order to comply with the Regulation. This does not apply to
+      third parties making tools, services, processes, or components
+      (other than general-purpose AI models) accessible to the public under
+      a free and open-source licence.
     legal_text: "Article 25(4)"
+    exact_quote: >-
+      The provider of a high-risk AI system and the third party that
+      supplies an AI system, tools, services, components, or processes
+      that are used or integrated in a high-risk AI system shall, by
+      written agreement, specify the necessary information, capabilities,
+      technical access and other assistance based on the generally
+      acknowledged state of the art, in order to enable the provider of
+      the high-risk AI system to fully comply with the obligations set
+      out in this Regulation.
     severity: "mandatory"
     applies_to: ["high_risk"]
     check_type: "organizational"
     evidence_fields: []
     note: >
-      Contractual obligation. The AI Office may develop voluntary model contract
-      terms for this purpose. Not verifiable by trace inspection.
+      Contractual obligation. The AI Office may publish voluntary model
+      contract terms. Not verifiable from traces.

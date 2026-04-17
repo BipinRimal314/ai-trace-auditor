@@ -1,159 +1,243 @@
 regulation: "EU AI Act"
 article: "Article 50"
 title: "Transparency obligations for providers and deployers of certain AI systems"
-legal_reference: "Regulation (EU) 2024/1689, Article 50, pp. 82-83"
+legal_reference: "Regulation (EU) 2024/1689, Article 50"
 framework_nature: "law"
 
-# NOTE: downgraded to `verified_against_primary: false` pending migration to
-# the Sprint 1 exact_quote + source-pinning regime. Article 50's provisions
-# (chatbots, synthetic-content labelling, deepfakes, emotion recognition)
-# are high-value targets for the next migration wave — see Article 12
-# (requirements/eu_ai_act/article_12.yaml) for the template.
-verified_against_primary: false
-verified_date: "2026-04-07"
+source: "eu-ai-act-2024-1689"
+verified_against_primary: true
+verified_date: "2026-04-17"
+verified_by: "bipin"
 
-# NOTE: Article 50 applies broadly — not just to high-risk systems. It covers:
-# - AI systems interacting with people (chatbots) → 50(1)
-# - AI generating synthetic content (text, image, audio, video) → 50(2)
-# - Emotion recognition / biometric categorisation → 50(3)
-# - Deep fakes → 50(4)
-# These are CHAPTER IV obligations, separate from Chapter III high-risk requirements.
+# Article 50 applies broadly — not just to high-risk systems. It covers:
+#   50(1): AI systems interacting with people (chatbots)
+#   50(2): AI generating synthetic audio/image/video/text content
+#   50(3): emotion recognition / biometric categorisation systems
+#   50(4): deep fakes and AI-generated public-interest text
+#   50(5): timing and accessibility of the required disclosures
+# These are Chapter IV obligations, separate from Chapter III high-risk
+# requirements.
 
 requirements:
-  # --- 50(1): AI interaction disclosure ---
-
+  # =========================================================================
+  # 50(1) — Chatbot / AI-interaction disclosure
+  # =========================================================================
   - id: "EU-AIA-50.1"
     title: "AI interaction disclosure"
     description: >
-      Providers shall ensure that AI systems intended to interact directly with
-      natural persons are designed and developed in such a way that the natural
-      persons concerned are informed that they are interacting with an AI system,
-      unless this is obvious from the point of view of a natural person who is
-      reasonably well-informed, observant and circumspect, taking into account
-      the circumstances and the context of use.
+      Providers must ensure that AI systems intended to interact directly
+      with natural persons are designed and developed in such a way that the
+      natural persons concerned are informed that they are interacting with
+      an AI system, unless this is obvious from the context.
     legal_text: "Article 50(1)"
+    exact_quote: >-
+      Providers shall ensure that AI systems intended to interact directly
+      with natural persons are designed and developed in such a way that the
+      natural persons concerned are informed that they are interacting with
+      an AI system, unless this is obvious from the point of view of a
+      natural person who is reasonably well-informed, observant and
+      circumspect, taking into account the circumstances and the context of
+      use.
     severity: "mandatory"
     applies_to: ["all", "human_interaction"]
-    compliance_tier: "deterministic"
+    compliance_tier: "structural"
     evidence_fields:
       - field_path: "spans[].ai_disclosure"
-        description: "AI disclosure marker present in system output or interaction"
-        required: true
+        description: >
+          Marker indicating the system disclosed its AI nature in the
+          output or interaction. Presence in the trace is a defensible
+          proxy for the statutory capability; absence is not a statutory
+          failure if disclosure is made by another channel (UI banner,
+          system prompt framing, etc.).
+        required: false
         check_type: "present"
-        note: "Tier 1 — law requires disclosure. Check for disclosure marker, system prompt instruction, or UI-level indicator."
+        legal_basis: "structural"
+        note: >
+          Article 50(1) prescribes a design-time capability ("designed and
+          developed in such a way that persons are informed"), not a
+          specific trace field. A disclosure marker in the span is one
+          reasonable implementation; it is not the only one.
     exemptions:
       - "Obviously AI from context (reasonably well-informed person would know)"
       - "AI systems authorised by law for criminal offence detection/prevention/prosecution"
 
-  # --- 50(2): Machine-readable AI content marking ---
-
+  # =========================================================================
+  # 50(2) — Machine-readable marking of synthetic content
+  # =========================================================================
   - id: "EU-AIA-50.2"
     title: "AI-generated content marking"
     description: >
-      Providers of AI systems, including general-purpose AI systems, generating
-      synthetic audio, image, video or text content, shall ensure that the outputs
-      of the AI system are marked in a machine-readable format and detectable as
-      artificially generated or manipulated. Providers shall ensure their technical
-      solutions are effective, interoperable, robust and reliable.
+      Providers of AI systems, including general-purpose AI systems, that
+      generate synthetic audio, image, video, or text content must ensure
+      the outputs are marked in a machine-readable format and detectable
+      as artificially generated or manipulated. Technical solutions must be
+      effective, interoperable, robust, and reliable.
     legal_text: "Article 50(2)"
+    exact_quote: >-
+      Providers of AI systems, including general-purpose AI systems,
+      generating synthetic audio, image, video or text content, shall
+      ensure that the outputs of the AI system are marked in a
+      machine-readable format and detectable as artificially generated or
+      manipulated.
     severity: "mandatory"
     applies_to: ["all", "content_generation"]
-    compliance_tier: "deterministic"
+    compliance_tier: "structural"
     evidence_fields:
       - field_path: "spans[].content_marking"
-        description: "Machine-readable marking on AI-generated content (C2PA, watermark, metadata)"
-        required: true
+        description: >
+          Machine-readable marking on AI-generated content (C2PA manifest,
+          watermark metadata, provenance signature, or equivalent).
+        required: false
         check_type: "present"
-        note: "Tier 1 — law requires machine-readable marking. Check for C2PA manifest, watermark metadata, or equivalent."
+        legal_basis: "structural"
+        note: >
+          Article 50(2) mandates marking "in a machine-readable format" but
+          does not name a specific standard or trace field. A trace-level
+          marking flag is one defensible proxy; C2PA manifests, SynthID
+          watermarks, and provider-specific signatures are others.
       - field_path: "spans[].output_messages"
-        description: "Generated content available for marking verification"
+        description: >
+          Generated content available in the trace — allows marking
+          verification to be run downstream.
         required: false
         check_type: "non_empty"
-        note: "Implementation guidance — content must exist to verify marking"
+        legal_basis: "structural"
+        note: >
+          Not a statutory field. Logging output content is one way to
+          enable downstream marking audit; the law does not require it.
     exemptions:
       - "Assistive function for standard editing that does not substantially alter input"
       - "AI authorised by law for criminal offence detection/prevention/prosecution"
 
-  # --- 50(3): Emotion recognition / biometric disclosure ---
-
+  # =========================================================================
+  # 50(3) — Emotion recognition and biometric categorisation notice
+  # =========================================================================
   - id: "EU-AIA-50.3"
     title: "Emotion recognition and biometric categorisation disclosure"
     description: >
-      Deployers of an emotion recognition system or a biometric categorisation
-      system shall inform the natural persons exposed thereto of the operation
-      of the system, and shall process the personal data in accordance with
-      Regulations (EU) 2016/679, (EU) 2018/1725 and Directive (EU) 2016/680.
+      Deployers of an emotion recognition system or a biometric
+      categorisation system must inform the natural persons exposed to
+      the system of its operation, and must process personal data in
+      accordance with Regulations (EU) 2016/679 and (EU) 2018/1725 and
+      Directive (EU) 2016/680 as applicable.
     legal_text: "Article 50(3)"
+    exact_quote: >-
+      Deployers of an emotion recognition system or a biometric
+      categorisation system shall inform the natural persons exposed
+      thereto of the operation of the system, and shall process the
+      personal data in accordance with Regulations (EU) 2016/679 and (EU)
+      2018/1725 and Directive (EU) 2016/680, as applicable.
     severity: "mandatory"
     applies_to: ["emotion_recognition", "biometric_categorisation"]
-    compliance_tier: "deterministic"
+    # Organizational: requires both a human-facing notice and a documented
+    # GDPR processing basis. Neither can be verified by trace inspection
+    # alone; surface as a documentation checklist entry.
+    check_type: "organizational"
     evidence_fields: []
     note: >
-      Applies to deployers of emotion recognition and biometric categorisation
-      systems. Requires informing exposed persons AND GDPR-compliant data processing.
-      Cannot be fully verified by trace inspection — requires UI/process review.
+      Applies to deployers of emotion recognition and biometric
+      categorisation systems. Compliance has two branches — informing
+      exposed persons (UI/notice) and GDPR-compliant personal-data
+      processing (legal/process review) — neither of which can be
+      verified from traces alone.
     exemptions:
       - "Systems permitted by law for criminal offence detection/prevention/investigation"
 
-  # --- 50(4): Deep fake disclosure ---
-
+  # =========================================================================
+  # 50(4) — Deep fake / AI-generated content disclosure
+  # =========================================================================
   - id: "EU-AIA-50.4a"
-    title: "Deep fake image/audio/video disclosure"
+    title: "Deep fake image / audio / video disclosure"
     description: >
-      Deployers of an AI system that generates or manipulates image, audio or
-      video content constituting a deep fake, shall disclose that the content
-      has been artificially generated or manipulated.
+      Deployers of an AI system that generates or manipulates image, audio,
+      or video content constituting a deep fake must disclose that the
+      content has been artificially generated or manipulated. For
+      evidently artistic, creative, satirical, fictional, or analogous
+      works, the disclosure is limited to an appropriate form that does
+      not hamper display or enjoyment.
     legal_text: "Article 50(4), first subparagraph"
+    exact_quote: >-
+      Deployers of an AI system that generates or manipulates image, audio
+      or video content constituting a deep fake, shall disclose that the
+      content has been artificially generated or manipulated.
     severity: "mandatory"
     applies_to: ["all", "deep_fake"]
-    compliance_tier: "deterministic"
+    compliance_tier: "structural"
     evidence_fields:
       - field_path: "spans[].content_marking"
-        description: "Deep fake disclosure marker on generated content"
-        required: true
+        description: >
+          Deep-fake disclosure marker on generated content — a trace-level
+          proxy for the statutory deployer obligation.
+        required: false
         check_type: "present"
-        note: "Tier 1 — law requires disclosure of deep fakes"
+        legal_basis: "structural"
+        note: >
+          Article 50(4) obliges the deployer to disclose, not specifically
+          to emit a trace field. A marker in the span is one reasonable
+          way to show the disclosure path is in place.
     exemptions:
       - "Authorised by law for criminal offence detection/prevention/prosecution"
-      - "Evidently artistic, creative, satirical, fictional content — limited to non-hampering disclosure"
+      - "Evidently artistic, creative, satirical, fictional content — limited disclosure"
 
   - id: "EU-AIA-50.4b"
-    title: "AI-generated text disclosure (public interest)"
+    title: "AI-generated public-interest text disclosure"
     description: >
-      Deployers of an AI system that generates or manipulates text which is
-      published with the purpose of informing the public on matters of public
-      interest shall disclose that the text has been artificially generated
-      or manipulated.
+      Deployers of an AI system that generates or manipulates text which
+      is published with the purpose of informing the public on matters of
+      public interest must disclose that the text has been artificially
+      generated or manipulated.
     legal_text: "Article 50(4), second subparagraph"
+    exact_quote: >-
+      Deployers of an AI system that generates or manipulates text which is
+      published with the purpose of informing the public on matters of
+      public interest shall disclose that the text has been artificially
+      generated or manipulated.
     severity: "mandatory"
     applies_to: ["all", "text_generation", "public_interest"]
-    compliance_tier: "deterministic"
+    compliance_tier: "structural"
     evidence_fields:
       - field_path: "spans[].ai_disclosure"
-        description: "AI-generated text disclosure for public-interest content"
-        required: true
+        description: >
+          AI-generated text disclosure marker for public-interest content.
+        required: false
         check_type: "present"
-        note: "Tier 1 — law requires disclosure when AI text informs the public"
+        legal_basis: "structural"
+        note: >
+          Article 50(4) second subparagraph obliges the deployer to
+          disclose, not specifically to emit a trace field. The
+          human-review / editorial-responsibility exemption cannot be
+          verified from traces alone.
     exemptions:
       - "Authorised by law for criminal offence detection/prevention/prosecution"
-      - "AI-generated content that has undergone human review or editorial control AND a natural or legal person holds editorial responsibility"
+      - "Content that has undergone human review AND has a natural or legal person holding editorial responsibility"
 
-  # --- 50(5): Timing and accessibility ---
-
+  # =========================================================================
+  # 50(5) — Timing and accessibility of disclosures
+  # =========================================================================
   - id: "EU-AIA-50.5"
     title: "Disclosure timing and clarity"
     description: >
-      The information referred to in paragraphs 1 to 4 shall be provided to
-      the natural persons concerned in a clear and distinguishable manner at
-      the latest at the time of the first interaction or exposure. The
-      information shall conform to the applicable accessibility requirements.
+      The information referred to in paragraphs 1 to 4 must be provided to
+      the natural persons concerned in a clear and distinguishable manner
+      at the latest at the time of the first interaction or exposure, and
+      must conform to applicable accessibility requirements.
     legal_text: "Article 50(5)"
+    exact_quote: >-
+      The information referred to in paragraphs 1 to 4 shall be provided to
+      the natural persons concerned in a clear and distinguishable manner
+      at the latest at the time of the first interaction or exposure. The
+      information shall conform to the applicable accessibility
+      requirements.
     severity: "mandatory"
     applies_to: ["all"]
-    compliance_tier: "deterministic"
-    evidence_fields:
-      - field_path: "spans[].start_time"
-        description: "First interaction timestamp — disclosure must occur at or before this point"
-        required: false
-        check_type: "non_null"
-        note: "Implementation guidance — timing verification requires UI/UX review, not just trace data"
+    # Organizational: "clear and distinguishable", "at the latest at the
+    # time of the first interaction or exposure", and "applicable
+    # accessibility requirements" are UI / UX / accessibility-review
+    # criteria. Trace inspection can observe a disclosure field exists but
+    # cannot assess clarity, timing, or accessibility conformity.
+    check_type: "organizational"
+    evidence_fields: []
+    note: >
+      Compliance depends on when and how disclosure is surfaced in the
+      user-facing flow, which is outside the scope of trace inspection.
+      Surface as a documentation / UX-review checklist entry.

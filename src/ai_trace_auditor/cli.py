@@ -285,6 +285,169 @@ def ingest(
         console.print(f"Normalized traces written to [bold]{output}[/bold]")
 
 
+@app.command(name="verify-sources")
+def verify_sources(
+    requirements_dir: Annotated[
+        Optional[Path],
+        typer.Option(
+            "--requirements-dir",
+            "-r",
+            help=(
+                "Directory of YAML requirement files to validate. "
+                "Defaults to the packaged requirements/ directory."
+            ),
+        ),
+    ] = None,
+    only_verified: Annotated[
+        bool,
+        typer.Option(
+            "--only-verified/--all",
+            help=(
+                "Only check YAMLs that declare verified_against_primary: "
+                "true. Matches CI behavior; --all also validates unverified "
+                "files (will usually print no findings, since the gate is "
+                "opt-in at the file level)."
+            ),
+        ),
+    ] = True,
+    quiet: Annotated[
+        bool,
+        typer.Option(
+            "--quiet",
+            "-q",
+            help="Suppress lines for passing files; only show failures.",
+        ),
+    ] = False,
+) -> None:
+    """Validate every requirement YAML against its pinned primary source.
+
+    Runs the anti-fabrication gate used by CI:
+
+    - YAMLs that declare verified_against_primary: true must reference a
+      source pinned in verification/registry.yaml by SHA-256 hash.
+    - Every requirement must carry an exact_quote that byte-matches the
+      normalized text of the pinned source document.
+    - Every evidence_field with legal_basis: direct must carry a
+      source_quote that also byte-matches.
+
+    Exits non-zero if any YAML fails. Intended as a pre-release / CI gate
+    and as a quick local check while authoring new requirements.
+    """
+    try:
+        from ai_trace_auditor.verification.quote_validator import (
+            validate_requirement_file,
+        )
+        from ai_trace_auditor.verification.sources import SourceHashMismatch
+    except ImportError:
+        stdout_console.print(
+            "[red]The 'verify' extra is not installed.[/red] Run:\n"
+            "    pip install -e '.[verify]'\n"
+            "or add ai-trace-auditor[verify] to your requirements."
+        )
+        raise typer.Exit(code=2)
+
+    import yaml as _yaml
+
+    # Default to the requirements/ directory next to the package.
+    if requirements_dir is None:
+        project_root = Path(__file__).resolve().parents[2]
+        requirements_dir = project_root / "requirements"
+
+    if not requirements_dir.is_dir():
+        stdout_console.print(
+            f"[red]Not a directory:[/red] {requirements_dir}"
+        )
+        raise typer.Exit(code=2)
+
+    yaml_files = sorted(requirements_dir.rglob("*.yaml"))
+    if not yaml_files:
+        stdout_console.print(
+            f"[yellow]No YAML files found in {requirements_dir}[/yellow]"
+        )
+        raise typer.Exit(code=0)
+
+    # Partition into verified vs unverified so the summary is honest about
+    # what was actually checked.
+    verified: list[Path] = []
+    unverified: list[Path] = []
+    for yaml_path in yaml_files:
+        try:
+            with open(yaml_path, encoding="utf-8") as fh:
+                data = _yaml.safe_load(fh)
+        except Exception:
+            unverified.append(yaml_path)
+            continue
+        if isinstance(data, dict) and data.get("verified_against_primary"):
+            verified.append(yaml_path)
+        else:
+            unverified.append(yaml_path)
+
+    to_check = verified if only_verified else (verified + unverified)
+
+    if not to_check:
+        stdout_console.print(
+            "[yellow]No YAMLs declare verified_against_primary: true. "
+            "Run with --all to also walk unverified files.[/yellow]"
+        )
+        raise typer.Exit(code=0)
+
+    files_ok = 0
+    files_failed = 0
+    total_errors = 0
+
+    for yaml_path in to_check:
+        rel = yaml_path.relative_to(requirements_dir)
+        try:
+            report = validate_requirement_file(yaml_path)
+        except (FileNotFoundError, SourceHashMismatch) as exc:
+            files_failed += 1
+            total_errors += 1
+            stdout_console.print(f"[red]FATAL[/red] {rel}")
+            stdout_console.print(f"    {exc}", style="dim")
+            continue
+
+        if report.ok:
+            files_ok += 1
+            if not quiet:
+                stdout_console.print(f"[green]  PASS[/green]  {rel}")
+            continue
+
+        files_failed += 1
+        total_errors += len(report.errors)
+        stdout_console.print(
+            f"[red]  FAIL[/red]  {rel}  "
+            f"[dim]({len(report.errors)} error(s))[/dim]"
+        )
+        for finding in report.errors:
+            prefix = finding.requirement_id or "<file>"
+            if finding.field_path:
+                prefix = f"{prefix}:{finding.field_path}"
+            stdout_console.print(f"        [bold]{finding.code}[/bold]  {prefix}")
+            stdout_console.print(f"        {finding.message}", style="dim")
+
+    # Honest summary line: distinguish "verified files checked" from
+    # "unverified files skipped" so nobody mistakes a silent skip for a
+    # pass.
+    stdout_console.print()
+    if only_verified and unverified:
+        stdout_console.print(
+            f"[dim]Skipped {len(unverified)} file(s) without "
+            f"verified_against_primary: true. Run with --all to include them.[/dim]"
+        )
+
+    if files_failed == 0:
+        stdout_console.print(
+            f"[green]All {files_ok} verified YAML file(s) passed.[/green]"
+        )
+        return
+
+    stdout_console.print(
+        f"[red]{files_failed} file(s) failed, {files_ok} file(s) passed. "
+        f"Total errors: {total_errors}.[/red]"
+    )
+    raise typer.Exit(code=1)
+
+
 @app.command(name="requirements")
 def list_requirements(
     regulation: Annotated[
@@ -1139,7 +1302,7 @@ def _print_flow_summary(flow_result: "FlowScanResult") -> None:
 
 
 @app.command()
-def comply(
+def scan(
     path: Annotated[
         Path, typer.Argument(help="Codebase directory to scan")
     ] = Path("."),
@@ -1180,8 +1343,8 @@ def comply(
 
     One codebase. One command. Three articles.
     """
-    from ai_trace_auditor.comply.runner import run_full_compliance
-    from ai_trace_auditor.reports.comply_report import ComplyReporter
+    from ai_trace_auditor.scan.runner import run_full_compliance
+    from ai_trace_auditor.reports.scan_report import ScanReporter
 
     if not path.exists() or not path.is_dir():
         console.print(f"[red]Error:[/red] {path} is not a valid directory")
@@ -1219,7 +1382,7 @@ def comply(
     )
 
     # Print summary
-    _print_comply_summary(pkg)
+    _print_compliance_summary(pkg)
 
     # Evidence pack mode
     if evidence_pack is not None:
@@ -1244,7 +1407,7 @@ def comply(
         raise typer.Exit(code=1 if has_gaps else 0)
 
     # Output
-    reporter = ComplyReporter()
+    reporter = ScanReporter()
     want_pdf = report_format in ("pdf", "both")
     want_md = report_format in ("markdown", "both")
 
@@ -1294,9 +1457,9 @@ def comply(
     raise typer.Exit(code=1 if has_gaps else 0)
 
 
-def _print_comply_summary(pkg: "CompliancePackage") -> None:
+def _print_compliance_summary(pkg: "CompliancePackage") -> None:
     """Print the unified compliance summary."""
-    from ai_trace_auditor.comply.runner import CompliancePackage
+    from ai_trace_auditor.scan.runner import CompliancePackage
 
     table = Table(title="EU AI Act Compliance Package", border_style="bold green")
     table.add_column("Article", style="bold")
