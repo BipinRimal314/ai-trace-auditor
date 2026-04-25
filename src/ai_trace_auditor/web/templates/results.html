@@ -1,0 +1,245 @@
+{% extends "base.html" %}
+
+{% block title %}Audit Results — AI Trace Auditor{% endblock %}
+{% block nav_audit %}active{% endblock %}
+
+{% block content %}
+<div x-data="{ activeTab: 'all', expandedReq: null }">
+
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-10">
+        <div>
+            <span class="inline-block text-[10px] font-bold tracking-[0.2em] uppercase text-secondary mb-3">Audit Report</span>
+            <h1 class="text-3xl font-headline font-bold text-primary mb-2">Audit Results</h1>
+            <p class="text-on-surface-variant text-sm">
+                Source: <span class="font-semibold text-on-surface">{{ trace_source }}</span>
+                &middot; {{ trace_count }} trace{{ 's' if trace_count != 1 else '' }}
+                &middot; {{ span_count }} span{{ 's' if span_count != 1 else '' }}
+                &middot; {{ regulations_checked | join(', ') }}
+            </p>
+        </div>
+        <div class="mt-4 sm:mt-0 flex items-center gap-3">
+            {% if report_id %}
+            <a href="/audit/pdf/{{ report_id }}"
+                class="px-5 py-2.5 bg-primary text-on-primary rounded-xl text-sm font-semibold hover:bg-primary-container transition-all inline-flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                Download PDF
+            </a>
+            {% endif %}
+            <a href="/audit" class="px-5 py-2.5 text-primary rounded-xl text-sm font-semibold hover:bg-surface-container-low transition-all"
+                style="border: 1px solid rgba(196, 198, 211, 0.2);">
+                New Audit
+            </a>
+        </div>
+    </div>
+
+    <!-- Score overview -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-10">
+        <!-- Overall score -->
+        <div class="bg-surface-container-lowest p-8 rounded-xl flex flex-col items-center">
+            <div class="score-ring mb-4"
+                style="background: conic-gradient(
+                    {% if score >= 90 %}#2d8a56{% elif score >= 50 %}#b8860b{% else %}#c0392b{% endif %} {{ score * 3.6 }}deg,
+                    #e8e8e8 {{ score * 3.6 }}deg
+                )">
+                <div class="w-[100px] h-[100px] rounded-full bg-surface-container-lowest flex items-center justify-center">
+                    <span class="font-headline font-bold {% if score >= 90 %}status-satisfied{% elif score >= 50 %}status-partial{% else %}status-missing{% endif %}">
+                        {{ score }}%
+                    </span>
+                </div>
+            </div>
+            <div class="text-[10px] font-bold text-outline uppercase tracking-widest">Overall Score</div>
+        </div>
+
+        <!-- Status counts -->
+        <div class="bg-surface-container-lowest p-8 rounded-xl">
+            <div class="text-[10px] font-bold text-outline uppercase tracking-widest mb-4">Status Breakdown</div>
+            <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <span class="text-sm status-satisfied flex items-center gap-2 font-medium">
+                        <span class="w-2.5 h-2.5 rounded-full" style="background-color: #2d8a56;"></span>
+                        Satisfied
+                    </span>
+                    <span class="text-on-surface font-bold font-headline text-lg">{{ summary.satisfied }}</span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-sm status-partial flex items-center gap-2 font-medium">
+                        <span class="w-2.5 h-2.5 rounded-full" style="background-color: #b8860b;"></span>
+                        Partial
+                    </span>
+                    <span class="text-on-surface font-bold font-headline text-lg">{{ summary.partial }}</span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-sm status-missing flex items-center gap-2 font-medium">
+                        <span class="w-2.5 h-2.5 rounded-full" style="background-color: #c0392b;"></span>
+                        Missing
+                    </span>
+                    <span class="text-on-surface font-bold font-headline text-lg">{{ summary.missing }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tiered scores -->
+        <div class="bg-surface-container-lowest p-8 rounded-xl md:col-span-2">
+            <div class="text-[10px] font-bold text-outline uppercase tracking-widest mb-4">Tiered Scores</div>
+            <div class="space-y-4">
+                {% for tier in tiered_scores %}
+                <div>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <span class="text-sm text-on-surface font-medium">{{ tier.label }}</span>
+                        <span class="text-sm font-bold font-headline {% if tier.score >= 90 %}status-satisfied{% elif tier.score >= 50 %}status-partial{% else %}status-missing{% endif %}">
+                            {{ tier.score }}%
+                        </span>
+                    </div>
+                    <div class="w-full bg-surface-container-high rounded-full h-2">
+                        <div class="h-2 rounded-full transition-all duration-500"
+                            style="width: {{ tier.score }}%; background-color: {% if tier.score >= 90 %}#2d8a56{% elif tier.score >= 50 %}#b8860b{% else %}#c0392b{% endif %};"></div>
+                    </div>
+                    <div class="text-xs text-outline mt-1">{{ tier.satisfied }}/{{ tier.count }} requirements satisfied</div>
+                </div>
+                {% endfor %}
+                {% if not tiered_scores %}
+                <p class="text-sm text-outline">No tiered scoring data available.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Top gaps -->
+    {% if summary.top_gaps %}
+    <div class="bg-surface-container-lowest p-8 rounded-xl mb-10">
+        <h2 class="text-xl font-headline font-bold text-primary mb-5">Top Compliance Gaps</h2>
+        <div class="space-y-3">
+            {% for gap in summary.top_gaps %}
+            <div class="flex items-start gap-4 text-sm">
+                <span class="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 text-xs font-bold status-missing" style="background-color: rgba(192,57,43,0.08);">{{ loop.index }}</span>
+                <span class="text-on-surface-variant leading-relaxed">{{ gap }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Filter tabs -->
+    <div class="flex gap-3 mb-8 flex-wrap">
+        <button @click="activeTab = 'all'"
+            :class="activeTab === 'all' ? 'bg-gradient-to-r from-primary to-primary-container text-white' : 'bg-surface-container-high text-on-surface-variant'"
+            class="px-5 py-2.5 rounded-xl text-sm font-medium transition-all">
+            All ({{ summary.total }})
+        </button>
+        <button @click="activeTab = 'satisfied'"
+            :class="activeTab === 'satisfied' ? 'bg-status-satisfied status-satisfied font-semibold' : 'bg-surface-container-high text-on-surface-variant'"
+            class="px-5 py-2.5 rounded-xl text-sm font-medium transition-all">
+            Satisfied ({{ summary.satisfied }})
+        </button>
+        <button @click="activeTab = 'partial'"
+            :class="activeTab === 'partial' ? 'bg-status-partial status-partial font-semibold' : 'bg-surface-container-high text-on-surface-variant'"
+            class="px-5 py-2.5 rounded-xl text-sm font-medium transition-all">
+            Partial ({{ summary.partial }})
+        </button>
+        <button @click="activeTab = 'missing'"
+            :class="activeTab === 'missing' ? 'bg-status-missing status-missing font-semibold' : 'bg-surface-container-high text-on-surface-variant'"
+            class="px-5 py-2.5 rounded-xl text-sm font-medium transition-all">
+            Missing ({{ summary.missing }})
+        </button>
+    </div>
+
+    <!-- Results list -->
+    <div class="space-y-4">
+        {% for status in ['satisfied', 'partial', 'missing', 'not_applicable'] %}
+        {% for req in results_by_status[status] %}
+        <div x-show="activeTab === 'all' || activeTab === '{{ status }}'"
+            class="bg-surface-container-lowest rounded-xl bg-status-{{ status }} transition-all duration-200"
+            style="border-left: 4px solid {% if status == 'satisfied' %}#2d8a56{% elif status == 'partial' %}#b8860b{% elif status == 'missing' %}#c0392b{% else %}#c4c6d3{% endif %};"
+            x-transition>
+            <div class="p-6 cursor-pointer" @click="expandedReq = expandedReq === '{{ req.id }}' ? null : '{{ req.id }}'">
+                <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-3 mb-1.5 flex-wrap">
+                            <span class="text-xs font-mono text-outline">{{ req.id }}</span>
+                            <span class="badge badge-{{ req.severity }}">{{ req.severity }}</span>
+                            <span class="text-xs text-outline">{{ req.compliance_tier }}</span>
+                        </div>
+                        <h3 class="text-on-surface font-semibold">{{ req.title }}</h3>
+                        <p class="text-sm text-on-surface-variant mt-1 font-headline italic">{{ req.article }} &mdash; {{ req.regulation }}</p>
+                    </div>
+                    <div class="flex items-center gap-3 ml-4">
+                        <span class="text-lg font-bold font-headline status-{{ status }}">{{ req.score }}%</span>
+                        <svg class="w-5 h-5 text-outline transition-transform" :class="expandedReq === '{{ req.id }}' ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Expanded details -->
+            <div x-show="expandedReq === '{{ req.id }}'" x-transition class="px-6 pb-6">
+                <div class="pt-6 space-y-6" style="border-top: 1px solid rgba(196, 198, 211, 0.15);">
+                    <!-- Description -->
+                    <div>
+                        <h4 class="text-[10px] font-bold text-outline uppercase tracking-widest mb-1.5">Description</h4>
+                        <p class="text-sm text-on-surface-variant leading-relaxed">{{ req.description }}</p>
+                    </div>
+
+                    <!-- Legal citation -->
+                    <div>
+                        <h4 class="text-[10px] font-bold text-outline uppercase tracking-widest mb-1.5">Legal Citation</h4>
+                        <p class="text-sm text-primary font-headline italic">{{ req.legal_text }}</p>
+                    </div>
+
+                    <!-- Evidence fields -->
+                    {% if req.evidence %}
+                    <div>
+                        <h4 class="text-[10px] font-bold text-outline uppercase tracking-widest mb-3">Evidence Fields</h4>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead>
+                                    <tr class="text-[10px] font-bold text-outline uppercase tracking-widest">
+                                        <th class="text-left py-2 pr-4">Field</th>
+                                        <th class="text-right py-2 pr-4">Coverage</th>
+                                        <th class="text-right py-2">Present / Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for ev in req.evidence %}
+                                    <tr class="{% if loop.index is odd %}bg-surface-container-low/50{% endif %}">
+                                        <td class="py-2.5 pr-4 font-mono text-on-surface text-xs">{{ ev.field }}</td>
+                                        <td class="py-2.5 pr-4 text-right font-bold {% if ev.coverage >= 90 %}status-satisfied{% elif ev.coverage >= 50 %}status-partial{% else %}status-missing{% endif %}">
+                                            {{ ev.coverage }}%
+                                        </td>
+                                        <td class="py-2.5 text-right text-on-surface-variant">{{ ev.present }} / {{ ev.total }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Gaps -->
+                    {% if req.gaps %}
+                    <div>
+                        <h4 class="text-[10px] font-bold text-outline uppercase tracking-widest mb-3">Gaps</h4>
+                        <div class="space-y-3">
+                            {% for gap in req.gaps %}
+                            <div class="bg-surface-container-low rounded-xl p-4">
+                                <p class="text-sm status-missing font-semibold">{{ gap.description }}</p>
+                                <p class="text-xs text-outline mt-1.5">Impact: {{ gap.impact }}</p>
+                                <p class="text-xs text-on-surface-variant mt-1">Recommendation: {{ gap.recommendation }}</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
