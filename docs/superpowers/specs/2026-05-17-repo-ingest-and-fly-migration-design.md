@@ -50,7 +50,7 @@ Web layer adds one route — `POST /audit/repo` — and one template — `repo_r
 Three detector kinds — and only three:
 
 1. **`file_presence`** — filename matches any of N patterns (case-insensitive). Output: `found` / `not_found` plus the matching path.
-2. **`content_contains`** — a file exists AND contains any string from a small literal allow-list (case-insensitive). Output: `found_with_phrase` / `found_without_phrase` / `not_found`.
+2. **`content_contains`** — a file at one of N path patterns exists AND contains any string from a small literal allow-list (case-insensitive). Each `content_contains` detector entry specifies both `file_patterns` and `phrases`; scope is never "all files in the repo". Output: `found_with_phrase` / `found_without_phrase` / `not_found`.
 3. **`config_key`** — a known config filename contains a known key. Output: `key_present` / `key_absent`. The detector never interprets the key's value as compliant; presence is treated only as evidence of capability, never of compliance.
 
 Excluded by design: AST parsing, regex over source code, "LLM SDK call" detection, anything that infers purpose from variable or function names. These are the abstraction-curve traps that produced the v0.14.0 fabrications.
@@ -85,7 +85,7 @@ Each entry written `legal_text` first, then detector. Same discipline as the exi
 
 1. User pastes `https://github.com/owner/repo` on `/audit` (new field alongside file upload + sample selector).
 2. `POST /audit/repo` validates URL shape, calls `fetcher.clone(url)`.
-3. `fetcher.clone` performs `git clone --depth=1` into `/tmp/aitrace-repo-{uuid}/`, enforces 50MB total cap and 30s timeout, deletes `.git/` post-clone, returns the path. Raises one of: `InvalidRepoURL`, `RepoTooLarge`, `RepoFetchTimeout`, `PrivateRepo`, `RepoNotFound`.
+3. `fetcher.clone` performs `git clone --depth=1` into `$REPO_TMPDIR/aitrace-repo-{uuid}/` (where `REPO_TMPDIR` defaults to `/tmp/aitrace` so the Fly volume is reused), enforces 50MB total cap and 30s timeout, deletes `.git/` post-clone, returns the path. Raises one of: `InvalidRepoURL`, `RepoTooLarge`, `RepoFetchTimeout`, `PrivateRepo`, `RepoNotFound`.
 4. `trace_finder.find(path)` walks the tree. For each `.json` or `.jsonl` file under 5MB, sniffs the first object and classifies as OTEL-shape, Langfuse-shape, or chat-message-shape, otherwise ignores. Returns `list[TraceArtifact]`.
 5. `doc_scanner.scan(path, manifest)` walks the tree once, evaluates each detector, returns `list[DocEvidence]`.
 6. If `trace_finder` returned artifacts, concatenate and run the existing `audit_service.run_audit`. If none, the trace section of the report says "No trace artifacts found in repo. Documentation evidence only."
@@ -162,6 +162,7 @@ Coverage target stays at 80%, matching project norms.
 
 - `PORT` — set automatically by Fly.
 - `PDF_TMPDIR=/tmp/aitrace`
+- `REPO_TMPDIR=/tmp/aitrace`
 - `MAX_REPO_BYTES=52428800`
 - `REPO_FETCH_TIMEOUT=30`
 
@@ -174,7 +175,7 @@ One persistent volume mounted at `/tmp/aitrace` (1GB) for clone scratch space. N
 ```bash
 fly launch --no-deploy
 fly volumes create aitrace_tmp --size 1
-fly secrets set PDF_TMPDIR=/tmp/aitrace MAX_REPO_BYTES=52428800 REPO_FETCH_TIMEOUT=30
+fly secrets set PDF_TMPDIR=/tmp/aitrace REPO_TMPDIR=/tmp/aitrace MAX_REPO_BYTES=52428800 REPO_FETCH_TIMEOUT=30
 fly deploy
 ```
 
