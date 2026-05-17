@@ -63,10 +63,10 @@
     phrases:
       - "intended purpose"
       - "intended use"
-      - "use case"
-      - "designed to"
-      - "this project is for"
-  evidence_when_present: "Intended-purpose language found in {path}. Reviewer must confirm it accurately describes the AI system's purpose."
+      - "this AI system"
+      - "this model is designed"
+      - "this system is designed"
+  evidence_when_present: "Purpose-adjacent language found in {path}. Generic phrases (e.g. 'designed to') are excluded by design; reviewer must confirm the AI system's specific intended purpose is documented per Annex IV(2)(c)."
   evidence_when_absent: "No intended-purpose language found in README. Annex IV(2)(c) requires a description of intended purpose."
 
 - id: annex_iv_2d_third_party_components
@@ -115,7 +115,7 @@
   legal_text: "Article 19: providers of high-risk AI systems shall keep the logs referred to in Article 12(1)... for a period appropriate to the intended purpose of the high-risk AI system, of at least six months."
   verified_against_primary: true
   framework_nature: law
-  compliance_tier: structural
+  compliance_tier: deterministic
   regulation: "EU AI Act"
   article: "Article 19"
   detector_kind: config_key
@@ -146,6 +146,7 @@
   detector_kind: file_presence
   detector_config:
     patterns:
+      # SECURITY.md as evidence of documented third-party/deployer obligations
       - SECURITY.md
       - DPA.md
       - data-processing-agreement.md
@@ -243,6 +244,7 @@
     patterns:
       - INCIDENT_RESPONSE.md
       - incident-response.md
+      # SECURITY.md as evidence of a security-event evaluation process
       - SECURITY.md
       - docs/incident-response.md
       - .github/SECURITY.md
