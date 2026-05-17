@@ -77,7 +77,9 @@ source .env && .venv/bin/python -m twine upload dist/*  # Publish
 - **Redline integration** — Redline lints documents, Trace Auditor lints traces. Combined compliance view.
 - **Hosted dashboard** — $99/month single repo, $499/month org.
 - **Langfuse/Arize/Datadog integrations** — pull traces from where teams already store them
-- **PDF report output** — compliance officers email PDFs to lawyers
+
+### Shipped
+- **PDF report output** (v0.16.1, 2026-04-25) — `/audit/pdf/{report_id}` route on the web dashboard. Markdown report cached in-memory after each audit, rendered to PDF via weasyprint on demand. Download button on results pages.
 
 ### Parked
 - Claude Code analytics features (insights, workflow, predict) — different buyer, no deadline urgency. May become separate `aitrace-insights` package.
@@ -87,6 +89,81 @@ source .env && .venv/bin/python -m twine upload dist/*  # Publish
 - ISO 42001 and SOC 2 YAMLs unverified against paid standards.
 - "SOC 2 AI Addendum" was renamed — any references in marketing/docs need updating.
 - PyPI token was exposed in conversation history on 2026-04-07 — rotate it.
+
+## Web Dashboard
+
+A FastAPI web UI for running audits without the CLI. Lives at `src/ai_trace_auditor/web/`.
+
+### Structure
+
+```
+src/ai_trace_auditor/web/
+├── __init__.py
+├── server.py          # FastAPI app — routes: landing, audit, results, regulations
+├── audit_service.py   # Business logic wrapping existing CLI audit pipeline
+├── static/            # Static assets
+└── templates/         # Jinja2 templates
+    ├── base.html      # Base layout (Architectural Ledger design system)
+    ├── index.html     # Landing page
+    ├── audit.html     # Audit form (file upload + demo trace selector)
+    ├── results.html   # Audit results display
+    ├── multi_agent.html
+    ├── regulations.html
+    └── error.html
+```
+
+### Design System
+
+"Architectural Ledger" — light mode (#faf9f9 background), Noto Serif headlines, Inter body text, tonal layering with no borders. Tailwind CSS via CDN + Alpine.js for interactivity.
+
+### Running Locally
+
+```bash
+.venv/bin/python -m ai_trace_auditor.web.server   # Starts on port 8001
+```
+
+Also registered as `aitrace-web` script entry point in `pyproject.toml`.
+
+### Demo Mode
+
+Sample traces from `tests/fixtures/` are selectable in the web UI for instant demos without uploading files.
+
+## Deployment
+
+### Live URL
+
+https://ai-trace-auditor.fly.dev  (default Fly hostname; confirm with `flyctl info` after deploy)
+
+### Fly.io (preferred)
+
+Configured via `fly.toml` and `Dockerfile`. Python 3.11-slim, installs the
+package with `[web,pdf]` extras and `git` for repo ingestion. A persistent
+volume `aitrace_tmp` is mounted at `/tmp/aitrace` for clone scratch space
+and PDF rendering.
+
+```bash
+flyctl deploy
+```
+
+Env vars are baked into `fly.toml`: `PORT`, `PDF_TMPDIR`, `REPO_TMPDIR`,
+`MAX_REPO_BYTES`, `REPO_FETCH_TIMEOUT`. Secrets (none currently required)
+would go via `flyctl secrets set`.
+
+### Railway (legacy — retained for one-week observation)
+
+`railway.toml` remains in the repo until Fly is observed stable. Remove
+after 2026-05-24 (one week after cutover).
+
+### Docker
+
+```bash
+docker build -t ai-trace-auditor .
+docker run -p 8001:8001 ai-trace-auditor
+```
+
+## Sovereign Compliance Suite
+
+AI Trace Auditor is part of the Sovereign Compliance suite alongside Comply and Redline. Unified landing page: https://sovereign-compliance-landing.vercel.app
 
 ## PyPI
 ```bash

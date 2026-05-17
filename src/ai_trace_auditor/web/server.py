@@ -25,8 +25,17 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 import ai_trace_auditor
+from ai_trace_auditor.repo.errors import (
+    InvalidRepoURL,
+    PrivateRepo,
+    RepoError,
+    RepoFetchTimeout,
+    RepoNotFound,
+    RepoTooLarge,
+)
 from ai_trace_auditor.reports.markdown import MarkdownReporter
 from ai_trace_auditor.web.audit_service import (
+    audit_repo,
     build_results_context,
     get_regulation_summary,
     get_regulations_detail,
@@ -161,6 +170,59 @@ async def run_audit_handler(
         "trace_source": trace_source,
         "report_id": report_id,
         **results_ctx,
+    })
+
+
+_REPO_ERROR_STATUS = {
+    InvalidRepoURL: 400,
+    RepoNotFound: 404,
+    PrivateRepo: 403,
+    RepoTooLarge: 413,
+    RepoFetchTimeout: 504,
+}
+
+
+@app.post("/audit/repo", response_class=HTMLResponse)
+async def run_repo_audit_handler(
+    request: Request,
+    repo_url: str = Form(""),
+) -> HTMLResponse:
+    """Clone a GitHub repo, audit traces + docs, render combined results."""
+    if not repo_url.strip():
+        return _render(request, "error.html", {
+            "version": ai_trace_auditor.__version__,
+            "error_title": "Missing repo URL",
+            "error_message": "Paste a public GitHub repo URL (https://github.com/owner/repo).",
+        }, status_code=400)
+
+    try:
+        report = audit_repo(repo_url=repo_url.strip(), registry=_registry)
+    except RepoError as exc:
+        status = _REPO_ERROR_STATUS.get(type(exc), 500)
+        return _render(request, "error.html", {
+            "version": ai_trace_auditor.__version__,
+            "error_title": type(exc).__name__,
+            "error_message": str(exc),
+        }, status_code=status)
+    except Exception:
+        logger.exception("Repo audit failed")
+        return _render(request, "error.html", {
+            "version": ai_trace_auditor.__version__,
+            "error_title": "Audit Error",
+            "error_message": "An unexpected error occurred. Check the server logs.",
+        }, status_code=500)
+
+    doc_summary = {
+        "present": sum(1 for r in report.doc_results if r.status == "present"),
+        "partial": sum(1 for r in report.doc_results if r.status == "partial"),
+        "absent": sum(1 for r in report.doc_results if r.status == "absent"),
+        "total": len(report.doc_results),
+    }
+
+    return _render(request, "repo_results.html", {
+        "version": ai_trace_auditor.__version__,
+        "report": report,
+        "doc_summary": doc_summary,
     })
 
 

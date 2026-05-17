@@ -1794,5 +1794,40 @@ def version() -> None:
     console.print(f"ai-trace-auditor v{ai_trace_auditor.__version__}")
 
 
+@app.command("audit-repo")
+def audit_repo_command(
+    repo_url: Annotated[str, typer.Argument(help="Public GitHub repo URL")],
+) -> None:
+    """Audit a public GitHub repository for AI compliance evidence."""
+    from ai_trace_auditor.repo.errors import RepoError
+    from ai_trace_auditor.web.audit_service import audit_repo
+
+    registry = RequirementRegistry()
+    registry.load()
+
+    try:
+        report = audit_repo(repo_url=repo_url, registry=registry)
+    except RepoError as exc:
+        console.print(f"[red]Repo audit failed:[/red] {exc}")
+        raise typer.Exit(code=1)
+
+    stdout_console.print(f"\n[bold]Repository:[/bold] {report.repo_url}")
+    stdout_console.print(
+        f"Trace artifacts: {report.trace_artifacts_found}"
+    )
+    if report.trace_report is not None:
+        score = report.trace_report.overall_score * 100
+        stdout_console.print(f"Trace audit score: {score:.1f}%")
+    present = sum(1 for r in report.doc_results if r.status == "present")
+    partial = sum(1 for r in report.doc_results if r.status == "partial")
+    absent = sum(1 for r in report.doc_results if r.status == "absent")
+    stdout_console.print(
+        f"Documentation: {present} present, {partial} partial, {absent} absent"
+    )
+
+    if absent > 0:
+        raise typer.Exit(code=2)
+
+
 if __name__ == "__main__":
     app()
