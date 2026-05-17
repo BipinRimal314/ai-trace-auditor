@@ -2,9 +2,14 @@
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 from ai_trace_auditor.repo.models import DocCheck, DocCheckResult
+
+_KEY_LINE_RE = re.compile(
+    r"^\s*(?P<key>[A-Za-z_][A-Za-z0-9_.-]*)\s*[:=]", re.MULTILINE
+)
 
 
 def _normalize(s: str) -> str:
@@ -63,6 +68,34 @@ def _detect_content_contains(
     return None, False
 
 
+def _detect_config_key(
+    repo_path: Path,
+    filenames: list[str],
+    keys: list[str],
+) -> tuple[Path | None, str | None]:
+    """Return (matched_file_path, matched_key_name), or (None, None) / (path, None)."""
+    file_targets = {_normalize(f) for f in filenames}
+    keys_lower = {k.lower() for k in keys}
+
+    for path in repo_path.rglob("*"):
+        if not path.is_file():
+            continue
+        rel = _normalize(str(path.relative_to(repo_path)))
+        if rel not in file_targets:
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            return path, None
+        for match in _KEY_LINE_RE.finditer(text):
+            key = match.group("key").lower()
+            if key in keys_lower:
+                return path, match.group("key")
+        return path, None
+
+    return None, None
+
+
 def _evaluate(check: DocCheck, repo_path: Path) -> DocCheckResult:
     if check.detector_kind == "file_presence":
         patterns = check.detector_config.get("patterns", [])
@@ -108,6 +141,27 @@ def _evaluate(check: DocCheck, repo_path: Path) -> DocCheckResult:
                 f"File {rel} exists but contains no required phrase. "
                 f"{check.evidence_when_absent}"
             ),
+            matched_path=matched,
+        )
+
+    if check.detector_kind == "config_key":
+        filenames = check.detector_config.get("filenames", [])
+        keys = check.detector_config.get("keys", [])
+        matched, matched_key = _detect_config_key(repo_path, filenames, keys)
+        if matched is not None and matched_key is not None:
+            rel = matched.relative_to(repo_path)
+            return DocCheckResult(
+                check=check,
+                status="present",
+                evidence=check.evidence_when_present.format(
+                    path=str(rel), key=matched_key
+                ),
+                matched_path=matched,
+            )
+        return DocCheckResult(
+            check=check,
+            status="absent",
+            evidence=check.evidence_when_absent,
             matched_path=matched,
         )
 
