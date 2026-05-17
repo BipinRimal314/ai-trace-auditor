@@ -17,7 +17,7 @@ from ai_trace_auditor.repo.errors import (
 )
 
 _GITHUB_URL_RE = re.compile(
-    r"^https?://github\.com/(?P<owner>[A-Za-z0-9_.-]+)/(?P<repo>[A-Za-z0-9_.-]+?)(?:\.git)?/?$"
+    r"^https://github\.com/(?P<owner>[A-Za-z0-9_.-]+)/(?P<repo>[A-Za-z0-9_.-]+?)(?:\.git)?/?$"
 )
 
 
@@ -83,10 +83,13 @@ def clone_repo(
         shutil.rmtree(target, ignore_errors=True)
         raise _classify_clone_failure(result.returncode, result.stderr)
 
-    size = _directory_size_bytes(target)
-    if size > max_bytes:
+    try:
+        size = _directory_size_bytes(target)
+        if size > max_bytes:
+            raise RepoTooLarge(actual_bytes=size, limit_bytes=max_bytes)
+    except Exception:
         shutil.rmtree(target, ignore_errors=True)
-        raise RepoTooLarge(actual_bytes=size, limit_bytes=max_bytes)
+        raise
 
     git_dir = target / ".git"
     if git_dir.exists():

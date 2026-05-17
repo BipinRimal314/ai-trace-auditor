@@ -46,6 +46,11 @@ def test_parse_github_url_rejects_missing_repo():
         parse_github_url("https://github.com/owner")
 
 
+def test_parse_github_url_rejects_http():
+    with pytest.raises(InvalidRepoURL):
+        parse_github_url("http://github.com/owner/repo")
+
+
 def _make_repo_contents(target: Path, file_count: int = 2, byte_size: int = 100) -> None:
     """Helper: populate a directory as if `git clone` had written to it."""
     target.mkdir(parents=True, exist_ok=True)
@@ -78,7 +83,7 @@ def test_clone_happy_path(tmp_path: Path):
     shutil.rmtree(result_path)
 
 
-def test_clone_raises_repo_not_found_on_128():
+def test_clone_raises_repo_not_found_on_128(tmp_path: Path):
     def fake_run(cmd, *args, **kwargs):
         return subprocess.CompletedProcess(
             cmd, 128, "", "fatal: repository 'https://github.com/x/y' not found"
@@ -90,11 +95,11 @@ def test_clone_raises_repo_not_found_on_128():
                 "https://github.com/x/y",
                 max_bytes=10_000,
                 timeout_seconds=30,
-                tmpdir_root=Path("/tmp"),
+                tmpdir_root=tmp_path,
             )
 
 
-def test_clone_raises_private_repo_on_auth_required():
+def test_clone_raises_private_repo_on_auth_required(tmp_path: Path):
     def fake_run(cmd, *args, **kwargs):
         return subprocess.CompletedProcess(
             cmd, 128, "", "fatal: Authentication failed"
@@ -106,11 +111,11 @@ def test_clone_raises_private_repo_on_auth_required():
                 "https://github.com/x/y",
                 max_bytes=10_000,
                 timeout_seconds=30,
-                tmpdir_root=Path("/tmp"),
+                tmpdir_root=tmp_path,
             )
 
 
-def test_clone_raises_timeout():
+def test_clone_raises_timeout(tmp_path: Path):
     def fake_run(cmd, *args, **kwargs):
         raise subprocess.TimeoutExpired(cmd, kwargs.get("timeout", 30))
 
@@ -120,7 +125,7 @@ def test_clone_raises_timeout():
                 "https://github.com/owner/repo",
                 max_bytes=10_000,
                 timeout_seconds=30,
-                tmpdir_root=Path("/tmp"),
+                tmpdir_root=tmp_path,
             )
 
 
@@ -143,7 +148,7 @@ def test_clone_raises_too_large_when_repo_exceeds_cap(tmp_path: Path):
     assert leftovers == []
 
 
-def test_clone_invalid_url_never_invokes_subprocess():
+def test_clone_invalid_url_never_invokes_subprocess(tmp_path: Path):
     mock_run = MagicMock()
     with patch("ai_trace_auditor.repo.fetcher.subprocess.run", mock_run):
         with pytest.raises(InvalidRepoURL):
@@ -151,6 +156,53 @@ def test_clone_invalid_url_never_invokes_subprocess():
                 "https://gitlab.com/x/y",
                 max_bytes=10_000,
                 timeout_seconds=30,
-                tmpdir_root=Path("/tmp"),
+                tmpdir_root=tmp_path,
             )
     mock_run.assert_not_called()
+
+
+def test_clone_raises_repo_not_found_on_could_not_read(tmp_path: Path):
+    def fake_run(cmd, *args, **kwargs):
+        return subprocess.CompletedProcess(
+            cmd, 128, "", "fatal: Could not read from remote repository."
+        )
+
+    with patch("ai_trace_auditor.repo.fetcher.subprocess.run", side_effect=fake_run):
+        with pytest.raises(RepoNotFound):
+            clone_repo(
+                "https://github.com/x/y",
+                max_bytes=10_000,
+                timeout_seconds=30,
+                tmpdir_root=tmp_path,
+            )
+
+
+def test_clone_raises_private_repo_on_permission_denied(tmp_path: Path):
+    def fake_run(cmd, *args, **kwargs):
+        return subprocess.CompletedProcess(
+            cmd, 128, "", "fatal: Permission denied (publickey)"
+        )
+
+    with patch("ai_trace_auditor.repo.fetcher.subprocess.run", side_effect=fake_run):
+        with pytest.raises(PrivateRepo):
+            clone_repo(
+                "https://github.com/x/y",
+                max_bytes=10_000,
+                timeout_seconds=30,
+                tmpdir_root=tmp_path,
+            )
+
+
+def test_clone_unknown_failure_falls_back_to_repo_not_found(tmp_path: Path):
+    """An unknown nonzero exit with empty stderr falls back to RepoNotFound."""
+    def fake_run(cmd, *args, **kwargs):
+        return subprocess.CompletedProcess(cmd, 7, "", "")
+
+    with patch("ai_trace_auditor.repo.fetcher.subprocess.run", side_effect=fake_run):
+        with pytest.raises(RepoNotFound):
+            clone_repo(
+                "https://github.com/x/y",
+                max_bytes=10_000,
+                timeout_seconds=30,
+                tmpdir_root=tmp_path,
+            )
