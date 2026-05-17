@@ -77,3 +77,12 @@ def test_value_is_never_interpreted(tmp_path: Path):
     results = scan_docs(tmp_path, [check])
 
     assert results[0].status == "present"
+
+
+def test_absent_when_key_is_commented_out(tmp_path: Path):
+    (tmp_path / ".env.example").write_text("# LOG_RETENTION_DAYS=90\nOTHER_KEY=x\n")
+    check = _make_check([".env.example"], ["LOG_RETENTION_DAYS"])
+
+    results = scan_docs(tmp_path, [check])
+
+    assert results[0].status == "absent"

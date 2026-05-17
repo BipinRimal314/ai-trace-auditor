@@ -19,19 +19,33 @@ def _normalize(s: str) -> str:
 def _detect_file_presence(repo_path: Path, patterns: list[str]) -> Path | None:
     """Return the first matching path, or None.
 
-    A pattern with a trailing ``/`` matches a directory; otherwise matches a file.
-    Match is case-insensitive on the relative path from ``repo_path``.
+    Patterns are exact relative paths (case-insensitive), not globs.
+    A trailing ``/`` requires a directory; otherwise a file.
+    When multiple patterns could match, pattern-list order decides
+    (the earlier the pattern, the higher its priority).
     """
-    targets = {_normalize(p): p.endswith("/") for p in patterns}
+    target_priority: dict[str, int] = {}
+    target_expects_dir: dict[str, bool] = {}
+    for i, p in enumerate(patterns):
+        n = _normalize(p)
+        if n not in target_priority:
+            target_priority[n] = i
+            target_expects_dir[n] = p.endswith("/")
 
+    candidates: list[tuple[int, Path, bool]] = []
     for path in repo_path.rglob("*"):
         rel = _normalize(str(path.relative_to(repo_path)))
-        for target, expect_dir in targets.items():
-            if rel == target:
-                if expect_dir and path.is_dir():
-                    return path
-                if not expect_dir and path.is_file():
-                    return path
+        if rel in target_priority:
+            candidates.append(
+                (target_priority[rel], path, target_expects_dir[rel])
+            )
+
+    candidates.sort(key=lambda t: t[0])
+    for _, path, expect_dir in candidates:
+        if expect_dir and path.is_dir():
+            return path
+        if not expect_dir and path.is_file():
+            return path
     return None
 
 
@@ -40,22 +54,28 @@ def _detect_content_contains(
     file_patterns: list[str],
     phrases: list[str],
 ) -> tuple[Path | None, bool]:
-    """Return (matched_file_path, contained_a_phrase).
+    """Return (matched_file_path, contained_a_phrase) deterministically.
 
-    Walks the repo once and finds the first file whose relative path matches
-    any of ``file_patterns`` (case-insensitive). Returns the file's path and
-    whether any phrase from ``phrases`` was present in its contents.
-    Returns (None, False) if no file matched.
+    When multiple file_patterns could match, pattern-list order decides.
+    Returns (None, False) if no pattern matched any file.
     """
-    file_targets = {_normalize(p) for p in file_patterns}
+    target_priority: dict[str, int] = {}
+    for i, p in enumerate(file_patterns):
+        n = _normalize(p)
+        if n not in target_priority:
+            target_priority[n] = i
     phrases_lower = [p.lower() for p in phrases]
 
+    candidates: list[tuple[int, Path]] = []
     for path in repo_path.rglob("*"):
         if not path.is_file():
             continue
         rel = _normalize(str(path.relative_to(repo_path)))
-        if rel not in file_targets:
-            continue
+        if rel in target_priority:
+            candidates.append((target_priority[rel], path))
+
+    candidates.sort(key=lambda t: t[0])
+    for _, path in candidates:
         try:
             text = path.read_text(encoding="utf-8", errors="ignore").lower()
         except OSError:
@@ -73,16 +93,24 @@ def _detect_config_key(
     filenames: list[str],
     keys: list[str],
 ) -> tuple[Path | None, str | None]:
-    """Return (matched_file_path, matched_key_name), or (None, None) / (path, None)."""
-    file_targets = {_normalize(f) for f in filenames}
+    """Return (matched_file_path, matched_key_name) deterministically."""
+    target_priority: dict[str, int] = {}
+    for i, f in enumerate(filenames):
+        n = _normalize(f)
+        if n not in target_priority:
+            target_priority[n] = i
     keys_lower = {k.lower() for k in keys}
 
+    candidates: list[tuple[int, Path]] = []
     for path in repo_path.rglob("*"):
         if not path.is_file():
             continue
         rel = _normalize(str(path.relative_to(repo_path)))
-        if rel not in file_targets:
-            continue
+        if rel in target_priority:
+            candidates.append((target_priority[rel], path))
+
+    candidates.sort(key=lambda t: t[0])
+    for _, path in candidates:
         try:
             text = path.read_text(encoding="utf-8", errors="ignore")
         except OSError:
@@ -162,7 +190,7 @@ def _evaluate(check: DocCheck, repo_path: Path) -> DocCheckResult:
             check=check,
             status="absent",
             evidence=check.evidence_when_absent,
-            matched_path=matched,
+            matched_path=None,
         )
 
     raise NotImplementedError(f"Detector kind not yet supported: {check.detector_kind}")
