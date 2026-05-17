@@ -78,3 +78,25 @@ def test_repo_audit_report_assembles():
     assert report.repo_url == "https://github.com/x/y"
     assert report.trace_report is None
     assert report.doc_results == []
+
+
+def test_repo_audit_report_rejects_negative_artifact_count():
+    with pytest.raises(ValueError):
+        RepoAuditReport(
+            repo_url="https://github.com/x/y",
+            trace_artifacts_found=-1,
+            trace_report=None,
+            doc_results=[],
+        )
+
+
+def test_repo_audit_report_rejects_trace_report_without_artifacts():
+    from unittest.mock import MagicMock
+    fake_report = MagicMock()
+    with pytest.raises(ValueError):
+        RepoAuditReport(
+            repo_url="https://github.com/x/y",
+            trace_artifacts_found=0,
+            trace_report=fake_report,
+            doc_results=[],
+        )

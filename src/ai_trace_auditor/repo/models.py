@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any, Literal, get_args
 
 from ai_trace_auditor.models.gap import GapReport
 
@@ -14,9 +14,9 @@ DocStatus = Literal["present", "absent", "partial"]
 FrameworkNature = Literal["law", "voluntary", "certifiable_standard", "audit_framework"]
 ComplianceTier = Literal["deterministic", "structural", "quality", "organizational"]
 
-_VALID_SHAPES = {"otel", "langfuse", "chat_jsonl"}
-_VALID_STATUSES = {"present", "absent", "partial"}
-_VALID_DETECTOR_KINDS = {"file_presence", "content_contains", "config_key"}
+_VALID_SHAPES = set(get_args(TraceShape))
+_VALID_STATUSES = set(get_args(DocStatus))
+_VALID_DETECTOR_KINDS = set(get_args(DetectorKind))
 
 
 @dataclass(frozen=True)
@@ -75,3 +75,13 @@ class RepoAuditReport:
     trace_artifacts_found: int
     trace_report: GapReport | None
     doc_results: list[DocCheckResult] = field(default_factory=list)
+
+    def __post_init__(self) -> None:
+        if self.trace_artifacts_found < 0:
+            raise ValueError(
+                f"trace_artifacts_found must be >= 0, got {self.trace_artifacts_found}"
+            )
+        if self.trace_report is not None and self.trace_artifacts_found == 0:
+            raise ValueError(
+                "trace_report is set but trace_artifacts_found is 0"
+            )
