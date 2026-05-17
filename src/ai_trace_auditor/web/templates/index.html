@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}AI Trace Auditor — Deterministic AI Compliance Auditing{% endblock %}
+{% block nav_home %}active{% endblock %}
+
+{% block content %}
+<!-- Hero Section — Editorial Layout -->
+<section class="pt-16 pb-20">
+    <div class="max-w-4xl">
+        <span class="inline-block text-[10px] font-bold tracking-[0.2em] uppercase text-secondary mb-6">Open Source Compliance Tooling</span>
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-headline font-bold leading-[1.1] text-primary mb-8">
+            Deterministic AI<br>Compliance Auditing
+        </h1>
+        <p class="text-lg text-on-surface-variant max-w-2xl mb-12 font-light leading-relaxed">
+            Audit LLM traces against EU AI Act, NIST AI RMF, ISO 42001, and SOC 2.
+            Every requirement verified against primary legal text with exact clause citations.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4">
+            <a href="/audit"
+                class="bg-gradient-to-r from-primary to-primary-container text-white px-10 py-4 rounded-xl font-semibold text-lg hover:brightness-110 transition-all text-center">
+                Run an Audit
+            </a>
+            <a href="/regulations"
+                class="text-primary px-10 py-4 rounded-xl font-semibold text-lg hover:bg-surface-container-low transition-all text-center"
+                style="border: 1px solid rgba(196, 198, 211, 0.2);">
+                Browse Regulations
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Stats bar — Large display numbers in Noto Serif -->
+<section class="bg-surface-container-low py-12 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 mb-16">
+    <div class="max-w-7xl mx-auto">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-8">
+            <div class="text-center">
+                <div class="text-4xl sm:text-5xl font-headline font-bold text-primary">{{ total_requirements }}</div>
+                <div class="text-[10px] font-bold text-outline uppercase tracking-widest mt-2">Total Requirements</div>
+            </div>
+            <div class="text-center">
+                <div class="text-4xl sm:text-5xl font-headline font-bold text-primary">{{ regulations|length }}</div>
+                <div class="text-[10px] font-bold text-outline uppercase tracking-widest mt-2">Regulations</div>
+            </div>
+            <div class="text-center">
+                <div class="text-4xl sm:text-5xl font-headline font-bold text-primary">3</div>
+                <div class="text-[10px] font-bold text-outline uppercase tracking-widest mt-2">Compliance Tiers</div>
+            </div>
+            <div class="text-center">
+                <div class="text-4xl sm:text-5xl font-headline font-bold text-primary">5</div>
+                <div class="text-[10px] font-bold text-outline uppercase tracking-widest mt-2">Trace Formats</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Regulation Cards -->
+<section class="mb-16">
+    <h2 class="text-3xl font-headline font-bold text-primary mb-8">Supported Regulations</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {% for reg in regulations %}
+        <div class="bg-surface-container-lowest p-8 rounded-xl transition-all hover:shadow-[0_32px_64px_-12px_rgba(0,42,110,0.06)]">
+            <div class="flex items-start justify-between mb-4">
+                <div>
+                    <h3 class="text-lg font-headline font-bold text-primary">{{ reg.name }}</h3>
+                    <span class="text-[10px] font-bold text-outline uppercase tracking-widest">{{ reg.nature }}</span>
+                </div>
+                <div class="text-3xl font-headline font-bold text-primary">{{ reg.count }}</div>
+            </div>
+            <p class="text-sm text-on-surface-variant mb-6 leading-relaxed">{{ reg.description }}</p>
+            <div class="flex gap-3 text-xs flex-wrap">
+                {% if reg.mandatory > 0 %}
+                <span class="badge badge-mandatory">{{ reg.mandatory }} mandatory</span>
+                {% endif %}
+                {% if reg.recommended > 0 %}
+                <span class="badge badge-recommended">{{ reg.recommended }} recommended</span>
+                {% endif %}
+                {% if reg.best_practice > 0 %}
+                <span class="badge badge-best_practice">{{ reg.best_practice }} best practice</span>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- How it works -->
+<section class="mb-16">
+    <h2 class="text-3xl font-headline font-bold text-primary mb-8">How It Works</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="bg-surface-container-lowest p-8 rounded-xl">
+            <span class="text-3xl font-headline text-outline-variant italic mb-4 block">01</span>
+            <h3 class="text-lg font-headline font-bold text-primary mb-3">Ingest Traces</h3>
+            <p class="text-sm text-on-surface-variant leading-relaxed">
+                Upload OTel, Langfuse, Claude Code, or raw API traces. Multi-agent DAGs detected automatically.
+            </p>
+        </div>
+        <div class="bg-surface-container-lowest p-8 rounded-xl">
+            <span class="text-3xl font-headline text-outline-variant italic mb-4 block">02</span>
+            <h3 class="text-lg font-headline font-bold text-primary mb-3">Deterministic Scan</h3>
+            <p class="text-sm text-on-surface-variant leading-relaxed">
+                Each trace field is checked against verified legal requirements. No LLM guessing; pattern matching against exact statutory text.
+            </p>
+        </div>
+        <div class="bg-surface-container-lowest p-8 rounded-xl">
+            <span class="text-3xl font-headline text-outline-variant italic mb-4 block">03</span>
+            <h3 class="text-lg font-headline font-bold text-primary mb-3">Tiered Report</h3>
+            <p class="text-sm text-on-surface-variant leading-relaxed">
+                Get separate scores for Legal Compliance, Structural Evidence, and Quality. No misleading single number.
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Tiered scoring explanation -->
+<section class="bg-surface-container-low py-16 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 mb-16">
+    <div class="max-w-7xl mx-auto">
+        <h3 class="text-2xl font-headline font-bold text-primary mb-8">Three-Tier Scoring Model</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="bg-surface-container-lowest p-8 rounded-xl" style="border-left: 4px solid #c0392b;">
+                <h4 class="font-headline font-bold text-primary mb-2">Tier 1: Legal Compliance</h4>
+                <p class="text-sm text-on-surface-variant leading-relaxed">
+                    Binary pass/fail on law-prescribed checks. Art 12(3) biometric fields, Art 19 retention periods, Art 50 disclosure.
+                </p>
+            </div>
+            <div class="bg-surface-container-lowest p-8 rounded-xl" style="border-left: 4px solid #b8860b;">
+                <h4 class="font-headline font-bold text-primary mb-2">Tier 2: Structural Evidence</h4>
+                <p class="text-sm text-on-surface-variant leading-relaxed">
+                    Coverage percentage for capability-level requirements. General logging, NIST monitoring, system documentation.
+                </p>
+            </div>
+            <div class="bg-surface-container-lowest p-8 rounded-xl" style="border-left: 4px solid #2d8a56;">
+                <h4 class="font-headline font-bold text-primary mb-2">Tier 3: Quality</h4>
+                <p class="text-sm text-on-surface-variant leading-relaxed">
+                    Best practice observability scores. Token counting, trace linkage, evaluation capture.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

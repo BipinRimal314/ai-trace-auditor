@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}AI Trace Auditor{% endblock %}</title>
+    <!-- Google Fonts: Noto Serif & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Serif:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'surface': '#faf9f9',
+                        'surface-container-lowest': '#ffffff',
+                        'surface-container-low': '#f4f3f3',
+                        'surface-container': '#eeeeee',
+                        'surface-container-high': '#e8e8e8',
+                        'surface-container-highest': '#e2e2e2',
+                        'primary': '#002a6e',
+                        'primary-container': '#1e418a',
+                        'on-primary': '#ffffff',
+                        'on-surface': '#1a1c1c',
+                        'on-surface-variant': '#444651',
+                        'outline': '#747782',
+                        'outline-variant': '#c4c6d3',
+                        'secondary': '#515e81',
+                        'error': '#ba1a1a',
+                        'error-container': '#ffdad6',
+                        'on-error-container': '#93000a',
+                    },
+                    fontFamily: {
+                        'headline': ['"Noto Serif"', 'serif'],
+                        'body': ['"Inter"', 'sans-serif'],
+                        'label': ['"Inter"', 'sans-serif'],
+                    },
+                    borderRadius: {
+                        'DEFAULT': '0.25rem',
+                        'lg': '0.5rem',
+                        'xl': '0.75rem',
+                        'full': '9999px',
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #faf9f9;
+            color: #1a1c1c;
+        }
+        h1, h2, h3, .font-headline {
+            font-family: 'Noto Serif', serif;
+        }
+
+        /* Status colors — muted, professional tones */
+        .status-satisfied { color: #2d8a56; }
+        .status-partial { color: #b8860b; }
+        .status-missing { color: #c0392b; }
+        .status-not_applicable { color: #747782; }
+
+        .bg-status-satisfied { background-color: rgba(45, 138, 86, 0.06); }
+        .bg-status-partial { background-color: rgba(184, 134, 11, 0.06); }
+        .bg-status-missing { background-color: rgba(192, 57, 43, 0.06); }
+        .bg-status-not_applicable { background-color: rgba(116, 119, 130, 0.04); }
+
+        .badge {
+            padding: 0.125rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .badge-mandatory { background-color: rgba(192, 57, 43, 0.08); color: #c0392b; }
+        .badge-recommended { background-color: rgba(184, 134, 11, 0.08); color: #b8860b; }
+        .badge-best_practice { background-color: rgba(45, 138, 86, 0.08); color: #2d8a56; }
+
+        .score-ring {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            font-weight: 700;
+        }
+
+        .nav-link {
+            transition: color 0.15s, border-color 0.15s;
+            border-bottom: 2px solid transparent;
+            padding-bottom: 0.25rem;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #002a6e;
+            border-color: #002a6e;
+        }
+
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .mermaid svg { max-width: 100%; }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="min-h-screen antialiased">
+    <!-- Navigation — Glassmorphism horizontal bar -->
+    <nav class="glass-nav fixed top-0 w-full z-50 shadow-[0_1px_0_rgba(196,198,211,0.3)]">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-8">
+                    <a href="/" class="flex items-center gap-3">
+                        <span class="text-lg font-bold tracking-tight text-primary font-headline">AI Trace Auditor</span>
+                        <span class="text-[10px] font-label text-outline uppercase tracking-widest">v{{ version }}</span>
+                    </a>
+                    <div class="hidden sm:flex items-center gap-6">
+                        <a href="/" class="nav-link text-sm font-medium text-on-surface-variant {% block nav_home %}{% endblock %}">Overview</a>
+                        <a href="/audit" class="nav-link text-sm font-medium text-on-surface-variant {% block nav_audit %}{% endblock %}">Run Audit</a>
+                        <a href="/regulations" class="nav-link text-sm font-medium text-on-surface-variant {% block nav_regulations %}{% endblock %}">Regulations</a>
+                    </div>
+                </div>
+                <div class="text-[10px] font-bold text-outline uppercase tracking-widest hidden sm:block">
+                    Deterministic Compliance
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile nav -->
+    <div class="sm:hidden fixed top-16 w-full z-40 glass-nav shadow-[0_1px_0_rgba(196,198,211,0.3)]">
+        <div class="flex justify-around py-2">
+            <a href="/" class="text-sm text-on-surface-variant hover:text-primary px-3 py-1 font-medium">Overview</a>
+            <a href="/audit" class="text-sm text-on-surface-variant hover:text-primary px-3 py-1 font-medium">Run Audit</a>
+            <a href="/regulations" class="text-sm text-on-surface-variant hover:text-primary px-3 py-1 font-medium">Regulations</a>
+        </div>
+    </div>
+
+    <!-- Main content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-surface-container-high mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <p class="text-[11px] text-outline uppercase tracking-widest">
+                    AI Trace Auditor v{{ version }} &mdash; Every requirement verified against primary legal text.
+                </p>
+                <div class="flex gap-6 text-xs text-secondary font-medium">
+                    <a href="https://github.com/BipinRimal314/ai-trace-auditor" target="_blank" class="hover:text-primary transition-colors">GitHub</a>
+                    <a href="https://pypi.org/project/ai-trace-auditor/" target="_blank" class="hover:text-primary transition-colors">PyPI</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'neutral',
+            themeVariables: {
+                primaryColor: '#ffffff',
+                primaryTextColor: '#1a1c1c',
+                primaryBorderColor: '#c4c6d3',
+                lineColor: '#002a6e',
+                secondaryColor: '#f4f3f3',
+                tertiaryColor: '#e8e8e8',
+            }
+        });
+    </script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

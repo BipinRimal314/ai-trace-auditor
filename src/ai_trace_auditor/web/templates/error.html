@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Error — AI Trace Auditor{% endblock %}
+
+{% block content %}
+<div class="max-w-xl mx-auto text-center py-20">
+    <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6" style="background-color: rgba(192, 57, 43, 0.06);">
+        <svg class="w-8 h-8 status-missing" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+        </svg>
+    </div>
+    <h1 class="text-2xl font-headline font-bold text-primary mb-3">{{ error_title }}</h1>
+    <p class="text-on-surface-variant mb-10 leading-relaxed">{{ error_message }}</p>
+    <a href="/audit" class="bg-gradient-to-r from-primary to-primary-container text-white px-8 py-3.5 rounded-xl font-semibold transition-all hover:brightness-110">
+        Try Again
+    </a>
+</div>
+{% endblock %}
