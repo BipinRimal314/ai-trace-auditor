@@ -24,7 +24,7 @@ def test_repo_too_large_carries_byte_count():
     err = RepoTooLarge(actual_bytes=100_000_000, limit_bytes=52_428_800)
     assert err.actual_bytes == 100_000_000
     assert err.limit_bytes == 52_428_800
-    assert "100000000" in str(err) or "100 MB" in str(err) or "100,000,000" in str(err)
+    assert "100,000,000" in str(err)
 
 
 def test_repo_fetch_timeout_carries_seconds():

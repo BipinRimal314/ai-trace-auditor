@@ -12,11 +12,11 @@ class InvalidRepoURL(RepoError):
 
 
 class RepoNotFound(RepoError):
-    """Repository does not exist or is not publicly accessible."""
+    """Repository returned 404 — does not exist as a public repo."""
 
 
 class PrivateRepo(RepoError):
-    """Repository exists but is private."""
+    """Repository exists but returned 403 — is private or requires auth."""
 
 
 class RepoTooLarge(RepoError):
