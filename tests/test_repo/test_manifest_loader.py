@@ -84,3 +84,37 @@ def test_rejects_empty_file(tmp_path: Path) -> None:
     manifest_file.write_text("")
     with pytest.raises(ValueError, match="empty"):
         load_manifest(manifest_file)
+
+
+def test_rejects_missing_evidence_when_absent(tmp_path: Path) -> None:
+    manifest_file = tmp_path / "manifest.yaml"
+    manifest_file.write_text(
+        """
+- id: x
+  legal_text: "x"
+  verified_against_primary: true
+  framework_nature: law
+  compliance_tier: structural
+  regulation: "EU AI Act"
+  article: "Annex IV"
+  detector_kind: file_presence
+  detector_config: {patterns: [X]}
+  evidence_when_present: "p"
+"""
+    )
+    with pytest.raises(ValueError, match="evidence_when_absent"):
+        load_manifest(manifest_file)
+
+
+def test_rejects_non_dict_entry(tmp_path: Path) -> None:
+    manifest_file = tmp_path / "manifest.yaml"
+    manifest_file.write_text("- just_a_string\n")
+    with pytest.raises(ValueError, match="not a mapping"):
+        load_manifest(manifest_file)
+
+
+def test_rejects_non_list_root(tmp_path: Path) -> None:
+    manifest_file = tmp_path / "manifest.yaml"
+    manifest_file.write_text("id: x\n")
+    with pytest.raises(ValueError, match="root must be a list"):
+        load_manifest(manifest_file)

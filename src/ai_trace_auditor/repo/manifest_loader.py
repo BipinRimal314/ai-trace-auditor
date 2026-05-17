@@ -33,7 +33,7 @@ def load_manifest(path: Path) -> list[DocCheck]:
         data = yaml.safe_load(f)
 
     if not data:
-        raise ValueError(f"Manifest file is empty: {path}")
+        raise ValueError(f"Manifest file has no entries (or is empty): {path}")
 
     if not isinstance(data, list):
         raise ValueError(f"Manifest root must be a list, got {type(data).__name__}")
@@ -48,6 +48,11 @@ def load_manifest(path: Path) -> list[DocCheck]:
                     f"Manifest entry #{index} ({entry.get('id', '<unknown>')}) "
                     f"missing required field '{field}'"
                 )
-        checks.append(DocCheck(**entry))
+        try:
+            checks.append(DocCheck(**entry))
+        except TypeError as exc:
+            raise ValueError(
+                f"Manifest entry #{index} ({entry.get('id', '<unknown>')}): {exc}"
+            ) from exc
 
     return checks
