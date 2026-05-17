@@ -1,34 +1,39 @@
-app = "ai-trace-auditor"
-primary_region = "iad"
+# fly.toml app configuration file generated for ai-trace-auditor on 2026-05-17T16:00:55+05:45
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'ai-trace-auditor'
+primary_region = 'iad'
 
 [build]
-  dockerfile = "Dockerfile"
+  dockerfile = 'Dockerfile'
 
 [env]
-  PORT = "8001"
-  PDF_TMPDIR = "/tmp/aitrace"
-  REPO_TMPDIR = "/tmp/aitrace"
-  MAX_REPO_BYTES = "52428800"
-  REPO_FETCH_TIMEOUT = "30"
+  MAX_REPO_BYTES = '52428800'
+  PDF_TMPDIR = '/tmp/aitrace'
+  PORT = '8001'
+  REPO_FETCH_TIMEOUT = '30'
+  REPO_TMPDIR = '/tmp/aitrace'
+
+[[mounts]]
+  source = 'aitrace_tmp'
+  destination = '/tmp/aitrace'
 
 [http_service]
   internal_port = 8001
   force_https = true
-  auto_stop_machines = true
+  auto_stop_machines = 'stop'
   auto_start_machines = true
   min_machines_running = 0
 
   [[http_service.checks]]
-    interval = "30s"
-    timeout = "5s"
-    grace_period = "10s"
-    method = "GET"
-    path = "/"
-
-[[mounts]]
-  source = "aitrace_tmp"
-  destination = "/tmp/aitrace"
+    interval = '30s'
+    timeout = '5s'
+    grace_period = '10s'
+    method = 'GET'
+    path = '/'
 
 [[vm]]
-  size = "shared-cpu-1x"
-  memory = "512mb"
+  size = 'shared-cpu-1x'
+  memory = '512mb'
