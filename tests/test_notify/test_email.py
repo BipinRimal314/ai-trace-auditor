@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from ai_trace_auditor.comply.runner import run_full_compliance
+from ai_trace_auditor.scan.runner import run_full_compliance
 from ai_trace_auditor.notify.email_notify import format_email_body
 
 

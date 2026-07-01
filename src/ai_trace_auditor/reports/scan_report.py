@@ -7,12 +7,12 @@ from pathlib import Path
 from jinja2 import Environment, FileSystemLoader
 
 import ai_trace_auditor
-from ai_trace_auditor.comply.runner import CompliancePackage
+from ai_trace_auditor.scan.runner import CompliancePackage
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
 
 
-class ComplyReporter:
+class ScanReporter:
     """Renders a full CompliancePackage to Markdown."""
 
     def __init__(self) -> None:

@@ -29,7 +29,7 @@ Open source, Apache 2.0. Tested against LiteLLM, n8n, Dify,
 Haystack, and CrewAI codebases. PRs with compliance guides submitted
 to all five.
 
-pip install ai-trace-auditor && aitrace comply ./
+pip install ai-trace-auditor && aitrace scan ./
 
 Landing page: https://bipinrimal314.github.io/ai-trace-auditor/
 GitHub: https://github.com/BipinRimal314/ai-trace-auditor

@@ -30,11 +30,11 @@ mcp = FastMCP(
 
 
 # ---------------------------------------------------------------------------
-# Tool 1: aitrace_comply — full compliance scan
+# Tool 1: aitrace_scan — full compliance scan
 # ---------------------------------------------------------------------------
 
 @mcp.tool()
-def aitrace_comply(path: str) -> str:
+def aitrace_scan(path: str) -> str:
     """Run full EU AI Act compliance scan on a codebase directory.
 
     Scans the codebase and generates a complete compliance package covering
@@ -53,16 +53,16 @@ def aitrace_comply(path: str) -> str:
         if not codebase_dir.exists() or not codebase_dir.is_dir():
             return f"Error: {path} is not a valid directory"
 
-        from ai_trace_auditor.comply.runner import run_full_compliance
-        from ai_trace_auditor.reports.comply_report import ComplyReporter
+        from ai_trace_auditor.scan.runner import run_full_compliance
+        from ai_trace_auditor.reports.scan_report import ScanReporter
 
         pkg = run_full_compliance(codebase_dir=codebase_dir)
 
         # Build a structured summary for the AI assistant
-        summary = _build_comply_summary(pkg)
+        summary = _build_scan_summary(pkg)
 
         # Also generate the full markdown report
-        reporter = ComplyReporter()
+        reporter = ScanReporter()
         full_report = reporter.render(pkg)
 
         return json.dumps({
@@ -74,7 +74,7 @@ def aitrace_comply(path: str) -> str:
         return f"Error running compliance scan: {e}\n{traceback.format_exc()}"
 
 
-def _build_comply_summary(pkg: object) -> dict:
+def _build_scan_summary(pkg: object) -> dict:
     """Build a structured summary dict from a CompliancePackage."""
     summary: dict = {
         "source_dir": pkg.source_dir,

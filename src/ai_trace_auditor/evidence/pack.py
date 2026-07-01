@@ -10,8 +10,8 @@ from pathlib import Path
 import ai_trace_auditor
 from typing import Any
 
-from ai_trace_auditor.comply.runner import CompliancePackage
-from ai_trace_auditor.reports.comply_report import ComplyReporter
+from ai_trace_auditor.scan.runner import CompliancePackage
+from ai_trace_auditor.reports.scan_report import ScanReporter
 
 
 def generate_evidence_pack(pkg: CompliancePackage, output_dir: Path) -> list[Path]:
@@ -35,7 +35,7 @@ def generate_evidence_pack(pkg: CompliancePackage, output_dir: Path) -> list[Pat
     output_dir.mkdir(parents=True, exist_ok=True)
     created: list[Path] = []
 
-    reporter = ComplyReporter()
+    reporter = ScanReporter()
     md_content = reporter.render(pkg)
 
     # 1. Split individual reports

@@ -12,9 +12,9 @@ The EU AI Act's record-keeping and transparency obligations (Articles 11, 12, 13
 
 What it does:
 
-- `aitrace comply ./` scans your codebase and generates: Annex IV technical documentation (Art. 11), record-keeping gap analysis against your OTel/Langfuse traces (Art. 12), data flow diagrams with GDPR transfer warnings (Art. 13), and a GDPR Article 30 Records of Processing Activities template.
+- `aitrace scan ./` scans your codebase and generates: Annex IV technical documentation (Art. 11), record-keeping gap analysis against your OTel/Langfuse traces (Art. 12), data flow diagrams with GDPR transfer warnings (Art. 13), and a GDPR Article 30 Records of Processing Activities template.
 
-- `aitrace comply ./ --evidence-pack output/` bundles everything into a folder (PDF, Mermaid diagrams, per-requirement checklist, metadata) that a compliance officer can hand to an auditor.
+- `aitrace scan ./ --evidence-pack output/` bundles everything into a folder (PDF, Mermaid diagrams, per-requirement checklist, metadata) that a compliance officer can hand to an auditor.
 
 - Runs as a GitHub Action in CI. Fails the build if compliance gaps appear.
 

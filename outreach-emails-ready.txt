@@ -25,7 +25,7 @@ GDPR Article 30. It's available as a GitHub Action:
 
     - uses: BipinRimal314/ai-trace-auditor@v0.14.0
       with:
-        command: comply
+        command: scan
         path: .
 
 For LiteLLM specifically, this catches:
@@ -66,7 +66,7 @@ The tool that generated the guide is now a GitHub Action:
 
     - uses: BipinRimal314/ai-trace-auditor@v0.14.0
       with:
-        command: comply
+        command: scan
         path: .
 
 It flags when n8n's codebase adds new AI provider integrations
@@ -138,7 +138,7 @@ It's now a GitHub Action:
 
     - uses: BipinRimal314/ai-trace-auditor@v0.14.0
       with:
-        command: comply
+        command: scan
         path: .
 
 Would flag new provider integrations, track GDPR transfer obligations,

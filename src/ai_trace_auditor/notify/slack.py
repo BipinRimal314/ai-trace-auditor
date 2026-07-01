@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 import ai_trace_auditor
-from ai_trace_auditor.comply.runner import CompliancePackage
+from ai_trace_auditor.scan.runner import CompliancePackage
 
 
 def format_slack_message(pkg: CompliancePackage) -> dict[str, Any]:
