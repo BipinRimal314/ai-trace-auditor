@@ -1,61 +1,173 @@
 {% extends "base.html" %}
 
-{% block title %}AI Trace Auditor — Deterministic AI Compliance Auditing{% endblock %}
+{% block title %}AI Trace Auditor: Deterministic AI Compliance Auditing{% endblock %}
 {% block nav_home %}active{% endblock %}
 
 {% block content %}
-<!-- Hero Section — Editorial Layout -->
-<section class="pt-16 pb-20">
-    <div class="max-w-4xl">
-        <span class="inline-block text-[10px] font-bold tracking-[0.2em] uppercase text-secondary mb-6">Open Source Compliance Tooling</span>
+<!-- Hero: lead with the reframe -->
+<section class="pt-16 pb-16">
+    <div class="max-w-3xl">
+        <span class="inline-block text-[10px] font-bold tracking-[0.2em] uppercase text-secondary mb-6">EU AI Act · NIST AI RMF · GDPR, checked from your own logs</span>
         <h1 class="text-4xl sm:text-5xl lg:text-6xl font-headline font-bold leading-[1.1] text-primary mb-8">
-            Deterministic AI<br>Compliance Auditing
+            Most tools that read the law are guessing. We know, because ours did too.
         </h1>
-        <p class="text-lg text-on-surface-variant max-w-2xl mb-12 font-light leading-relaxed">
-            Audit LLM traces against EU AI Act, NIST AI RMF, ISO 42001, and SOC 2.
-            Every requirement verified against primary legal text with exact clause citations.
+        <p class="text-lg text-on-surface-variant max-w-2xl mb-10 font-light leading-relaxed">
+            This tool audits the records your AI system keeps against the rules the law says you have to meet.
+            It used to invent some of those rules. It got caught. What runs today is what survived the rebuild:
+            every requirement quotes the exact clause of the law, and the checking never guesses.
         </p>
         <div class="flex flex-col sm:flex-row gap-4">
             <a href="/audit"
                 class="bg-gradient-to-r from-primary to-primary-container text-white px-10 py-4 rounded-xl font-semibold text-lg hover:brightness-110 transition-all text-center">
-                Run an Audit
+                Point it at your traces
             </a>
-            <a href="/regulations"
+            <a href="#how"
                 class="text-primary px-10 py-4 rounded-xl font-semibold text-lg hover:bg-surface-container-low transition-all text-center"
                 style="border: 1px solid rgba(196, 198, 211, 0.2);">
-                Browse Regulations
+                See how it works
             </a>
         </div>
     </div>
 </section>
 
-<!-- Stats bar — Large display numbers in Noto Serif -->
-<section class="bg-surface-container-low py-12 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 mb-16">
-    <div class="max-w-7xl mx-auto">
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-8">
-            <div class="text-center">
-                <div class="text-4xl sm:text-5xl font-headline font-bold text-primary">{{ total_requirements }}</div>
-                <div class="text-[10px] font-bold text-outline uppercase tracking-widest mt-2">Total Requirements</div>
+<!-- The problem, in plain terms -->
+<section class="mb-20">
+    <div class="max-w-3xl">
+        <span class="text-[10px] font-bold tracking-[0.2em] uppercase text-outline">The situation</span>
+        <h2 class="text-3xl font-headline font-bold text-primary mt-3 mb-6">A new law says: if you run an AI system, keep records.</h2>
+        <p class="text-base text-on-surface-variant leading-relaxed mb-4">
+            Write down what the AI was asked, what it answered, which model ran, and when. That is the EU AI Act,
+            and it is in force. The trouble is that most teams cannot tell you whether their records actually pass.
+        </p>
+        <p class="text-base text-on-surface-variant leading-relaxed">
+            Finding out the old way means paying a law firm to read your code and logs for a few weeks. Call it five
+            or six figures, and a report that is stale the moment your system changes. This tool does that gap analysis
+            in seconds, from the logs you already have.
+        </p>
+    </div>
+</section>
+
+<!-- The failure that made it trustworthy -->
+<section class="bg-surface-container-low py-16 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 mb-20">
+    <div class="max-w-3xl mx-auto">
+        <span class="text-[10px] font-bold tracking-[0.2em] uppercase text-outline">Why you can trust it</span>
+        <h2 class="text-3xl font-headline font-bold text-primary mt-3 mb-6">It shipped wrong once. That is the whole reason it is careful now.</h2>
+        <p class="text-base text-on-surface-variant leading-relaxed mb-4">
+            Version 0.14 went out with roughly 60% of its EU AI Act requirements fabricated. A language model had
+            projected software-engineering habits onto legal text; the output looked authoritative and was simply
+            made up. A maintainer of a real open-source AI project caught it.
+        </p>
+        <p class="text-base text-on-surface-variant leading-relaxed mb-8">
+            So it was torn down and rebuilt around one rule: no requirement ships unless it quotes the exact clause,
+            "Article 12(2)(a)", and has been checked page by page against the primary legal text. The more abstract the
+            jump from legal words to a code check, the higher the odds a model invented the connection. So the discipline
+            is now backwards from how it started: write the legal quote first, then ask whether the check actually follows
+            from those exact words. If it does not, it is labelled guidance, not law.
+        </p>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div class="bg-surface-container-lowest p-6 rounded-xl">
+                <div class="text-4xl font-headline font-bold text-primary mb-1">0%</div>
+                <p class="text-sm text-on-surface-variant leading-relaxed">fabrication when the check is a concrete text pattern</p>
             </div>
-            <div class="text-center">
-                <div class="text-4xl sm:text-5xl font-headline font-bold text-primary">{{ regulations|length }}</div>
-                <div class="text-[10px] font-bold text-outline uppercase tracking-widest mt-2">Regulations</div>
+            <div class="bg-surface-container-lowest p-6 rounded-xl">
+                <div class="text-4xl font-headline font-bold text-primary mb-1">60%</div>
+                <p class="text-sm text-on-surface-variant leading-relaxed">fabrication in the old abstract legal-to-field mappings</p>
             </div>
-            <div class="text-center">
-                <div class="text-4xl sm:text-5xl font-headline font-bold text-primary">3</div>
-                <div class="text-[10px] font-bold text-outline uppercase tracking-widest mt-2">Compliance Tiers</div>
-            </div>
-            <div class="text-center">
-                <div class="text-4xl sm:text-5xl font-headline font-bold text-primary">5</div>
-                <div class="text-[10px] font-bold text-outline uppercase tracking-widest mt-2">Trace Formats</div>
+            <div class="bg-surface-container-lowest p-6 rounded-xl">
+                <div class="text-4xl font-headline font-bold text-primary mb-1">1 rule</div>
+                <p class="text-sm text-on-surface-variant leading-relaxed">quote the clause, verify against the source, or it does not ship</p>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Regulation Cards -->
-<section class="mb-16">
-    <h2 class="text-3xl font-headline font-bold text-primary mb-8">Supported Regulations</h2>
+<!-- How it actually works -->
+<section id="how" class="mb-20 scroll-mt-24">
+    <div class="max-w-3xl mb-10">
+        <span class="text-[10px] font-bold tracking-[0.2em] uppercase text-outline">How it works</span>
+        <h2 class="text-3xl font-headline font-bold text-primary mt-3 mb-6">There is no AI in the checking. A field is present, or it is not.</h2>
+        <p class="text-base text-on-surface-variant leading-relaxed">
+            For each requirement, the tool asks one question of each event in your logs: is this field there. It counts
+            how many events have it, and divides. Take Article 12(1), which says to keep automatic logs. The tool checks
+            whether each event carries a timestamp. Run it on a real 410-event session and it finds 331 of them. That is
+            the number. Same logs in, same answer out, every time. Nothing to hallucinate.
+        </p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="bg-surface-container-lowest p-8 rounded-xl">
+            <span class="text-3xl font-headline text-outline-variant italic mb-4 block">01</span>
+            <h3 class="text-lg font-headline font-bold text-primary mb-3">Read the records</h3>
+            <p class="text-sm text-on-surface-variant leading-relaxed">
+                Upload OpenTelemetry, Langfuse, Claude Code, or raw API traces. Point it at a public repo and it reads
+                the code instead. Multi-agent handoffs are reconstructed automatically.
+            </p>
+        </div>
+        <div class="bg-surface-container-lowest p-8 rounded-xl">
+            <span class="text-3xl font-headline text-outline-variant italic mb-4 block">02</span>
+            <h3 class="text-lg font-headline font-bold text-primary mb-3">Count, do not guess</h3>
+            <p class="text-sm text-on-surface-variant leading-relaxed">
+                Each required field is matched against verified legal requirements. The logic is deliberately plain:
+                present or absent, counted into a coverage number, tied to an exact statutory clause.
+            </p>
+        </div>
+        <div class="bg-surface-container-lowest p-8 rounded-xl">
+            <span class="text-3xl font-headline text-outline-variant italic mb-4 block">03</span>
+            <h3 class="text-lg font-headline font-bold text-primary mb-3">Hand back the gaps</h3>
+            <p class="text-sm text-on-surface-variant leading-relaxed">
+                Three separate scores, the exact clauses you are missing, and an evidence pack you can download as a PDF
+                and hand to whoever asks.
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Why three scores -->
+<section class="mb-20">
+    <div class="max-w-3xl mb-10">
+        <span class="text-[10px] font-bold tracking-[0.2em] uppercase text-outline">The score</span>
+        <h2 class="text-3xl font-headline font-bold text-primary mt-3 mb-6">One number would be a lie, so you get three.</h2>
+        <p class="text-base text-on-surface-variant leading-relaxed">
+            Some rules are the law. Some are best practice. A single "85% compliant" lets a missing legal requirement
+            hide behind a pile of easy bonus points. So the checks are split, and a failure in the first tier cannot be
+            bought back by the third.
+        </p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="bg-surface-container-lowest p-8 rounded-xl" style="border-left: 4px solid #c0392b;">
+            <h4 class="font-headline font-bold text-primary mb-2">Tier 1: Legal Compliance</h4>
+            <p class="text-sm text-on-surface-variant leading-relaxed">
+                Binary pass or fail on the checks the law prescribes exactly. Article 12(3) biometric fields, Article 19
+                retention, Article 50 disclosure. No partial credit.
+            </p>
+        </div>
+        <div class="bg-surface-container-lowest p-8 rounded-xl" style="border-left: 4px solid #b8860b;">
+            <h4 class="font-headline font-bold text-primary mb-2">Tier 2: Structural Evidence</h4>
+            <p class="text-sm text-on-surface-variant leading-relaxed">
+                Coverage for capability-level requirements, where the law asks that you be able to do something. General
+                logging, NIST monitoring, system documentation.
+            </p>
+        </div>
+        <div class="bg-surface-container-lowest p-8 rounded-xl" style="border-left: 4px solid #2d8a56;">
+            <h4 class="font-headline font-bold text-primary mb-2">Tier 3: Quality</h4>
+            <p class="text-sm text-on-surface-variant leading-relaxed">
+                Best-practice observability that is smart but not legally required. Token counting, trace linkage,
+                evaluation capture.
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- What it checks: dynamic regulation cards -->
+<section class="mb-20">
+    <div class="max-w-3xl mb-10">
+        <span class="text-[10px] font-bold tracking-[0.2em] uppercase text-outline">What it checks</span>
+        <h2 class="text-3xl font-headline font-bold text-primary mt-3 mb-4">{{ total_requirements }} requirements across {{ regulations|length }} frameworks.</h2>
+        <p class="text-base text-on-surface-variant leading-relaxed">
+            The EU AI Act, NIST AI RMF, and GDPR requirements are verified against their primary sources. ISO 42001 and
+            SOC 2 are not, because those are paid standards the tool cannot read against. It tells you which is which, so
+            you never quote a rule it could not confirm.
+        </p>
+    </div>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {% for reg in regulations %}
         <div class="bg-surface-container-lowest p-8 rounded-xl transition-all hover:shadow-[0_32px_64px_-12px_rgba(0,42,110,0.06)]">
@@ -83,58 +195,18 @@
     </div>
 </section>
 
-<!-- How it works -->
-<section class="mb-16">
-    <h2 class="text-3xl font-headline font-bold text-primary mb-8">How It Works</h2>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div class="bg-surface-container-lowest p-8 rounded-xl">
-            <span class="text-3xl font-headline text-outline-variant italic mb-4 block">01</span>
-            <h3 class="text-lg font-headline font-bold text-primary mb-3">Ingest Traces</h3>
-            <p class="text-sm text-on-surface-variant leading-relaxed">
-                Upload OTel, Langfuse, Claude Code, or raw API traces. Multi-agent DAGs detected automatically.
-            </p>
-        </div>
-        <div class="bg-surface-container-lowest p-8 rounded-xl">
-            <span class="text-3xl font-headline text-outline-variant italic mb-4 block">02</span>
-            <h3 class="text-lg font-headline font-bold text-primary mb-3">Deterministic Scan</h3>
-            <p class="text-sm text-on-surface-variant leading-relaxed">
-                Each trace field is checked against verified legal requirements. No LLM guessing; pattern matching against exact statutory text.
-            </p>
-        </div>
-        <div class="bg-surface-container-lowest p-8 rounded-xl">
-            <span class="text-3xl font-headline text-outline-variant italic mb-4 block">03</span>
-            <h3 class="text-lg font-headline font-bold text-primary mb-3">Tiered Report</h3>
-            <p class="text-sm text-on-surface-variant leading-relaxed">
-                Get separate scores for Legal Compliance, Structural Evidence, and Quality. No misleading single number.
-            </p>
-        </div>
-    </div>
-</section>
-
-<!-- Tiered scoring explanation -->
-<section class="bg-surface-container-low py-16 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 mb-16">
-    <div class="max-w-7xl mx-auto">
-        <h3 class="text-2xl font-headline font-bold text-primary mb-8">Three-Tier Scoring Model</h3>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div class="bg-surface-container-lowest p-8 rounded-xl" style="border-left: 4px solid #c0392b;">
-                <h4 class="font-headline font-bold text-primary mb-2">Tier 1: Legal Compliance</h4>
-                <p class="text-sm text-on-surface-variant leading-relaxed">
-                    Binary pass/fail on law-prescribed checks. Art 12(3) biometric fields, Art 19 retention periods, Art 50 disclosure.
-                </p>
-            </div>
-            <div class="bg-surface-container-lowest p-8 rounded-xl" style="border-left: 4px solid #b8860b;">
-                <h4 class="font-headline font-bold text-primary mb-2">Tier 2: Structural Evidence</h4>
-                <p class="text-sm text-on-surface-variant leading-relaxed">
-                    Coverage percentage for capability-level requirements. General logging, NIST monitoring, system documentation.
-                </p>
-            </div>
-            <div class="bg-surface-container-lowest p-8 rounded-xl" style="border-left: 4px solid #2d8a56;">
-                <h4 class="font-headline font-bold text-primary mb-2">Tier 3: Quality</h4>
-                <p class="text-sm text-on-surface-variant leading-relaxed">
-                    Best practice observability scores. Token counting, trace linkage, evaluation capture.
-                </p>
-            </div>
-        </div>
+<!-- Closing CTA -->
+<section class="bg-surface-container-low py-16 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-3xl mx-auto text-center">
+        <h2 class="text-3xl font-headline font-bold text-primary mb-6">Stop guessing where you stand.</h2>
+        <p class="text-base text-on-surface-variant leading-relaxed mb-10 max-w-xl mx-auto">
+            Upload a trace file, pick one of the samples, or hand it a public repo. You will have a tiered report and a
+            downloadable evidence pack before you finish reading this sentence.
+        </p>
+        <a href="/audit"
+            class="inline-block bg-gradient-to-r from-primary to-primary-container text-white px-10 py-4 rounded-xl font-semibold text-lg hover:brightness-110 transition-all">
+            Run an audit
+        </a>
     </div>
 </section>
 {% endblock %}
