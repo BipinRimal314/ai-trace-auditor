@@ -147,13 +147,13 @@ What to show in comparison:
 **Data source:** Already available. `~/.claude/projects/` has 44 directories. Just iterate all of them.
 
 **1.2 Project detection and naming**
-The directory names like `-Users-bipinrimal-Downloads-Ekline-AgentsTest` are ugly. Detect the actual project name from:
+The directory names like `-Users-bipinrimal-Projects-agents-test` are ugly. Detect the actual project name from:
 - The last path segment (usually the repo name)
 - `package.json` name field if it exists in the cwd
 - `pyproject.toml` project name
 - Git remote URL
 
-Display as "AgentsTest" or "ekline-app", not the full escaped path.
+Display as "agents-test" or "my-app", not the full escaped path.
 
 **1.3 Time-series tracking**
 Track how usage changes over time. Store a lightweight summary after each `aitrace insights` run:
