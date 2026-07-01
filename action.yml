@@ -8,9 +8,9 @@ branding:
 
 inputs:
   command:
-    description: "Command to run: comply (full suite), audit (Art 12), docs (Art 11), flow (Art 13)"
+    description: "Command to run: scan (full suite), audit (Art 12), docs (Art 11), flow (Art 13)"
     required: false
-    default: "comply"
+    default: "scan"
   path:
     description: "Codebase directory to scan (for comply/docs/flow) or trace file (for audit)"
     required: false
@@ -24,7 +24,7 @@ inputs:
     required: false
     default: "compliance-report.md"
   split:
-    description: "Write individual report files to output directory (comply only)"
+    description: "Write individual report files to output directory (scan only)"
     required: false
     default: "false"
   regulation:
@@ -44,7 +44,7 @@ inputs:
     required: false
     default: "markdown"
   evidence-pack:
-    description: "Generate evidence pack in this directory (comply only, replaces --output)"
+    description: "Generate evidence pack in this directory (scan only, replaces --output)"
     required: false
     default: ""
   slack-webhook:
@@ -102,7 +102,7 @@ runs:
             ARGS+=(-r "${{ inputs.regulation }}")
           fi
           aitrace audit "${ARGS[@]}"
-        elif [ "$COMMAND" = "comply" ]; then
+        elif [ "$COMMAND" = "scan" ]; then
           ARGS=("${{ inputs.path }}" --risk-level "${{ inputs.risk-level }}")
           if [ -n "${{ inputs.evidence-pack }}" ]; then
             ARGS+=(--evidence-pack "${{ inputs.evidence-pack }}")
@@ -115,7 +115,7 @@ runs:
           if [ "${{ inputs.split }}" = "true" ]; then
             ARGS+=(--split)
           fi
-          aitrace comply "${ARGS[@]}"
+          aitrace scan "${ARGS[@]}"
         elif [ "$COMMAND" = "docs" ]; then
           ARGS=("${{ inputs.path }}" -o "${{ inputs.output }}")
           if [ -n "${{ inputs.traces }}" ]; then
@@ -147,7 +147,7 @@ runs:
         pip install ai-trace-auditor[notify] -q
         python3 -c "
 import os, pathlib
-from ai_trace_auditor.comply.runner import run_full_compliance
+from ai_trace_auditor.scan.runner import run_full_compliance
 from ai_trace_auditor.notify.slack import send_slack_notification
 pkg = run_full_compliance(pathlib.Path(os.environ['SCAN_PATH']))
 ok = send_slack_notification(os.environ['SLACK_WEBHOOK'], pkg)

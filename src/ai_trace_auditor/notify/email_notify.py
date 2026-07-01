@@ -6,7 +6,7 @@ import smtplib
 from email.mime.text import MIMEText
 
 import ai_trace_auditor
-from ai_trace_auditor.comply.runner import CompliancePackage
+from ai_trace_auditor.scan.runner import CompliancePackage
 
 
 def format_email_body(pkg: CompliancePackage) -> str:

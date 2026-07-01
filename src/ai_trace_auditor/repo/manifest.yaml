@@ -1,0 +1,252 @@
+# Governance-document detectors for AI Trace Auditor repo ingestion.
+#
+# Every entry must satisfy the Compliance Verification Gate:
+#   - legal_text:                exact clause text
+#   - verified_against_primary:  true only after page-by-page check
+#   - framework_nature:          law | voluntary | certifiable_standard | audit_framework
+#   - compliance_tier:           deterministic | structural | quality | organizational
+#
+# Detector kinds (and ONLY these three):
+#   - file_presence:    filename matches any of N case-insensitive patterns
+#   - content_contains: file at one of N path patterns contains any phrase from a list
+#   - config_key:       known config file contains a known key (value never interpreted)
+
+- id: annex_iv_2a_general_description
+  legal_text: "Annex IV(2)(a): the technical documentation shall contain... a general description of the AI system including its intended purpose."
+  verified_against_primary: true
+  framework_nature: law
+  compliance_tier: structural
+  regulation: "EU AI Act"
+  article: "Annex IV"
+  detector_kind: file_presence
+  detector_config:
+    patterns:
+      - README.md
+      - README.rst
+      - README
+      - readme.md
+  evidence_when_present: "README found at {path}. Reviewer must confirm it contains a general description of the AI system per Annex IV(2)(a)."
+  evidence_when_absent: "No README found. Annex IV(2)(a) requires a general description of the AI system."
+
+- id: annex_iv_2b_design_specifications
+  legal_text: "Annex IV(2)(b): a description of the elements of the AI system and of the process for its development."
+  verified_against_primary: true
+  framework_nature: law
+  compliance_tier: structural
+  regulation: "EU AI Act"
+  article: "Annex IV"
+  detector_kind: file_presence
+  detector_config:
+    patterns:
+      - MODEL_CARD.md
+      - model_card.md
+      - MODELCARD.md
+      - docs/model-card.md
+      - docs/MODEL_CARD.md
+      - SYSTEM_CARD.md
+  evidence_when_present: "Model/system card found at {path}. Reviewer must confirm it documents design specifications per Annex IV(2)(b)."
+  evidence_when_absent: "No model or system card found. Annex IV(2)(b) requires documented design specifications."
+
+- id: annex_iv_2c_intended_purpose_disclosed
+  legal_text: "Annex IV(2)(c): a description of the intended purpose of the AI system."
+  verified_against_primary: true
+  framework_nature: law
+  compliance_tier: structural
+  regulation: "EU AI Act"
+  article: "Annex IV"
+  detector_kind: content_contains
+  detector_config:
+    file_patterns:
+      - README.md
+      - README.rst
+      - README
+    phrases:
+      - "intended purpose"
+      - "intended use"
+      - "this AI system"
+      - "this model is designed"
+      - "this system is designed"
+  evidence_when_present: "Purpose-adjacent language found in {path}. Generic phrases (e.g. 'designed to') are excluded by design; reviewer must confirm the AI system's specific intended purpose is documented per Annex IV(2)(c)."
+  evidence_when_absent: "No intended-purpose language found in README. Annex IV(2)(c) requires a description of intended purpose."
+
+- id: annex_iv_2d_third_party_components
+  legal_text: "Annex IV(2)(d): a description of the relevant... third-party tools used and how they were integrated."
+  verified_against_primary: true
+  framework_nature: law
+  compliance_tier: structural
+  regulation: "EU AI Act"
+  article: "Annex IV"
+  detector_kind: file_presence
+  detector_config:
+    patterns:
+      - THIRD_PARTY_NOTICES
+      - THIRD_PARTY_NOTICES.md
+      - NOTICE
+      - NOTICE.md
+      - LICENSE
+      - LICENSE.md
+      - licenses/
+      - DATA_SOURCES.md
+  evidence_when_present: "Third-party documentation found at {path}. Reviewer must confirm coverage of all integrated components per Annex IV(2)(d)."
+  evidence_when_absent: "No third-party notices, license, or data-sources document found. Annex IV(2)(d) requires documentation of third-party components."
+
+- id: article_12_logging_capability
+  legal_text: "Article 12(1): high-risk AI systems shall technically allow for the automatic recording of events ('logs') over the lifetime of the system."
+  verified_against_primary: true
+  framework_nature: law
+  compliance_tier: structural
+  regulation: "EU AI Act"
+  article: "Article 12"
+  detector_kind: file_presence
+  detector_config:
+    patterns:
+      - otel-collector.yaml
+      - otel-config.yaml
+      - langfuse.yaml
+      - langfuse.json
+      - arize.yaml
+      - logging.yaml
+      - logging.conf
+      - opentelemetry.yaml
+  evidence_when_present: "Logging/observability config found at {path}. Reviewer must confirm it implements automatic event recording per Article 12(1)."
+  evidence_when_absent: "No logging or observability configuration found. Article 12(1) requires automatic event recording capability."
+
+- id: article_19_retention_configured
+  legal_text: "Article 19: providers of high-risk AI systems shall keep the logs referred to in Article 12(1)... for a period appropriate to the intended purpose of the high-risk AI system, of at least six months."
+  verified_against_primary: true
+  framework_nature: law
+  compliance_tier: deterministic
+  regulation: "EU AI Act"
+  article: "Article 19"
+  detector_kind: config_key
+  detector_config:
+    filenames:
+      - .env.example
+      - .env.sample
+      - config.yaml
+      - logging.yaml
+      - otel-collector.yaml
+    keys:
+      - LOG_RETENTION_DAYS
+      - RETENTION_PERIOD
+      - LOG_RETENTION_PERIOD
+      - retention
+      - retention_days
+      - retention_period
+  evidence_when_present: "Retention configuration key '{key}' found in {path}. Reviewer must verify the configured period meets the Article 19 six-month minimum."
+  evidence_when_absent: "No retention configuration key found. Article 19 requires logs to be kept for at least six months."
+
+- id: article_25_value_chain_documentation
+  legal_text: "Article 25: any distributor, importer, deployer or other third-party shall be considered to be a provider... and shall comply with the obligations of the provider under Article 16."
+  verified_against_primary: true
+  framework_nature: law
+  compliance_tier: organizational
+  regulation: "EU AI Act"
+  article: "Article 25"
+  detector_kind: file_presence
+  detector_config:
+    patterns:
+      # SECURITY.md as evidence of documented third-party/deployer obligations
+      - SECURITY.md
+      - DPA.md
+      - data-processing-agreement.md
+      - docs/security.md
+      - docs/dpa.md
+  evidence_when_present: "Value-chain document found at {path}. Reviewer must confirm it addresses third-party provider obligations under Article 25."
+  evidence_when_absent: "No security, DPA, or value-chain document found. Article 25 places provider obligations on distributors and integrators."
+
+- id: article_50_ai_interaction_disclosure
+  legal_text: "Article 50(1): providers shall ensure that AI systems intended to interact directly with natural persons are designed and developed in such a way that the natural persons concerned are informed that they are interacting with an AI system, unless this is obvious."
+  verified_against_primary: true
+  framework_nature: law
+  compliance_tier: deterministic
+  regulation: "EU AI Act"
+  article: "Article 50"
+  detector_kind: content_contains
+  detector_config:
+    file_patterns:
+      - README.md
+      - README.rst
+      - docs/transparency.md
+    phrases:
+      - "AI chatbot"
+      - "AI assistant"
+      - "powered by AI"
+      - "automated system"
+      - "you are interacting with"
+      - "this is an AI"
+  evidence_when_present: "AI disclosure phrase found in {path}. Reviewer must confirm end-user-facing surfaces also display this disclosure per Article 50(1)."
+  evidence_when_absent: "No AI-interaction disclosure language found in README or transparency docs. Article 50(1) requires users to be informed they are interacting with an AI system, unless obvious."
+
+- id: iso_42001_clause_6_ai_policy
+  legal_text: "ISO/IEC 42001 Clause 6: planning — the organization shall establish AI objectives and plans to achieve them."
+  verified_against_primary: false
+  framework_nature: certifiable_standard
+  compliance_tier: organizational
+  regulation: "ISO 42001"
+  article: "Clause 6"
+  detector_kind: file_presence
+  detector_config:
+    patterns:
+      - AI_POLICY.md
+      - ai-policy.md
+      - AI_GOVERNANCE.md
+      - ai-governance.md
+      - docs/ai-policy.md
+  evidence_when_present: "AI policy document found at {path}. Reviewer must confirm it establishes objectives and plans per ISO 42001 Clause 6."
+  evidence_when_absent: "No AI policy or governance document found. ISO 42001 Clause 6 requires documented AI objectives."
+
+- id: iso_42001_clause_7_2_roles_documented
+  legal_text: "ISO/IEC 42001 Clause 7.2: competence — the organization shall determine the necessary competence of persons doing work that affects its AI performance."
+  verified_against_primary: false
+  framework_nature: certifiable_standard
+  compliance_tier: organizational
+  regulation: "ISO 42001"
+  article: "Clause 7.2"
+  detector_kind: file_presence
+  detector_config:
+    patterns:
+      - ROLES.md
+      - GOVERNANCE.md
+      - docs/roles.md
+      - docs/governance.md
+      - CODEOWNERS
+      - .github/CODEOWNERS
+  evidence_when_present: "Roles/governance document found at {path}. Reviewer must confirm it documents AI-affecting role competences per ISO 42001 Clause 7.2."
+  evidence_when_absent: "No roles or governance document found. ISO 42001 Clause 7.2 requires documented competences for AI-affecting roles."
+
+- id: soc2_cc1_code_of_conduct
+  legal_text: "SOC 2 CC1.1: the entity demonstrates a commitment to integrity and ethical values, including establishing a code of conduct."
+  verified_against_primary: false
+  framework_nature: audit_framework
+  compliance_tier: organizational
+  regulation: "SOC 2 Trust Services Criteria"
+  article: "CC1"
+  detector_kind: file_presence
+  detector_config:
+    patterns:
+      - CODE_OF_CONDUCT.md
+      - code-of-conduct.md
+      - docs/code-of-conduct.md
+      - CONTRIBUTING.md
+  evidence_when_present: "Conduct document found at {path}. Reviewer must confirm it satisfies SOC 2 CC1.1 commitment to integrity."
+  evidence_when_absent: "No code of conduct or contributing document found. SOC 2 CC1.1 requires documented ethical commitments."
+
+- id: soc2_cc7_incident_response
+  legal_text: "SOC 2 CC7.3: the entity evaluates security events to determine whether they could or have resulted in a failure of the entity to meet its objectives (security incidents)."
+  verified_against_primary: false
+  framework_nature: audit_framework
+  compliance_tier: organizational
+  regulation: "SOC 2 Trust Services Criteria"
+  article: "CC7"
+  detector_kind: file_presence
+  detector_config:
+    patterns:
+      - INCIDENT_RESPONSE.md
+      - incident-response.md
+      # SECURITY.md as evidence of a security-event evaluation process
+      - SECURITY.md
+      - docs/incident-response.md
+      - .github/SECURITY.md
+  evidence_when_present: "Incident-response document found at {path}. Reviewer must confirm it establishes security-event evaluation per SOC 2 CC7.3."
+  evidence_when_absent: "No incident-response or security document found. SOC 2 CC7.3 requires a documented security-event evaluation process."

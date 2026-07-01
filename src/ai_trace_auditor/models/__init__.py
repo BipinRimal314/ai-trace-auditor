@@ -11,6 +11,7 @@ from ai_trace_auditor.models.trace import (
     NormalizedTrace,
     ToolCall,
 )
+from ai_trace_auditor.models.intake import IntakeProfile
 
 __all__ = [
     "NormalizedTrace",
@@ -20,4 +21,6 @@ __all__ = [
     "CodeScanResult",
     "AnnexIVSection",
     "AnnexIVDocument",
+    "IntakeProfile",
 ]
+

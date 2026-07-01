@@ -56,7 +56,7 @@ pip install ai-trace-auditor
 aitrace audit traces.json -r "EU AI Act" -o report.md
 
 # Full compliance package: Articles 11 + 12 + 13 + GDPR in one run
-aitrace comply ./my-ai-project/ --traces traces.json
+aitrace scan ./my-ai-project/ --traces traces.json
 
 # Generate Annex IV technical documentation from code
 aitrace docs ./my-ai-project/
@@ -67,6 +67,18 @@ aitrace flow ./my-ai-project/
 # Multi-agent audit with DAG visualization
 aitrace audit multi_agent_traces.json --show-dag
 ```
+
+### Audit a GitHub repository
+
+```bash
+aitrace audit-repo https://github.com/owner/repo
+```
+
+The auditor clones the repo (shallowly, 50MB cap, 30s timeout), discovers
+trace artifacts (OTEL JSON, Langfuse exports, chat JSONL), and runs the
+governance-doc manifest (`MODEL_CARD.md`, retention configs, Article 50
+disclosure language, ISO/SOC 2 policy docs). The web dashboard also
+accepts a repo URL at `/audit`.
 
 ## Example Output
 
@@ -127,14 +139,14 @@ print(f"Score: {report.overall_score:.1%}")
 ```
 ai-trace-auditor/
 ├── src/ai_trace_auditor/
-│   ├── cli.py              # 7 commands: audit, docs, flow, comply, ingest, requirements, health
+│   ├── cli.py              # 7 commands: audit, docs, flow, scan, ingest, requirements, health
 │   ├── ingest/             # Trace ingestion (OTel, Langfuse, Claude Code, raw JSONL)
 │   ├── analysis/           # Gap analysis engine + multi-agent DAG auditing
 │   ├── models/             # Pydantic v2 data models
 │   ├── regulations/        # YAML requirement definitions (extensible)
 │   ├── docs/               # Article 11 Annex IV generator
 │   ├── flow/               # Article 13 data flow mapper + GDPR RoPA
-│   ├── comply/             # Full compliance package runner
+│   ├── scan/               # Full compliance package runner
 │   ├── evidence/           # Auditor-ready evidence pack generator
 │   ├── reports/            # Markdown, JSON, PDF report generation
 │   ├── scanner/            # Code scanner (AI framework detection)

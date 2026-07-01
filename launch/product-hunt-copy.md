@@ -38,7 +38,7 @@ Tested on real codebases: Dify merged the compliance guide it generated. LiteLLM
 The EU AI Act deadline is in flux (August 2026 or December 2027), but compliance infrastructure takes 12-18 months regardless. If you're shipping AI, this gives you a baseline in 60 seconds.
 
 **Screenshots needed:**
-1. Terminal: `aitrace comply ./` output showing the compliance table
+1. Terminal: `aitrace scan ./` output showing the compliance table
 2. Evidence pack folder structure in Finder/file explorer
 3. GitHub Action YAML + PR check passing
 4. Data flow Mermaid diagram rendered

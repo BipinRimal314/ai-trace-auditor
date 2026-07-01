@@ -21,7 +21,7 @@ It's now available as a GitHub Action:
 
     - uses: BipinRimal314/ai-trace-auditor@v0.11.0
       with:
-        command: comply
+        command: scan
         path: .
 
 For LiteLLM specifically, this would catch things like:
@@ -56,7 +56,7 @@ The tool that generated the guide is now a GitHub Action:
 
     - uses: BipinRimal314/ai-trace-auditor@v0.11.0
       with:
-        command: comply
+        command: scan
         path: .
 
 It would flag when n8n's codebase adds new AI provider integrations
@@ -116,7 +116,7 @@ It's now a GitHub Action:
 
     - uses: BipinRimal314/ai-trace-auditor@v0.11.0
       with:
-        command: comply
+        command: scan
         path: .
 
 Would flag new provider integrations, track GDPR transfer obligations,

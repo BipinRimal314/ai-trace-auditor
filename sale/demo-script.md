@@ -40,7 +40,7 @@ aitrace audit tests/fixtures/otel_multi_agent_trace.json --show-dag
 
 ```bash
 # Scan a codebase and generate compliance evidence for Articles 11 + 13 + GDPR
-aitrace comply tests/fixtures/sample_codebase/ -o /tmp/compliance-report.md
+aitrace scan tests/fixtures/sample_codebase/ -o /tmp/compliance-report.md
 
 # You'll see:
 # - Article 11: Annex IV technical documentation (auto-populated sections)

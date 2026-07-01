@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}Regulations Browser — AI Trace Auditor{% endblock %}
+{% block nav_regulations %}active{% endblock %}
+
+{% block content %}
+<div x-data="regulationsBrowser()">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-10">
+        <div>
+            <span class="inline-block text-[10px] font-bold tracking-[0.2em] uppercase text-secondary mb-3">Legal Requirements</span>
+            <h1 class="text-3xl font-headline font-bold text-primary mb-2">Regulations Browser</h1>
+            <p class="text-on-surface-variant text-sm">Browse all requirements with legal citations. Frameworks marked (Beta) have not been verified against primary source text.</p>
+        </div>
+    </div>
+
+    <!-- Filter bar -->
+    <div class="bg-surface-container-lowest p-6 rounded-xl mb-10">
+        <div class="flex flex-col sm:flex-row gap-4">
+            <div class="flex-1">
+                <input type="text" placeholder="Search requirements..."
+                    x-model="search"
+                    class="w-full px-5 py-3 bg-surface-container-low rounded-xl text-on-surface text-sm placeholder-outline focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                    style="border: none;">
+            </div>
+            <div class="flex gap-2 flex-wrap">
+                <button @click="filterReg = ''"
+                    :class="filterReg === '' ? 'bg-gradient-to-r from-primary to-primary-container text-white' : 'bg-surface-container-high text-on-surface-variant'"
+                    class="px-4 py-2.5 rounded-xl text-xs font-medium transition-all whitespace-nowrap">
+                    All
+                </button>
+                {% for reg in regulations %}
+                <button @click="filterReg = '{{ reg.name }}'"
+                    :class="filterReg === '{{ reg.name }}' ? 'bg-gradient-to-r from-primary to-primary-container text-white' : 'bg-surface-container-high text-on-surface-variant'"
+                    class="px-4 py-2.5 rounded-xl text-xs font-medium transition-all whitespace-nowrap">
+                    {{ reg.name }} ({{ reg.total }}){% if reg.is_beta %} <span class="text-amber-600">*</span>{% endif %}
+                </button>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Regulations accordion -->
+    {% for reg in regulations %}
+    <div x-show="filterReg === '' || filterReg === '{{ reg.name }}'" x-transition class="mb-8">
+        <div class="flex items-center gap-4 mb-5">
+            <h2 class="text-2xl font-headline font-bold text-primary">{{ reg.name }}</h2>
+            {% if reg.is_beta %}
+            <span class="text-[10px] font-bold uppercase tracking-wider text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full">Beta — Unverified</span>
+            {% endif %}
+            <span class="text-xs text-outline font-medium">({{ reg.total }} requirements)</span>
+        </div>
+
+        {% for article in reg.articles %}
+        <div class="bg-surface-container-lowest rounded-xl mb-4" x-data="{ open: false }">
+            <div class="p-5 cursor-pointer flex items-center justify-between" @click="open = !open">
+                <div class="flex items-center gap-3">
+                    <span class="text-primary font-headline font-bold">{{ article.name }}</span>
+                    <span class="text-xs text-outline">({{ article.requirements|length }} requirements)</span>
+                </div>
+                <svg class="w-5 h-5 text-outline transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </div>
+
+            <div x-show="open" x-transition>
+                {% for req in article.requirements %}
+                <div class="px-5 py-5 {% if not loop.last %}{% endif %}"
+                    style="{% if not loop.last %}border-bottom: 1px solid rgba(196, 198, 211, 0.15);{% endif %}"
+                    x-show="search === '' || '{{ req.title | lower }}'.includes(search.toLowerCase()) || '{{ req.id | lower }}'.includes(search.toLowerCase()) || '{{ req.description | lower }}'.includes(search.toLowerCase())">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="flex items-center gap-3 flex-wrap">
+                            <span class="text-xs font-mono text-outline">{{ req.id }}</span>
+                            <span class="badge badge-{{ req.severity }}">{{ req.severity }}</span>
+                            {% if req.compliance_tier != 'untiered' %}
+                            <span class="text-xs text-outline bg-surface-container-high px-2 py-0.5 rounded-full">{{ req.compliance_tier }}</span>
+                            {% endif %}
+                            {% if req.check_type == 'organizational' %}
+                            <span class="text-xs text-outline bg-surface-container-high px-2 py-0.5 rounded-full">organizational</span>
+                            {% endif %}
+                        </div>
+                        {% if req.verified %}
+                        <span class="text-xs status-satisfied flex items-center gap-1 font-medium">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            Verified
+                        </span>
+                        {% else %}
+                        <span class="text-xs text-outline">Unverified</span>
+                        {% endif %}
+                    </div>
+
+                    <h3 class="text-on-surface font-semibold mb-1.5">{{ req.title }}</h3>
+                    <p class="text-sm text-on-surface-variant mb-3 leading-relaxed">{{ req.description }}</p>
+
+                    <div class="bg-surface-container-low rounded-xl px-4 py-3">
+                        <span class="text-[10px] font-bold text-outline uppercase tracking-widest">Legal Citation: </span>
+                        <span class="text-sm text-primary font-headline italic">{{ req.legal_text }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+function regulationsBrowser() {
+    return {
+        search: '',
+        filterReg: '',
+    }
+}
+</script>
+{% endblock %}

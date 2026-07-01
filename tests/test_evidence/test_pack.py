@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from ai_trace_auditor.comply.runner import run_full_compliance
+from ai_trace_auditor.scan.runner import run_full_compliance
 from ai_trace_auditor.evidence.pack import generate_evidence_pack
 
 

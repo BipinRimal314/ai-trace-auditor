@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from ai_trace_auditor.comply.runner import CompliancePackage, run_full_compliance
+from ai_trace_auditor.scan.runner import CompliancePackage, run_full_compliance
 
 FIXTURES = Path(__file__).parent.parent / "fixtures"
 SAMPLE_CODEBASE = FIXTURES / "sample_codebase"
