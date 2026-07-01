@@ -3,8 +3,8 @@
 Lets the web UI hand out a short-lived report id with the results page,
 which the client then exchanges for a PDF download via /audit/pdf/{id}.
 
-Single-process only. Suitable for the Railway deployment; not for
-multi-replica or serverless setups.
+Single-process only. Suitable for the single-machine Fly.io deployment;
+not for multi-replica or serverless setups.
 """
 
 from __future__ import annotations

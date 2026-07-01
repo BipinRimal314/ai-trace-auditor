@@ -149,11 +149,6 @@ Env vars are baked into `fly.toml`: `PORT`, `PDF_TMPDIR`, `REPO_TMPDIR`,
 `MAX_REPO_BYTES`, `REPO_FETCH_TIMEOUT`. Secrets (none currently required)
 would go via `flyctl secrets set`.
 
-### Railway (legacy — retained for one-week observation)
-
-`railway.toml` remains in the repo until Fly is observed stable. Remove
-after 2026-05-24 (one week after cutover).
-
 ### Docker
 
 ```bash
