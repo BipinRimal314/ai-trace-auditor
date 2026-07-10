@@ -1,0 +1,1751 @@
+{
+  "checks_pack_version": 1,
+  "generated_by": "ai-trace-auditor v0.18.0",
+  "description": "Machine-readable registry of every compliance check AI Trace Auditor runs. Each check cites its framework, article, and clause; checks marked verified_against_primary have their quotes validated verbatim against the pinned primary source document in CI.",
+  "total_checks": 72,
+  "verified_against_primary_count": 41,
+  "frameworks": {
+    "EU AI Act": 41,
+    "ISO 42001": 9,
+    "LLM Observability Best Practices": 8,
+    "NIST AI RMF": 8,
+    "SOC 2 Trust Services Criteria": 6
+  },
+  "checks": [
+    {
+      "id": "BP-LLM-01",
+      "framework": "LLM Observability Best Practices",
+      "framework_nature": "best_practice",
+      "article": "Trace Quality",
+      "clause": null,
+      "title": "Operation identification",
+      "description": "Each LLM operation should be identifiable by type (chat, embeddings, completion, image generation), provider (openai, anthropic, google), and model (gpt-4, claude-3-opus, gemini-pro). This enables filtering, cost attribution, and behavior analysis.\n",
+      "severity": "recommended",
+      "check_type": null,
+      "compliance_tier": "quality",
+      "applies_to": [
+        "all"
+      ],
+      "verified_against_primary": false,
+      "what_we_look_for": [
+        {
+          "field_path": "spans[].operation",
+          "description": "Type of AI operation (chat, embeddings, text_completion, image_generation)",
+          "required": true,
+          "check_type": "non_empty",
+          "legal_basis": null
+        },
+        {
+          "field_path": "spans[].provider",
+          "description": "AI provider name (openai, anthropic, google, etc.)",
+          "required": true,
+          "check_type": "non_null",
+          "legal_basis": null
+        },
+        {
+          "field_path": "spans[].model_used",
+          "description": "Actual model version used (from API response)",
+          "required": true,
+          "check_type": "non_null",
+          "legal_basis": null
+        },
+        {
+          "field_path": "spans[].model_requested",
+          "description": "Model version requested (from API request, may differ from actual)",
+          "required": false,
+          "check_type": "non_null",
+          "legal_basis": null
+        }
+      ]
+    },
+    {
+      "id": "BP-LLM-02",
+      "framework": "LLM Observability Best Practices",
+      "framework_nature": "best_practice",
+      "article": "Trace Quality",
+      "clause": null,
+      "title": "Token consumption tracking",
+      "description": "Input and output token counts should be logged for cost monitoring, usage analysis, and anomaly detection. Token counts enable budget alerts, per-user cost attribution, and detection of prompt injection attempts (abnormally high token counts).\n",
+      "severity": "recommended",
+      "check_type": null,
+      "compliance_tier": "quality",
+      "applies_to": [
+        "all"
+      ],
+      "verified_against_primary": false,
+      "what_we_look_for": [
+        {
+          "field_path": "spans[].input_tokens",
+          "description": "Input/prompt token count per operation",
+          "required": true,
+          "check_type": "non_null",
+          "legal_basis": null
+        },
+        {
+          "field_path": "spans[].output_tokens",
+          "description": "Output/completion token count per operation",
+          "required": true,
+          "check_type": "non_null",
+          "legal_basis": null
+        }
+      ]
+    },
+    {
+      "id": "BP-LLM-03",
+      "framework": "LLM Observability Best Practices",
+      "framework_nature": "best_practice",
+      "article": "Trace Quality",
+      "clause": null,
+      "title": "Latency monitoring",
+      "description": "Operation duration should be tracked to detect performance degradation, identify slow providers, and establish baseline response times. Latency spikes often precede outages or indicate rate limiting.\n",
+      "severity": "recommended",
+      "check_type": null,
+      "compliance_tier": "quality",
+      "applies_to": [
+        "all"
+      ],
+      "verified_against_primary": false,
+      "what_we_look_for": [
+        {
+          "field_path": "spans[].duration_ms",
+          "description": "Operation latency in milliseconds",
+          "required": true,
+          "check_type": "non_null",
+          "legal_basis": null
+        }
+      ]
+    },
+    {
+      "id": "BP-LLM-04",
+      "framework": "LLM Observability Best Practices",
+      "framework_nature": "best_practice",
+      "article": "Trace Quality",
+      "clause": null,
+      "title": "Error classification",
+      "description": "When operations fail, the error type and message should be recorded for root cause analysis, alerting, and reliability measurement. Error classification enables tracking of failure patterns across providers and models.\n",
+      "severity": "recommended",
+      "check_type": null,
+      "compliance_tier": "quality",
+      "applies_to": [
+        "all"
+      ],
+      "verified_against_primary": false,
+      "what_we_look_for": [
+        {
+          "field_path": "spans[].error_type",
+          "description": "Error classification (rate_limit, timeout, auth, content_filter, etc.)",
+          "required": true,
+          "check_type": "present",
+          "legal_basis": null
+        },
+        {
+          "field_path": "spans[].error_message",
+          "description": "Error details for debugging",
+          "required": false,
+          "check_type": "present",
+          "legal_basis": null
+        },
+        {
+          "field_path": "spans[].finish_reasons",
+          "description": "Completion status (stop, length, content_filter, tool_calls, error)",
+          "required": true,
+          "check_type": "non_empty",
+          "legal_basis": null
+        }
+      ]
+    },
+    {
+      "id": "BP-LLM-05",
+      "framework": "LLM Observability Best Practices",
+      "framework_nature": "best_practice",
+      "article": "Trace Quality",
+      "clause": null,
+      "title": "Request parameter logging",
+      "description": "Configuration parameters that influence output (temperature, top_p, max_tokens, etc.) should be recorded to support reproducibility analysis and behavior explanation.\n",
+      "severity": "best_practice",
+      "check_type": null,
+      "compliance_tier": "quality",
+      "applies_to": [
+        "all"
+      ],
+      "verified_against_primary": false,
+      "what_we_look_for": [
+        {
+          "field_path": "spans[].temperature",
+          "description": "Temperature parameter controlling output randomness",
+          "required": false,
+          "check_type": "non_null",
+          "legal_basis": null
+        },
+        {
+          "field_path": "spans[].max_tokens",
+          "description": "Maximum token limit for output generation",
+          "required": false,
+          "check_type": "non_null",
+          "legal_basis": null
+        }
+      ]
+    },
+    {
+      "id": "BP-LLM-06",
+      "framework": "LLM Observability Best Practices",
+      "framework_nature": "best_practice",
+      "article": "Trace Quality",
+      "clause": null,
+      "title": "Input/output content recording",
+      "description": "For systems that require auditability, the actual prompts and responses should be recorded. This enables post-hoc review, bias detection, and incident investigation. Must be balanced against privacy requirements (GDPR, HIPAA) — opt-in with appropriate data protection.\n",
+      "severity": "best_practice",
+      "check_type": null,
+      "compliance_tier": "quality",
+      "applies_to": [
+        "all"
+      ],
+      "verified_against_primary": false,
+      "what_we_look_for": [
+        {
+          "field_path": "spans[].input_messages",
+          "description": "Input prompts/messages sent to the AI model",
+          "required": false,
+          "check_type": "non_empty",
+          "legal_basis": null
+        },
+        {
+          "field_path": "spans[].output_messages",
+          "description": "Output responses generated by the AI model",
+          "required": false,
+          "check_type": "non_empty",
+          "legal_basis": null
+        }
+      ]
+    },
+    {
+      "id": "BP-LLM-07",
+      "framework": "LLM Observability Best Practices",
+      "framework_nature": "best_practice",
+      "article": "Trace Quality",
+      "clause": null,
+      "title": "Tool and function call logging",
+      "description": "When AI systems use tools or function calls, these interactions should be logged to maintain a complete audit trail of the decision-making process. Critical for agent systems where tool use drives real-world actions.\n",
+      "severity": "recommended",
+      "check_type": null,
+      "compliance_tier": "quality",
+      "applies_to": [
+        "all"
+      ],
+      "verified_against_primary": false,
+      "what_we_look_for": [
+        {
+          "field_path": "spans[].tool_calls",
+          "description": "Tool/function calls made by the AI model",
+          "required": false,
+          "check_type": "present",
+          "legal_basis": null
+        },
+        {
+          "field_path": "spans[].tools_defined",
+          "description": "Tools/functions available to the AI model",
+          "required": false,
+          "check_type": "present",
+          "legal_basis": null
+        }
+      ]
+    },
+    {
+      "id": "BP-LLM-08",
+      "framework": "LLM Observability Best Practices",
+      "framework_nature": "best_practice",
+      "article": "Trace Quality",
+      "clause": null,
+      "title": "Trace linkage and causality",
+      "description": "Multi-step AI operations should maintain trace linkage (span IDs, parent-child relationships) so that the causal chain of decisions can be reconstructed. Essential for agent workflows, RAG pipelines, and any system with sequential LLM calls.\n",
+      "severity": "recommended",
+      "check_type": null,
+      "compliance_tier": "quality",
+      "applies_to": [
+        "all"
+      ],
+      "verified_against_primary": false,
+      "what_we_look_for": [
+        {
+          "field_path": "spans[].span_id",
+          "description": "Unique identifier for each operation span",
+          "required": true,
+          "check_type": "non_null",
+          "legal_basis": null
+        },
+        {
+          "field_path": "spans[].parent_span_id",
+          "description": "Parent span ID for hierarchical trace reconstruction",
+          "required": false,
+          "check_type": "present",
+          "legal_basis": null
+        },
+        {
+          "field_path": "spans[].trace_id",
+          "description": "Trace-level identifier grouping related operations",
+          "required": true,
+          "check_type": "non_null",
+          "legal_basis": null
+        }
+      ]
+    },
+    {
+      "id": "EU-AIA-12.1",
+      "framework": "EU AI Act",
+      "framework_nature": "law",
+      "article": "Article 12",
+      "clause": "Article 12(1)",
+      "title": "Automatic event logging",
+      "description": "High-risk AI systems must technically allow for the automatic recording of events (logs) over the lifetime of the system.\n",
+      "severity": "mandatory",
+      "check_type": null,
+      "compliance_tier": "structural",
+      "applies_to": [
+        "high_risk"
+      ],
+      "verified_against_primary": true,
+      "what_we_look_for": [
+        {
+          "field_path": "spans[].start_time",
+          "description": "A timestamp on each span is a defensible proxy for automatic event logging.",
+          "required": false,
+          "check_type": "non_null",
+          "legal_basis": "structural"
+        }
+      ]
+    },
+    {
+      "id": "EU-AIA-12.2a",
+      "framework": "EU AI Act",
+      "framework_nature": "law",
+      "article": "Article 12",
+      "clause": "Article 12(2)(a)",
+      "title": "Risk situation identification",
+      "description": "Logging capabilities must enable recording of events relevant for identifying situations that may result in the high-risk AI system presenting a risk within the meaning of Article 79(1) or in a substantial modification.\n",
+      "severity": "mandatory",
+      "check_type": null,
+      "compliance_tier": "structural",
+      "applies_to": [
+        "high_risk"
+      ],
+      "verified_against_primary": true,
+      "what_we_look_for": [
+        {
+          "field_path": "spans[].error_type",
+          "description": "Error classification when operations fail — a proxy for risk-relevant events.",
+          "required": false,
+          "check_type": "present",
+          "legal_basis": "structural"
+        },
+        {
+          "field_path": "spans[].finish_reasons",
+          "description": "Operation completion status — a proxy for risk-relevant events.",
+          "required": false,
+          "check_type": "present",
+          "legal_basis": "structural"
+        }
+      ]
+    },
+    {
+      "id": "EU-AIA-12.2b",
+      "framework": "EU AI Act",
+      "framework_nature": "law",
+      "article": "Article 12",
+      "clause": "Article 12(2)(b)",
+      "title": "Post-market monitoring facilitation",
+      "description": "Logging capabilities must enable recording of events relevant for facilitating the post-market monitoring referred to in Article 72.\n",
+      "severity": "mandatory",
+      "check_type": null,
+      "compliance_tier": "structural",
+      "applies_to": [
+        "high_risk"
+      ],
+      "verified_against_primary": true,
+      "what_we_look_for": [
+        {
+          "field_path": "spans[].model_used",
+          "description": "Model version identifier — useful for correlating post-deployment behavior changes.",
+          "required": false,
+          "check_type": "non_null",
+          "legal_basis": "structural"
+        }
+      ]
+    },
+    {
+      "id": "EU-AIA-12.2c",
+      "framework": "EU AI Act",
+      "framework_nature": "law",
+      "article": "Article 12",
+      "clause": "Article 12(2)(c)",
+      "title": "Deployer operation monitoring",
+      "description": "Logging capabilities must enable recording of events relevant for monitoring the operation of high-risk AI systems referred to in Article 26(5).\n",
+      "severity": "mandatory",
+      "check_type": null,
+      "compliance_tier": "structural",
+      "applies_to": [
+        "high_risk"
+      ],
+      "verified_against_primary": true,
+      "what_we_look_for": [
+        {
+          "field_path": "spans[].operation",
+          "description": "Operation type label — a proxy for deployer operation monitoring.",
+          "required": false,
+          "check_type": "non_empty",
+          "legal_basis": "structural"
+        }
+      ]
+    },
+    {
+      "id": "EU-AIA-12.3a",
+      "framework": "EU AI Act",
+      "framework_nature": "law",
+      "article": "Article 12",
+      "clause": "Article 12(3)(a)",
+      "title": "Period of use recording (biometric)",
+      "description": "For biometric identification systems (Annex III, point 1(a)), the logging capabilities must record the period of each use — start date and time, and end date and time.\n",
+      "severity": "mandatory",
+      "check_type": null,
+      "compliance_tier": "deterministic",
+      "applies_to": [
+        "annex_iii_1a_biometric"
+      ],
+      "verified_against_primary": true,
+      "what_we_look_for": [
+        {
+          "field_path": "spans[].start_time",
+          "description": "Start date and time of each use.",
+          "required": true,
+          "check_type": "non_null",
+          "legal_basis": "direct"
+        },
+        {
+          "field_path": "spans[].end_time",
+          "description": "End date and time of each use.",
+          "required": true,
+          "check_type": "non_null",
+          "legal_basis": "direct"
+        }
+      ]
+    },
+    {
+      "id": "EU-AIA-12.3b",
+      "framework": "EU AI Act",
+      "framework_nature": "law",
+      "article": "Article 12",
+      "clause": "Article 12(3)(b)",
+      "title": "Reference database identification (biometric)",
+      "description": "For biometric identification systems, the reference database against which input data has been checked must be logged.\n",
+      "severity": "mandatory",
+      "check_type": null,
+      "compliance_tier": "deterministic",
+      "applies_to": [
+        "annex_iii_1a_biometric"
+      ],
+      "verified_against_primary": true,
+      "what_we_look_for": [
+        {
+          "field_path": "spans[].reference_database",
+          "description": "Identifier of the reference database checked by the system.",
+          "required": true,
+          "check_type": "non_empty",
+          "legal_basis": "direct"
+        }
+      ]
+    },
+    {
+      "id": "EU-AIA-12.3c",
+      "framework": "EU AI Act",
+      "framework_nature": "law",
+      "article": "Article 12",
+      "clause": "Article 12(3)(c)",
+      "title": "Matching input data recording (biometric)",
+      "description": "For biometric identification systems, the input data for which the search has led to a match must be logged.\n",
+      "severity": "mandatory",
+      "check_type": null,
+      "compliance_tier": "deterministic",
+      "applies_to": [
+        "annex_iii_1a_biometric"
+      ],
+      "verified_against_primary": true,
+      "what_we_look_for": [
+        {
+          "field_path": "spans[].matched_input_data",
+          "description": "The specific input data that led to a positive match.",
+          "required": true,
+          "check_type": "non_empty",
+          "legal_basis": "direct"
+        }
+      ]
+    },
+    {
+      "id": "EU-AIA-12.3d",
+      "framework": "EU AI Act",
+      "framework_nature": "law",
+      "article": "Article 12",
+      "clause": "Article 12(3)(d)",
+      "title": "Verification personnel identification (biometric)",
+      "description": "For biometric identification systems, the identification of natural persons involved in verifying the results (as referred to in Article 14(5)) must be logged.\n",
+      "severity": "mandatory",
+      "check_type": null,
+      "compliance_tier": "deterministic",
+      "applies_to": [
+        "annex_iii_1a_biometric"
+      ],
+      "verified_against_primary": true,
+      "what_we_look_for": [
+        {
+          "field_path": "spans[].verification_personnel",
+          "description": "Identity of natural persons who verified the match result.",
+          "required": true,
+          "check_type": "non_empty",
+          "legal_basis": "direct"
+        }
+      ]
+    },
+    {
+      "id": "EU-AIA-19.1",
+      "framework": "EU AI Act",
+      "framework_nature": "law",
+      "article": "Article 19",
+      "clause": "Article 19(1)",
+      "title": "Log retention by providers",
+      "description": "Providers of high-risk AI systems must keep the logs referred to in Article 12(1), automatically generated by their high-risk AI systems, to the extent such logs are under their control. Logs must be retained for a period appropriate to the intended purpose and at least six months, unless Union or national law says otherwise.\n",
+      "severity": "mandatory",
+      "check_type": null,
+      "compliance_tier": "deterministic",
+      "applies_to": [
+        "high_risk"
+      ],
+      "verified_against_primary": true,
+      "what_we_look_for": [
+        {
+          "field_path": "spans[].start_time",
+          "description": "Span timestamps are required to verify the six-month retention window: without a persisted time reference on each logged event, retention compliance cannot be assessed from the traces.\n",
+          "required": true,
+          "check_type": "non_null",
+          "legal_basis": "direct"
+        }
+      ]
+    },
+    {
+      "id": "EU-AIA-19.2",
+      "framework": "EU AI Act",
+      "framework_nature": "law",
+      "article": "Article 19",
+      "clause": "Article 19(2)",
+      "title": "Financial institution log maintenance",
+      "description": "Providers that are financial institutions subject to Union financial services law must maintain the logs automatically generated by their high-risk AI systems as part of the documentation kept under the relevant financial services law.\n",
+      "severity": "mandatory",
+      "check_type": "organizational",
+      "compliance_tier": null,
+      "applies_to": [
+        "high_risk",
+        "financial_institution"
+      ],
+      "verified_against_primary": true,
+      "what_we_look_for": []
+    },
+    {
+      "id": "EU-AIA-25.1a",
+      "framework": "EU AI Act",
+      "framework_nature": "law",
+      "article": "Article 25",
+      "clause": "Article 25(1)(a)",
+      "title": "Name / trademark provider assumption",
+      "description": "A distributor, importer, deployer, or other third party that puts their name or trademark on a high-risk AI system already placed on the market or put into service is considered a provider under the Regulation and takes on the obligations of the provider under Article 16 (subject to contractual allocation).\n",
+      "severity": "mandatory",
+      "check_type": "organizational",
+      "compliance_tier": null,
+      "applies_to": [
+        "high_risk"
+      ],
+      "verified_against_primary": true,
+      "what_we_look_for": []
+    },
+    {
+      "id": "EU-AIA-25.1b",
+      "framework": "EU AI Act",
+      "framework_nature": "law",
+      "article": "Article 25",
+      "clause": "Article 25(1)(b)",
+      "title": "Substantial-modification provider assumption",
+      "description": "A third party that makes a substantial modification to a high-risk AI system already on the market or in service, such that the system remains high-risk under Article 6, is considered a provider and takes on the obligations of the provider under Article 16.\n",
+      "severity": "mandatory",
+      "check_type": "organizational",
+      "compliance_tier": null,
+      "applies_to": [
+        "high_risk"
+      ],
+      "verified_against_primary": true,
+      "what_we_look_for": []
+    },
+    {
+      "id": "EU-AIA-25.1c",
+      "framework": "EU AI Act",
+      "framework_nature": "law",
+      "article": "Article 25",
+      "clause": "Article 25(1)(c)",
+      "title": "Intended-purpose modification",
+      "description": "A third party that modifies the intended purpose of an AI system (including a general-purpose AI system) which has not been classified as high-risk and is already on the market or in service, in such a way that the system becomes high-risk under Article 6, is considered a provider.\n",
+      "severity": "mandatory",
+      "check_type": "organizational",
+      "compliance_tier": null,
+      "applies_to": [
+        "all"
+      ],
+      "verified_against_primary": true,
+      "what_we_look_for": []
+    },
+    {
+      "id": "EU-AIA-25.2",
+      "framework": "EU AI Act",
+      "framework_nature": "law",
+      "article": "Article 25",
+      "clause": "Article 25(2)",
+      "title": "Initial provider cooperation with new providers",
+      "description": "When paragraph 1 applies, the provider that initially placed the AI system on the market or put it into service ceases to be the provider for that specific system. The initial provider must closely cooperate with the new providers, make available the necessary information, and provide reasonably expected technical access and other assistance to support compliance — particularly for the conformity assessment. This paragraph does not apply where the initial provider has clearly specified that the system is not to be changed into a high-risk AI system.\n",
+      "severity": "mandatory",
+      "check_type": "organizational",
+      "compliance_tier": null,
+      "applies_to": [
+        "high_risk"
+      ],
+      "verified_against_primary": true,
+      "what_we_look_for": []
+    },
+    {
+      "id": "EU-AIA-25.4",
+      "framework": "EU AI Act",
+      "framework_nature": "law",
+      "article": "Article 25",
+      "clause": "Article 25(4)",
+      "title": "Third-party written agreement",
+      "description": "The provider of a high-risk AI system and any third party supplying tools, services, components, or processes used or integrated in the system must, by written agreement, specify the information, capabilities, technical access, and other assistance the provider needs in order to comply with the Regulation. This does not apply to third parties making tools, services, processes, or components (other than general-purpose AI models) accessible to the public under a free and open-source licence.\n",
+      "severity": "mandatory",
+      "check_type": "organizational",
+      "compliance_tier": null,
+      "applies_to": [
+        "high_risk"
+      ],
+      "verified_against_primary": true,
+      "what_we_look_for": []
+    },
+    {
+      "id": "EU-AIA-50.1",
+      "framework": "EU AI Act",
+      "framework_nature": "law",
+      "article": "Article 50",
+      "clause": "Article 50(1)",
+      "title": "AI interaction disclosure",
+      "description": "Providers must ensure that AI systems intended to interact directly with natural persons are designed and developed in such a way that the natural persons concerned are informed that they are interacting with an AI system, unless this is obvious from the context.\n",
+      "severity": "mandatory",
+      "check_type": null,
+      "compliance_tier": "structural",
+      "applies_to": [
+        "all",
+        "human_interaction"
+      ],
+      "verified_against_primary": true,
+      "what_we_look_for": [
+        {
+          "field_path": "spans[].ai_disclosure",
+          "description": "Marker indicating the system disclosed its AI nature in the output or interaction. Presence in the trace is a defensible proxy for the statutory capability; absence is not a statutory failure if disclosure is made by another channel (UI banner, system prompt framing, etc.).\n",
+          "required": false,
+          "check_type": "present",
+          "legal_basis": "structural"
+        }
+      ]
+    },
+    {
+      "id": "EU-AIA-50.2",
+      "framework": "EU AI Act",
+      "framework_nature": "law",
+      "article": "Article 50",
+      "clause": "Article 50(2)",
+      "title": "AI-generated content marking",
+      "description": "Providers of AI systems, including general-purpose AI systems, that generate synthetic audio, image, video, or text content must ensure the outputs are marked in a machine-readable format and detectable as artificially generated or manipulated. Technical solutions must be effective, interoperable, robust, and reliable.\n",
+      "severity": "mandatory",
+      "check_type": null,
+      "compliance_tier": "structural",
+      "applies_to": [
+        "all",
+        "content_generation"
+      ],
+      "verified_against_primary": true,
+      "what_we_look_for": [
+        {
+          "field_path": "spans[].content_marking",
+          "description": "Machine-readable marking on AI-generated content (C2PA manifest, watermark metadata, provenance signature, or equivalent).\n",
+          "required": false,
+          "check_type": "present",
+          "legal_basis": "structural"
+        },
+        {
+          "field_path": "spans[].output_messages",
+          "description": "Generated content available in the trace — allows marking verification to be run downstream.\n",
+          "required": false,
+          "check_type": "non_empty",
+          "legal_basis": "structural"
+        }
+      ]
+    },
+    {
+      "id": "EU-AIA-50.3",
+      "framework": "EU AI Act",
+      "framework_nature": "law",
+      "article": "Article 50",
+      "clause": "Article 50(3)",
+      "title": "Emotion recognition and biometric categorisation disclosure",
+      "description": "Deployers of an emotion recognition system or a biometric categorisation system must inform the natural persons exposed to the system of its operation, and must process personal data in accordance with Regulations (EU) 2016/679 and (EU) 2018/1725 and Directive (EU) 2016/680 as applicable.\n",
+      "severity": "mandatory",
+      "check_type": "organizational",
+      "compliance_tier": null,
+      "applies_to": [
+        "emotion_recognition",
+        "biometric_categorisation"
+      ],
+      "verified_against_primary": true,
+      "what_we_look_for": []
+    },
+    {
+      "id": "EU-AIA-50.4a",
+      "framework": "EU AI Act",
+      "framework_nature": "law",
+      "article": "Article 50",
+      "clause": "Article 50(4), first subparagraph",
+      "title": "Deep fake image / audio / video disclosure",
+      "description": "Deployers of an AI system that generates or manipulates image, audio, or video content constituting a deep fake must disclose that the content has been artificially generated or manipulated. For evidently artistic, creative, satirical, fictional, or analogous works, the disclosure is limited to an appropriate form that does not hamper display or enjoyment.\n",
+      "severity": "mandatory",
+      "check_type": null,
+      "compliance_tier": "structural",
+      "applies_to": [
+        "all",
+        "deep_fake"
+      ],
+      "verified_against_primary": true,
+      "what_we_look_for": [
+        {
+          "field_path": "spans[].content_marking",
+          "description": "Deep-fake disclosure marker on generated content — a trace-level proxy for the statutory deployer obligation.\n",
+          "required": false,
+          "check_type": "present",
+          "legal_basis": "structural"
+        }
+      ]
+    },
+    {
+      "id": "EU-AIA-50.4b",
+      "framework": "EU AI Act",
+      "framework_nature": "law",
+      "article": "Article 50",
+      "clause": "Article 50(4), second subparagraph",
+      "title": "AI-generated public-interest text disclosure",
+      "description": "Deployers of an AI system that generates or manipulates text which is published with the purpose of informing the public on matters of public interest must disclose that the text has been artificially generated or manipulated.\n",
+      "severity": "mandatory",
+      "check_type": null,
+      "compliance_tier": "structural",
+      "applies_to": [
+        "all",
+        "text_generation",
+        "public_interest"
+      ],
+      "verified_against_primary": true,
+      "what_we_look_for": [
+        {
+          "field_path": "spans[].ai_disclosure",
+          "description": "AI-generated text disclosure marker for public-interest content.\n",
+          "required": false,
+          "check_type": "present",
+          "legal_basis": "structural"
+        }
+      ]
+    },
+    {
+      "id": "EU-AIA-50.5",
+      "framework": "EU AI Act",
+      "framework_nature": "law",
+      "article": "Article 50",
+      "clause": "Article 50(5)",
+      "title": "Disclosure timing and clarity",
+      "description": "The information referred to in paragraphs 1 to 4 must be provided to the natural persons concerned in a clear and distinguishable manner at the latest at the time of the first interaction or exposure, and must conform to applicable accessibility requirements.\n",
+      "severity": "mandatory",
+      "check_type": "organizational",
+      "compliance_tier": null,
+      "applies_to": [
+        "all"
+      ],
+      "verified_against_primary": true,
+      "what_we_look_for": []
+    },
+    {
+      "id": "EU-AIA-IV-1a",
+      "framework": "EU AI Act",
+      "framework_nature": "law",
+      "article": "Annex IV",
+      "clause": "Annex IV, 1(a)",
+      "title": "Intended purpose, provider name, and version",
+      "description": "A general description of the AI system including its intended purpose, the name of the provider, and the version of the system reflecting its relation to previous versions.\n",
+      "severity": "mandatory",
+      "check_type": null,
+      "compliance_tier": "structural",
+      "applies_to": [
+        "high_risk"
+      ],
+      "verified_against_primary": true,
+      "what_we_look_for": [
+        {
+          "field_path": "spans[].provider",
+          "description": "Provider name carried on each span is a defensible proxy for the provider identity documented in the technical file.\n",
+          "required": false,
+          "check_type": "non_null",
+          "legal_basis": "structural"
+        }
+      ]
+    },
+    {
+      "id": "EU-AIA-IV-1b",
+      "framework": "EU AI Act",
+      "framework_nature": "law",
+      "article": "Annex IV",
+      "clause": "Annex IV, 1(b)",
+      "title": "System interaction description",
+      "description": "How the AI system interacts with, or can be used to interact with, hardware or software (including other AI systems) that are not part of the AI system itself, where applicable.\n",
+      "severity": "mandatory",
+      "check_type": "organizational",
+      "compliance_tier": null,
+      "applies_to": [
+        "high_risk"
+      ],
+      "verified_against_primary": true,
+      "what_we_look_for": []
+    },
+    {
+      "id": "EU-AIA-IV-1c",
+      "framework": "EU AI Act",
+      "framework_nature": "law",
+      "article": "Annex IV",
+      "clause": "Annex IV, 1(c)",
+      "title": "Software / firmware versions and update requirements",
+      "description": "The versions of relevant software or firmware, and any requirements related to version updates.\n",
+      "severity": "mandatory",
+      "check_type": null,
+      "compliance_tier": "structural",
+      "applies_to": [
+        "high_risk"
+      ],
+      "verified_against_primary": true,
+      "what_we_look_for": [
+        {
+          "field_path": "spans[].model_used",
+          "description": "Model version present in traces corroborates the version information required in the technical documentation.\n",
+          "required": false,
+          "check_type": "non_null",
+          "legal_basis": "structural"
+        }
+      ]
+    },
+    {
+      "id": "EU-AIA-IV-1d",
+      "framework": "EU AI Act",
+      "framework_nature": "law",
+      "article": "Annex IV",
+      "clause": "Annex IV, 1(d)",
+      "title": "Forms of market placement",
+      "description": "Description of all the forms in which the AI system is placed on the market or put into service, such as software packages embedded into hardware, downloads, or APIs.\n",
+      "severity": "mandatory",
+      "check_type": "organizational",
+      "compliance_tier": null,
+      "applies_to": [
+        "high_risk"
+      ],
+      "verified_against_primary": true,
+      "what_we_look_for": []
+    },
+    {
+      "id": "EU-AIA-IV-1e",
+      "framework": "EU AI Act",
+      "framework_nature": "law",
+      "article": "Annex IV",
+      "clause": "Annex IV, 1(e)",
+      "title": "Hardware description",
+      "description": "The description of the hardware on which the AI system is intended to run.\n",
+      "severity": "mandatory",
+      "check_type": "organizational",
+      "compliance_tier": null,
+      "applies_to": [
+        "high_risk"
+      ],
+      "verified_against_primary": true,
+      "what_we_look_for": []
+    },
+    {
+      "id": "EU-AIA-IV-1h",
+      "framework": "EU AI Act",
+      "framework_nature": "law",
+      "article": "Annex IV",
+      "clause": "Annex IV, 1(h)",
+      "title": "Instructions for use",
+      "description": "Instructions for use for the deployer, and a basic description of the user-interface provided to the deployer, where applicable.\n",
+      "severity": "mandatory",
+      "check_type": "organizational",
+      "compliance_tier": null,
+      "applies_to": [
+        "high_risk"
+      ],
+      "verified_against_primary": true,
+      "what_we_look_for": []
+    },
+    {
+      "id": "EU-AIA-IV-2a",
+      "framework": "EU AI Act",
+      "framework_nature": "law",
+      "article": "Annex IV",
+      "clause": "Annex IV, 2(a)",
+      "title": "Development methods and third-party components",
+      "description": "The methods and steps performed for the development of the AI system, including, where relevant, recourse to pre-trained systems or tools provided by third parties and how those were used, integrated, or modified by the provider.\n",
+      "severity": "mandatory",
+      "check_type": "organizational",
+      "compliance_tier": null,
+      "applies_to": [
+        "high_risk"
+      ],
+      "verified_against_primary": true,
+      "what_we_look_for": []
+    },
+    {
+      "id": "EU-AIA-IV-2b",
+      "framework": "EU AI Act",
+      "framework_nature": "law",
+      "article": "Annex IV",
+      "clause": "Annex IV, 2(b)",
+      "title": "Design specifications and algorithms",
+      "description": "The design specifications of the system — the general logic of the AI system and of the algorithms, the key design choices with rationale and assumptions (including regarding affected persons or groups), the main classification choices, what the system is designed to optimise for, expected output and output quality, and trade-offs made regarding technical solutions for Chapter III, Section 2 compliance.\n",
+      "severity": "mandatory",
+      "check_type": "organizational",
+      "compliance_tier": null,
+      "applies_to": [
+        "high_risk"
+      ],
+      "verified_against_primary": true,
+      "what_we_look_for": []
+    },
+    {
+      "id": "EU-AIA-IV-2c",
+      "framework": "EU AI Act",
+      "framework_nature": "law",
+      "article": "Annex IV",
+      "clause": "Annex IV, 2(c)",
+      "title": "System architecture and compute resources",
+      "description": "Description of the system architecture explaining how software components build on or feed into each other and integrate into the overall processing, and the computational resources used to develop, train, test, and validate the AI system.\n",
+      "severity": "mandatory",
+      "check_type": "organizational",
+      "compliance_tier": null,
+      "applies_to": [
+        "high_risk"
+      ],
+      "verified_against_primary": true,
+      "what_we_look_for": []
+    },
+    {
+      "id": "EU-AIA-IV-2d",
+      "framework": "EU AI Act",
+      "framework_nature": "law",
+      "article": "Annex IV",
+      "clause": "Annex IV, 2(d)",
+      "title": "Training data requirements and datasheets",
+      "description": "Where relevant, the data requirements in terms of datasheets describing the training methodologies and techniques and the training data sets used — general description of data sets, provenance, scope and main characteristics, how the data was obtained and selected, labelling procedures, and data cleaning methodologies.\n",
+      "severity": "mandatory",
+      "check_type": "organizational",
+      "compliance_tier": null,
+      "applies_to": [
+        "high_risk"
+      ],
+      "verified_against_primary": true,
+      "what_we_look_for": []
+    },
+    {
+      "id": "EU-AIA-IV-2e",
+      "framework": "EU AI Act",
+      "framework_nature": "law",
+      "article": "Annex IV",
+      "clause": "Annex IV, 2(e)",
+      "title": "Human oversight assessment",
+      "description": "Assessment of the human oversight measures needed in accordance with Article 14, including an assessment of the technical measures needed to facilitate the interpretation of the outputs of AI systems by the deployers (Article 13(3)(d)).\n",
+      "severity": "mandatory",
+      "check_type": "organizational",
+      "compliance_tier": null,
+      "applies_to": [
+        "high_risk"
+      ],
+      "verified_against_primary": true,
+      "what_we_look_for": []
+    },
+    {
+      "id": "EU-AIA-IV-2g",
+      "framework": "EU AI Act",
+      "framework_nature": "law",
+      "article": "Annex IV",
+      "clause": "Annex IV, 2(g)",
+      "title": "Validation, testing procedures, and test logs",
+      "description": "The validation and testing procedures used — information about the validation and testing data, metrics used to measure accuracy, robustness, and compliance with other Chapter III, Section 2 requirements (including potentially discriminatory impacts), and test logs / test reports dated and signed by the responsible persons.\n",
+      "severity": "mandatory",
+      "check_type": "organizational",
+      "compliance_tier": null,
+      "applies_to": [
+        "high_risk"
+      ],
+      "verified_against_primary": true,
+      "what_we_look_for": []
+    },
+    {
+      "id": "EU-AIA-IV-2h",
+      "framework": "EU AI Act",
+      "framework_nature": "law",
+      "article": "Annex IV",
+      "clause": "Annex IV, 2(h)",
+      "title": "Cybersecurity measures",
+      "description": "Cybersecurity measures put in place.",
+      "severity": "mandatory",
+      "check_type": "organizational",
+      "compliance_tier": null,
+      "applies_to": [
+        "high_risk"
+      ],
+      "verified_against_primary": true,
+      "what_we_look_for": []
+    },
+    {
+      "id": "EU-AIA-IV-3",
+      "framework": "EU AI Act",
+      "framework_nature": "law",
+      "article": "Annex IV",
+      "clause": "Annex IV, 3",
+      "title": "Monitoring, functioning, and control information",
+      "description": "Detailed information about the monitoring, functioning, and control of the AI system — its capabilities and limitations in performance, degrees of accuracy for specific persons or groups, foreseeable unintended outcomes and sources of risks to health, safety, fundamental rights, and discrimination, the human oversight measures needed under Article 14, and specifications on input data as appropriate.\n",
+      "severity": "mandatory",
+      "check_type": null,
+      "compliance_tier": "structural",
+      "applies_to": [
+        "high_risk"
+      ],
+      "verified_against_primary": true,
+      "what_we_look_for": [
+        {
+          "field_path": "spans[].start_time",
+          "description": "Active traces demonstrate the monitoring capability the documentation describes.\n",
+          "required": false,
+          "check_type": "non_null",
+          "legal_basis": "structural"
+        }
+      ]
+    },
+    {
+      "id": "EU-AIA-IV-4",
+      "framework": "EU AI Act",
+      "framework_nature": "law",
+      "article": "Annex IV",
+      "clause": "Annex IV, 4",
+      "title": "Performance metrics appropriateness",
+      "description": "A description of the appropriateness of the performance metrics for the specific AI system.\n",
+      "severity": "mandatory",
+      "check_type": "organizational",
+      "compliance_tier": null,
+      "applies_to": [
+        "high_risk"
+      ],
+      "verified_against_primary": true,
+      "what_we_look_for": []
+    },
+    {
+      "id": "EU-AIA-IV-5",
+      "framework": "EU AI Act",
+      "framework_nature": "law",
+      "article": "Annex IV",
+      "clause": "Annex IV, 5",
+      "title": "Risk management system description",
+      "description": "A detailed description of the risk management system in accordance with Article 9.\n",
+      "severity": "mandatory",
+      "check_type": "organizational",
+      "compliance_tier": null,
+      "applies_to": [
+        "high_risk"
+      ],
+      "verified_against_primary": true,
+      "what_we_look_for": []
+    },
+    {
+      "id": "EU-AIA-IV-6",
+      "framework": "EU AI Act",
+      "framework_nature": "law",
+      "article": "Annex IV",
+      "clause": "Annex IV, 6",
+      "title": "Lifecycle changes description",
+      "description": "A description of relevant changes made by the provider to the system through its lifecycle.\n",
+      "severity": "mandatory",
+      "check_type": null,
+      "compliance_tier": "structural",
+      "applies_to": [
+        "high_risk"
+      ],
+      "verified_against_primary": true,
+      "what_we_look_for": [
+        {
+          "field_path": "spans[].model_used",
+          "description": "Model version drift across traces corroborates the lifecycle change history described in the documentation.\n",
+          "required": false,
+          "check_type": "non_null",
+          "legal_basis": "structural"
+        }
+      ]
+    },
+    {
+      "id": "EU-AIA-IV-7",
+      "framework": "EU AI Act",
+      "framework_nature": "law",
+      "article": "Annex IV",
+      "clause": "Annex IV, 7",
+      "title": "Harmonised standards / alternative solutions",
+      "description": "A list of the harmonised standards applied in full or in part whose references have been published in the Official Journal; where no such harmonised standards have been applied, a detailed description of the solutions adopted to meet the Chapter III, Section 2 requirements, including a list of other relevant standards and technical specifications applied.\n",
+      "severity": "mandatory",
+      "check_type": "organizational",
+      "compliance_tier": null,
+      "applies_to": [
+        "high_risk"
+      ],
+      "verified_against_primary": true,
+      "what_we_look_for": []
+    },
+    {
+      "id": "EU-AIA-IV-8",
+      "framework": "EU AI Act",
+      "framework_nature": "law",
+      "article": "Annex IV",
+      "clause": "Annex IV, 8",
+      "title": "EU declaration of conformity",
+      "description": "A copy of the EU declaration of conformity referred to in Article 47.\n",
+      "severity": "mandatory",
+      "check_type": "organizational",
+      "compliance_tier": null,
+      "applies_to": [
+        "high_risk"
+      ],
+      "verified_against_primary": true,
+      "what_we_look_for": []
+    },
+    {
+      "id": "EU-AIA-IV-9",
+      "framework": "EU AI Act",
+      "framework_nature": "law",
+      "article": "Annex IV",
+      "clause": "Annex IV, 9",
+      "title": "Post-market monitoring system",
+      "description": "A detailed description of the system in place to evaluate the AI system's performance in the post-market phase in accordance with Article 72, including the post-market monitoring plan referred to in Article 72(3).\n",
+      "severity": "mandatory",
+      "check_type": null,
+      "compliance_tier": "structural",
+      "applies_to": [
+        "high_risk"
+      ],
+      "verified_against_primary": true,
+      "what_we_look_for": [
+        {
+          "field_path": "spans[].start_time",
+          "description": "Active post-market traces demonstrate that the documented post-market monitoring system is actually running.\n",
+          "required": false,
+          "check_type": "non_null",
+          "legal_basis": "structural"
+        }
+      ]
+    },
+    {
+      "id": "ISO-42001-10.1",
+      "framework": "ISO 42001",
+      "framework_nature": "certifiable_standard",
+      "article": "AI Management System",
+      "clause": "Clause 10.1",
+      "title": "Continual improvement",
+      "description": "The organization shall continually improve the suitability, adequacy, and effectiveness of the AI management system through corrective actions, analysis of monitoring data, and management review outputs.\n",
+      "severity": "recommended",
+      "check_type": "organizational",
+      "compliance_tier": null,
+      "applies_to": [
+        "all"
+      ],
+      "verified_against_primary": false,
+      "what_we_look_for": []
+    },
+    {
+      "id": "ISO-42001-4.1",
+      "framework": "ISO 42001",
+      "framework_nature": "certifiable_standard",
+      "article": "AI Management System",
+      "clause": "Clause 4.1",
+      "title": "Context of the organization",
+      "description": "The organization shall determine external and internal issues that are relevant to its purpose and that affect its ability to achieve the intended outcomes of its AI management system.\n",
+      "severity": "mandatory",
+      "check_type": "organizational",
+      "compliance_tier": null,
+      "applies_to": [
+        "all"
+      ],
+      "verified_against_primary": false,
+      "what_we_look_for": []
+    },
+    {
+      "id": "ISO-42001-5.1",
+      "framework": "ISO 42001",
+      "framework_nature": "certifiable_standard",
+      "article": "AI Management System",
+      "clause": "Clause 5.1",
+      "title": "Leadership commitment",
+      "description": "Top management shall demonstrate leadership and commitment with respect to the AI management system by ensuring AI policies and objectives are established and compatible with strategic direction.\n",
+      "severity": "mandatory",
+      "check_type": "organizational",
+      "compliance_tier": null,
+      "applies_to": [
+        "all"
+      ],
+      "verified_against_primary": false,
+      "what_we_look_for": []
+    },
+    {
+      "id": "ISO-42001-6.1",
+      "framework": "ISO 42001",
+      "framework_nature": "certifiable_standard",
+      "article": "AI Management System",
+      "clause": "Clause 6.1",
+      "title": "Risk assessment for AI systems",
+      "description": "The organization shall plan actions to address risks and opportunities related to AI systems, including assessing potential impacts on individuals and groups of individuals.\n",
+      "severity": "mandatory",
+      "check_type": "organizational",
+      "compliance_tier": null,
+      "applies_to": [
+        "all"
+      ],
+      "verified_against_primary": false,
+      "what_we_look_for": []
+    },
+    {
+      "id": "ISO-42001-7.1",
+      "framework": "ISO 42001",
+      "framework_nature": "certifiable_standard",
+      "article": "AI Management System",
+      "clause": "Clause 7.1",
+      "title": "Resources for AI management",
+      "description": "The organization shall determine and provide resources needed for the establishment, implementation, maintenance, and continual improvement of the AI management system.\n",
+      "severity": "mandatory",
+      "check_type": "organizational",
+      "compliance_tier": null,
+      "applies_to": [
+        "all"
+      ],
+      "verified_against_primary": false,
+      "what_we_look_for": []
+    },
+    {
+      "id": "ISO-42001-8.1",
+      "framework": "ISO 42001",
+      "framework_nature": "certifiable_standard",
+      "article": "AI Management System",
+      "clause": "Clause 8.1",
+      "title": "Operational planning and control",
+      "description": "The organization shall plan, implement, and control processes needed to meet AI management system requirements, including determining criteria for AI processes.\n",
+      "severity": "mandatory",
+      "check_type": null,
+      "compliance_tier": "structural",
+      "applies_to": [
+        "all"
+      ],
+      "verified_against_primary": false,
+      "what_we_look_for": [
+        {
+          "field_path": "spans[].start_time",
+          "description": "Operations are timestamped for process control",
+          "required": false,
+          "check_type": "non_null",
+          "legal_basis": null
+        }
+      ]
+    },
+    {
+      "id": "ISO-42001-8.4",
+      "framework": "ISO 42001",
+      "framework_nature": "certifiable_standard",
+      "article": "AI Management System",
+      "clause": "Clause 8.4",
+      "title": "AI system impact assessment",
+      "description": "The organization shall conduct an AI system impact assessment to identify and evaluate the potential consequences of an AI system on individuals, groups, and society.\n",
+      "severity": "mandatory",
+      "check_type": "organizational",
+      "compliance_tier": null,
+      "applies_to": [
+        "all"
+      ],
+      "verified_against_primary": false,
+      "what_we_look_for": []
+    },
+    {
+      "id": "ISO-42001-9.1",
+      "framework": "ISO 42001",
+      "framework_nature": "certifiable_standard",
+      "article": "AI Management System",
+      "clause": "Clause 9.1",
+      "title": "Monitoring and measurement",
+      "description": "The organization shall determine what needs to be monitored and measured for the AI management system, including monitoring methods, timing, and responsible parties.\n",
+      "severity": "mandatory",
+      "check_type": null,
+      "compliance_tier": "structural",
+      "applies_to": [
+        "all"
+      ],
+      "verified_against_primary": false,
+      "what_we_look_for": [
+        {
+          "field_path": "spans[].start_time",
+          "description": "Temporal monitoring of AI operations",
+          "required": false,
+          "check_type": "non_null",
+          "legal_basis": null
+        },
+        {
+          "field_path": "spans[].end_time",
+          "description": "Operation duration enables performance measurement",
+          "required": false,
+          "check_type": "non_null",
+          "legal_basis": null
+        }
+      ]
+    },
+    {
+      "id": "ISO-42001-9.2",
+      "framework": "ISO 42001",
+      "framework_nature": "certifiable_standard",
+      "article": "AI Management System",
+      "clause": "Clause 9.2",
+      "title": "Internal audit",
+      "description": "The organization shall conduct internal audits at planned intervals to determine whether the AI management system conforms to requirements and is effectively implemented and maintained.\n",
+      "severity": "mandatory",
+      "check_type": null,
+      "compliance_tier": "structural",
+      "applies_to": [
+        "all"
+      ],
+      "verified_against_primary": false,
+      "what_we_look_for": [
+        {
+          "field_path": "spans[].trace_id",
+          "description": "Operations are traceable for audit purposes",
+          "required": false,
+          "check_type": "non_null",
+          "legal_basis": null
+        }
+      ]
+    },
+    {
+      "id": "NIST-MANAGE-4.1",
+      "framework": "NIST AI RMF",
+      "framework_nature": "voluntary",
+      "article": "MANAGE",
+      "clause": "MANAGE 4.1",
+      "title": "Post-deployment monitoring plans",
+      "description": "Post-deployment AI system monitoring plans are implemented, including mechanisms for capturing and evaluating input from users and other relevant AI actors, appeal and override, decommissioning, incident response, recovery, and change management.\n",
+      "severity": "recommended",
+      "check_type": null,
+      "compliance_tier": "structural",
+      "applies_to": [
+        "all"
+      ],
+      "verified_against_primary": false,
+      "what_we_look_for": [
+        {
+          "field_path": "spans[].start_time",
+          "description": "Timestamped operations indicate monitoring is active",
+          "required": false,
+          "check_type": "non_null",
+          "legal_basis": null
+        }
+      ]
+    },
+    {
+      "id": "NIST-MANAGE-4.3",
+      "framework": "NIST AI RMF",
+      "framework_nature": "voluntary",
+      "article": "MANAGE",
+      "clause": "MANAGE 4.3",
+      "title": "Incident and error communication",
+      "description": "Incidents and errors are communicated to relevant AI actors including affected communities. Processes for tracking, responding to, and recovering from incidents and errors are followed and documented.\n",
+      "severity": "recommended",
+      "check_type": null,
+      "compliance_tier": "structural",
+      "applies_to": [
+        "all"
+      ],
+      "verified_against_primary": false,
+      "what_we_look_for": [
+        {
+          "field_path": "spans[].error_type",
+          "description": "Error classification supports incident categorization",
+          "required": false,
+          "check_type": "present",
+          "legal_basis": null
+        },
+        {
+          "field_path": "spans[].error_message",
+          "description": "Error details support incident reports",
+          "required": false,
+          "check_type": "present",
+          "legal_basis": null
+        }
+      ]
+    },
+    {
+      "id": "NIST-MEASURE-2.1",
+      "framework": "NIST AI RMF",
+      "framework_nature": "voluntary",
+      "article": "MEASURE",
+      "clause": "MEASURE 2.1",
+      "title": "TEVV documentation",
+      "description": "Test sets, metrics, and details about the tools used during test, evaluation, validation, and verification (TEVV) are documented.\n",
+      "severity": "recommended",
+      "check_type": null,
+      "compliance_tier": "structural",
+      "applies_to": [
+        "all"
+      ],
+      "verified_against_primary": false,
+      "what_we_look_for": [
+        {
+          "field_path": "spans[].evaluations",
+          "description": "Evaluation scores or quality assessments attached to operations",
+          "required": false,
+          "check_type": "present",
+          "legal_basis": null
+        }
+      ]
+    },
+    {
+      "id": "NIST-MEASURE-2.4",
+      "framework": "NIST AI RMF",
+      "framework_nature": "voluntary",
+      "article": "MEASURE",
+      "clause": "MEASURE 2.4",
+      "title": "Production monitoring",
+      "description": "The functionality and behavior of the AI system and its components, as identified in the MAP function, are monitored when in production.\n",
+      "severity": "recommended",
+      "check_type": null,
+      "compliance_tier": "structural",
+      "applies_to": [
+        "all"
+      ],
+      "verified_against_primary": false,
+      "what_we_look_for": [
+        {
+          "field_path": "spans[].start_time",
+          "description": "Timestamps prove monitoring is occurring in production",
+          "required": false,
+          "check_type": "non_null",
+          "legal_basis": null
+        },
+        {
+          "field_path": "spans[].model_used",
+          "description": "Model tracking helps monitor behavior changes",
+          "required": false,
+          "check_type": "non_null",
+          "legal_basis": null
+        },
+        {
+          "field_path": "spans[].error_type",
+          "description": "Error tracking helps detect anomalous behavior",
+          "required": false,
+          "check_type": "present",
+          "legal_basis": null
+        }
+      ]
+    },
+    {
+      "id": "NIST-MEASURE-2.5",
+      "framework": "NIST AI RMF",
+      "framework_nature": "voluntary",
+      "article": "MEASURE",
+      "clause": "MEASURE 2.5",
+      "title": "Validity and reliability demonstration",
+      "description": "The AI system to be deployed is demonstrated to be valid and reliable. Limitations of the generalizability beyond the conditions under which the technology was developed are documented.\n",
+      "severity": "recommended",
+      "check_type": null,
+      "compliance_tier": "structural",
+      "applies_to": [
+        "all"
+      ],
+      "verified_against_primary": false,
+      "what_we_look_for": []
+    },
+    {
+      "id": "NIST-MEASURE-2.8",
+      "framework": "NIST AI RMF",
+      "framework_nature": "voluntary",
+      "article": "MEASURE",
+      "clause": "MEASURE 2.8",
+      "title": "Transparency and accountability risks",
+      "description": "Risks associated with transparency and accountability, as identified in the MAP function, are examined and documented.\n",
+      "severity": "recommended",
+      "check_type": null,
+      "compliance_tier": "structural",
+      "applies_to": [
+        "all"
+      ],
+      "verified_against_primary": false,
+      "what_we_look_for": [
+        {
+          "field_path": "spans[].operation",
+          "description": "Operation type aids transparency about system behavior",
+          "required": false,
+          "check_type": "non_empty",
+          "legal_basis": null
+        },
+        {
+          "field_path": "spans[].provider",
+          "description": "Provider identification aids accountability",
+          "required": false,
+          "check_type": "non_null",
+          "legal_basis": null
+        }
+      ]
+    },
+    {
+      "id": "NIST-MEASURE-2.9",
+      "framework": "NIST AI RMF",
+      "framework_nature": "voluntary",
+      "article": "MEASURE",
+      "clause": "MEASURE 2.9",
+      "title": "Model explanation and validation",
+      "description": "The AI model is explained, validated, and documented, and AI system output is interpreted within its context, as identified in the MAP function, and to inform responsible use and governance.\n",
+      "severity": "recommended",
+      "check_type": null,
+      "compliance_tier": "structural",
+      "applies_to": [
+        "all"
+      ],
+      "verified_against_primary": false,
+      "what_we_look_for": [
+        {
+          "field_path": "spans[].input_messages",
+          "description": "Input data supports reproducing and explaining decisions",
+          "required": false,
+          "check_type": "non_empty",
+          "legal_basis": null
+        },
+        {
+          "field_path": "spans[].output_messages",
+          "description": "Output data supports reviewing decisions",
+          "required": false,
+          "check_type": "non_empty",
+          "legal_basis": null
+        }
+      ]
+    },
+    {
+      "id": "NIST-MEASURE-3.1",
+      "framework": "NIST AI RMF",
+      "framework_nature": "voluntary",
+      "article": "MEASURE",
+      "clause": "MEASURE 3.1",
+      "title": "Risk tracking mechanisms",
+      "description": "Approaches, personnel, and documentation are in place to regularly identify and track existing, unanticipated, and emergent AI risks based on factors such as intended and actual performance in deployed contexts.\n",
+      "severity": "recommended",
+      "check_type": null,
+      "compliance_tier": "structural",
+      "applies_to": [
+        "all"
+      ],
+      "verified_against_primary": false,
+      "what_we_look_for": [
+        {
+          "field_path": "spans[].error_type",
+          "description": "Error classification supports risk tracking",
+          "required": false,
+          "check_type": "present",
+          "legal_basis": null
+        }
+      ]
+    },
+    {
+      "id": "SOC2-AI-A1.2",
+      "framework": "SOC 2 Trust Services Criteria",
+      "framework_nature": "audit_framework",
+      "article": "Trust Services Criteria",
+      "clause": "A1.2 — Recovery and Continuity",
+      "title": "AI system availability",
+      "description": "The entity authorizes, designs, develops or acquires, implements, operates, approves, maintains, and monitors environmental protections, software, data backup, and recovery infrastructure to meet its objectives.\n",
+      "severity": "mandatory",
+      "check_type": null,
+      "compliance_tier": "structural",
+      "applies_to": [
+        "all"
+      ],
+      "verified_against_primary": false,
+      "what_we_look_for": [
+        {
+          "field_path": "spans[].start_time",
+          "description": "Operation timing for availability measurement",
+          "required": false,
+          "check_type": "non_null",
+          "legal_basis": null
+        },
+        {
+          "field_path": "spans[].error_type",
+          "description": "Failure events for availability reporting",
+          "required": false,
+          "check_type": "present",
+          "legal_basis": null
+        }
+      ]
+    },
+    {
+      "id": "SOC2-AI-C1.1",
+      "framework": "SOC 2 Trust Services Criteria",
+      "framework_nature": "audit_framework",
+      "article": "Trust Services Criteria",
+      "clause": "C1.1 — Confidentiality",
+      "title": "AI data confidentiality",
+      "description": "The entity identifies and maintains confidential information to meet the entity's objectives related to confidentiality.\n",
+      "severity": "mandatory",
+      "check_type": null,
+      "compliance_tier": "structural",
+      "applies_to": [
+        "all"
+      ],
+      "verified_against_primary": false,
+      "what_we_look_for": [
+        {
+          "field_path": "spans[].provider",
+          "description": "Third-party data recipients identified",
+          "required": false,
+          "check_type": "non_null",
+          "legal_basis": null
+        }
+      ]
+    },
+    {
+      "id": "SOC2-AI-CC6.1",
+      "framework": "SOC 2 Trust Services Criteria",
+      "framework_nature": "audit_framework",
+      "article": "Trust Services Criteria",
+      "clause": "CC6.1 — Logical and Physical Access Controls",
+      "title": "Logical access to AI systems",
+      "description": "The entity implements logical access security software, infrastructure, and architectures over protected information assets to protect them from security events.\n",
+      "severity": "mandatory",
+      "check_type": null,
+      "compliance_tier": "structural",
+      "applies_to": [
+        "all"
+      ],
+      "verified_against_primary": false,
+      "what_we_look_for": [
+        {
+          "field_path": "spans[].provider",
+          "description": "AI provider access points are documented",
+          "required": false,
+          "check_type": "non_null",
+          "legal_basis": null
+        },
+        {
+          "field_path": "spans[].trace_id",
+          "description": "Operations are uniquely identifiable",
+          "required": false,
+          "check_type": "non_null",
+          "legal_basis": null
+        }
+      ]
+    },
+    {
+      "id": "SOC2-AI-CC7.2",
+      "framework": "SOC 2 Trust Services Criteria",
+      "framework_nature": "audit_framework",
+      "article": "Trust Services Criteria",
+      "clause": "CC7.2 — System Monitoring",
+      "title": "AI system monitoring",
+      "description": "The entity monitors system components and the operation of those components for anomalies that are indicative of malicious acts, natural disasters, and errors affecting the entity's ability to meet its objectives.\n",
+      "severity": "mandatory",
+      "check_type": null,
+      "compliance_tier": "structural",
+      "applies_to": [
+        "all"
+      ],
+      "verified_against_primary": false,
+      "what_we_look_for": [
+        {
+          "field_path": "spans[].error_type",
+          "description": "Error events captured for anomaly detection",
+          "required": false,
+          "check_type": "present",
+          "legal_basis": null
+        },
+        {
+          "field_path": "spans[].finish_reasons",
+          "description": "Output completion status monitored",
+          "required": false,
+          "check_type": "present",
+          "legal_basis": null
+        }
+      ]
+    },
+    {
+      "id": "SOC2-AI-CC8.1",
+      "framework": "SOC 2 Trust Services Criteria",
+      "framework_nature": "audit_framework",
+      "article": "Trust Services Criteria",
+      "clause": "CC8.1 — Change Management",
+      "title": "AI system change management",
+      "description": "The entity authorizes, designs, develops or acquires, configures, documents, tests, approves, and implements changes to infrastructure, data, software, and procedures to meet its objectives.\n",
+      "severity": "mandatory",
+      "check_type": null,
+      "compliance_tier": "structural",
+      "applies_to": [
+        "all"
+      ],
+      "verified_against_primary": false,
+      "what_we_look_for": [
+        {
+          "field_path": "spans[].model_used",
+          "description": "Active model version recorded per operation",
+          "required": false,
+          "check_type": "non_null",
+          "legal_basis": null
+        },
+        {
+          "field_path": "spans[].model_requested",
+          "description": "Requested vs actual model tracked",
+          "required": false,
+          "check_type": "non_null",
+          "legal_basis": null
+        }
+      ]
+    },
+    {
+      "id": "SOC2-AI-PI1.1",
+      "framework": "SOC 2 Trust Services Criteria",
+      "framework_nature": "audit_framework",
+      "article": "Trust Services Criteria",
+      "clause": "PI1.1 — Processing Integrity",
+      "title": "AI processing integrity",
+      "description": "The entity implements policies and procedures over system processing to result in products, services, and reporting to meet the entity's objectives.\n",
+      "severity": "mandatory",
+      "check_type": null,
+      "compliance_tier": "structural",
+      "applies_to": [
+        "all"
+      ],
+      "verified_against_primary": false,
+      "what_we_look_for": [
+        {
+          "field_path": "spans[].finish_reasons",
+          "description": "Processing completed with expected termination",
+          "required": false,
+          "check_type": "non_empty",
+          "legal_basis": null
+        }
+      ]
+    }
+  ]
+}

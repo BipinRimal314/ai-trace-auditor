@@ -27,7 +27,9 @@ from ai_trace_auditor.analysis.scorer import (
     identify_gaps,
 )
 from ai_trace_auditor.models.gap import GapReport, GapSummary, RequirementResult, TieredScore
+from ai_trace_auditor.models.intake import IntakeProfile
 from ai_trace_auditor.models.trace import NormalizedTrace
+from ai_trace_auditor.profiles.rules import matches_profile
 from ai_trace_auditor.regulations.registry import RequirementRegistry
 
 
@@ -43,6 +45,8 @@ class ComplianceAnalyzer:
         regulations: list[str] | None = None,
         risk_level: str = "high_risk",
         trace_source: str = "unknown",
+        profile: IntakeProfile | None = None,
+        profile_rationale: str | None = None,
     ) -> GapReport:
         """Run compliance analysis on normalized traces.
 
@@ -55,6 +59,12 @@ class ComplianceAnalyzer:
         requirements = self.registry.get_applicable_for_trace(risk_level, is_multi_agent)
         if regulations:
             requirements = [r for r in requirements if r.regulation in regulations]
+        if profile is not None:
+            if is_multi_agent and not profile.is_multi_agent:
+                # Trace evidence outranks the declared profile: keep Article 25
+                # multi-agent checks when the traces are actually multi-agent.
+                profile = profile.model_copy(update={"is_multi_agent": True})
+            requirements = [r for r in requirements if matches_profile(r, profile)]
 
         # Enrich multi-agent traces with DAG data before analysis
         if is_multi_agent:
@@ -111,6 +121,8 @@ class ComplianceAnalyzer:
             summary=summary,
             tiered_scores=tiered,
             agent_scores=agent_scores_dict,
+            profile_name=profile.system_name if profile is not None else None,
+            profile_rationale=profile_rationale,
         )
 
     def _enrich_multi_agent_traces(self, traces: list[NormalizedTrace]) -> None:
