@@ -1,8 +1,18 @@
 # AI Trace Auditor
 
-**The EU AI Act takes effect August 2, 2026.** Your AI system needs compliance evidence. Your observability tools collect traces. Your GRC platform manages policies. Nothing translates traces into compliance evidence. This tool does.
+**EU AI Act transparency obligations (Article 50) take effect December 2, 2026. High-risk obligations (Annex III) follow on December 2, 2027.** Your AI system needs compliance evidence. Your observability tools collect traces. Your GRC platform manages policies. Nothing translates traces into compliance evidence. This tool does.
 
-Open-source CLI that audits LLM traces against EU AI Act Articles 11, 12, 13, and 25, plus NIST AI RMF and GDPR Article 30. 301 tests. Zero LLM dependencies. Runs locally.
+Open-source CLI that audits LLM traces against EU AI Act Articles 11, 12, 13, and 25, plus NIST AI RMF and GDPR Article 30. 424 tests. Zero LLM dependencies. Runs locally.
+
+## 60-Second Demo
+
+```bash
+pip install ai-trace-auditor
+git clone https://github.com/BipinRimal314/ai-trace-auditor
+aitrace audit ai-trace-auditor/examples/golden_path/sample_traces.json -o report.md --show-dag
+```
+
+Audits a committed multi-agent trace sample (Router → Researcher + Writer, OpenAI + Anthropic) and produces a report with per-requirement article citations, per-agent compliance scores, and a Mermaid execution DAG. Don't want to run anything? Read the checked-in [sample report](examples/golden_path/sample_report.md) and the [golden path walkthrough](examples/golden_path/README.md).
 
 ## The Problem
 
@@ -43,6 +53,10 @@ No other open-source tool does multi-agent compliance auditing.
 
 Auto-detected. Use `--format` to override.
 
+## Public Checks Pack
+
+Every check the auditor runs is published as a machine-readable registry: [`spec/checks-pack-v1.json`](spec/checks-pack-v1.json) — 72 checks across 5 frameworks, each with framework, article, clause citation, severity, scope tags, and the trace fields inspected. 41 checks are verified verbatim against pinned primary source documents in CI. Regenerate with `aitrace export-checks`.
+
 ## Install
 
 ```bash
@@ -66,6 +80,13 @@ aitrace flow ./my-ai-project/
 
 # Multi-agent audit with DAG visualization
 aitrace audit multi_agent_traces.json --show-dag
+
+# Scope requirements to your system shape instead of checking everything
+aitrace audit traces.json --profile chatbot     # also: agent, rag-pipeline, high-risk
+
+# Track progress between runs (exits 1 on regression — CI-friendly)
+aitrace audit traces.json --report-format json -o report-v2.json
+aitrace diff report-v1.json report-v2.json
 ```
 
 ### Audit a GitHub repository
@@ -105,7 +126,7 @@ Top gaps:
 
 ```yaml
 - name: Audit AI traces
-  uses: BipinRimal314/ai-trace-auditor@v0.14.0
+  uses: BipinRimal314/ai-trace-auditor@v0.18.0
   with:
     path: traces/exported.json
     regulation: "EU AI Act"
@@ -139,7 +160,7 @@ print(f"Score: {report.overall_score:.1%}")
 ```
 ai-trace-auditor/
 ├── src/ai_trace_auditor/
-│   ├── cli.py              # 7 commands: audit, docs, flow, scan, ingest, requirements, health
+│   ├── cli.py              # audit, scan, docs, flow, diff, export-checks, audit-repo, ...
 │   ├── ingest/             # Trace ingestion (OTel, Langfuse, Claude Code, raw JSONL)
 │   ├── analysis/           # Gap analysis engine + multi-agent DAG auditing
 │   ├── models/             # Pydantic v2 data models
@@ -152,9 +173,9 @@ ai-trace-auditor/
 │   ├── scanner/            # Code scanner (AI framework detection)
 │   └── guide_linter/       # Lints compliance guides for accuracy
 ├── requirements/           # YAML regulatory requirement definitions
-│   ├── eu_ai_act/          # Articles 12, 19
-│   └── nist_ai_rmf/       # GOVERN, MAP, MEASURE, MANAGE
-└── tests/                  # 301 tests
+│   ├── eu_ai_act/          # Articles 12, 19, 25, 50, Annex IV
+│   └── nist_ai_rmf/        # GOVERN, MAP, MEASURE, MANAGE (+ iso_42001, soc2_ai)
+└── tests/                  # 424 tests
 ```
 
 No dependency on any LLM framework. Intentionally framework-agnostic.
