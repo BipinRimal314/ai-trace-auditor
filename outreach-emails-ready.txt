@@ -71,7 +71,8 @@ The tool that generated the guide is now a GitHub Action:
 
 It flags when n8n's codebase adds new AI provider integrations
 that create GDPR transfer obligations, and tracks compliance gaps
-as the codebase evolves toward August 2026.
+as the codebase evolves toward the December 2026 (Art 50) and
+December 2027 (high-risk) EU AI Act deadlines.
 
 New in v0.14: `--evidence-pack` generates an audit-ready folder (PDF,
 diagrams, checklists) and `.aitrace.toml` config for team-level defaults.

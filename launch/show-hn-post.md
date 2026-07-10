@@ -8,7 +8,7 @@
 
 I built an open-source CLI that scans AI codebases against EU AI Act requirements. One command, five articles.
 
-The EU AI Act's record-keeping and transparency obligations (Articles 11, 12, 13, 50) take effect August 2026. The European Parliament voted to extend to December 2027, but trilogue isn't done. Either way, compliance infrastructure takes 12-18 months to build, and most teams haven't started.
+The EU AI Act's transparency obligations (Article 50) take effect December 2, 2026, and high-risk record-keeping obligations (Articles 11, 12, 13) follow on December 2, 2027 under the Digital Omnibus adopted mid-2026. Compliance infrastructure takes 12-18 months to build, and most teams haven't started.
 
 What it does:
 

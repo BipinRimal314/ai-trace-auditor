@@ -19,11 +19,11 @@ It runs against your codebase or your exported traces. No API keys,
 no cloud, everything stays local. Also ships as a GitHub Action so
 you can fail builds when compliance gaps appear.
 
-The EU AI Act deadline is currently August 2, 2026, though the
-Parliament voted in March to extend to December 2027 (trilogue
-ongoing). Either way, compliance infrastructure takes 12-18 months
-to stand up. The regulatory text is final; only the calendar is
-moving.
+The EU AI Act timeline is now settled by the Digital Omnibus:
+Article 50 transparency obligations apply December 2, 2026, and
+high-risk (Annex III) obligations December 2, 2027. Compliance
+infrastructure takes 12-18 months to stand up, so the clock is
+already running.
 
 Open source, Apache 2.0. Tested against LiteLLM, n8n, Dify,
 Haystack, and CrewAI codebases. PRs with compliance guides submitted

@@ -8,7 +8,7 @@ These companies already collect AI traces. They need the compliance interpretati
 - **Why:** ClickHouse acquired Langfuse (Jan 2026, $400M Series D, $15B valuation). Langfuse has 2,000+ paying customers, 19 of Fortune 50. They collect LLM traces but DON'T interpret them for compliance. This tool plugs directly into their trace data.
 - **Contact:** Marc Klingen (Langfuse co-founder/CEO, now at ClickHouse)
 - **LinkedIn:** linkedin.com/in/marcklingen
-- **Angle:** "Your customers have traces. August 2026 they need compliance evidence. This turns Langfuse traces into EU AI Act audit reports."
+- **Angle:** "Your customers have traces. By December 2026 (Art 50) and December 2027 (high-risk) they need compliance evidence. This turns Langfuse traces into EU AI Act audit reports."
 - **Priority:** HIGH — best fit, biggest upside
 
 ### 2. Arize AI
@@ -35,7 +35,7 @@ These companies sell compliance automation (SOC2, ISO, HIPAA). EU AI Act is a ne
 - **Why:** Leading GRC platform backed by Sequoia. Explicitly positioned 2026 as pivotal for AI compliance. Currently does SOC2, ISO 27001, HIPAA, GDPR. EU AI Act is the next regulation their customers need.
 - **Contact:** Christina Cacioppo (CEO), Carol Hindsman (CTO)
 - **LinkedIn:** linkedin.com/in/ccacioppo
-- **Angle:** "Your customers already trust Vanta for SOC2. When they ask about EU AI Act (August 2026 deadline), what do you tell them? This tool gives you the answer."
+- **Angle:** "Your customers already trust Vanta for SOC2. When they ask about EU AI Act (Art 50: Dec 2026, high-risk: Dec 2027), what do you tell them? This tool gives you the answer."
 - **Priority:** HIGH
 
 ### 5. Drata
@@ -56,7 +56,7 @@ These companies sell compliance automation (SOC2, ISO, HIPAA). EU AI Act is a ne
 - **Why:** $78.5M raised. SOC2/compliance automation. CEO Shrav Mehta. Hosting National Cybersecurity Summit May 2026. EU AI Act is a natural extension.
 - **Contact:** Shrav Mehta (CEO), Natasja Nielsen (CTO)
 - **LinkedIn:** linkedin.com/in/shravmehta
-- **Angle:** "August 2026 deadline. Your enterprise customers will ask about EU AI Act. This gives Secureframe the answer before competitors have one."
+- **Angle:** "EU AI Act obligations start landing December 2026. Your enterprise customers will ask about it. This gives Secureframe the answer before competitors have one."
 - **Priority:** MEDIUM
 
 ---

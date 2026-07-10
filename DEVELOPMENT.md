@@ -2,7 +2,7 @@
 title: Development Plan — AI Trace Auditor
 branch: develop/product-hiring-edge
 focus: Product + demo surface for AI governance hiring; ship usable defaults
-status: draft plan — implement next
+status: implemented (v0.18.0) — Phase 0, 1a, checks pack, and diff shipped 2026-07-09; demo video + intake questionnaire remain
 updated: 2026-07-09
 related:
   - README.md
@@ -68,7 +68,7 @@ When choosing features, score them:
 | Makes first-run experience better | Only helps enterprise multi-tenant edge cases |
 | Produces a screenshot/demo for applications | Invisible internal refactor with no user-visible win |
 | Strengthens “deterministic + cited” claim | Adds LLM dependency that can invent legal text |
-| Aligns with EU AI Act Aug 2026 urgency | Generic “AI quality” dashboarding (Langfuse already owns this) |
+| Aligns with EU AI Act urgency (Art 50: Dec 2026, high-risk: Dec 2027) | Generic “AI quality” dashboarding (Langfuse already owns this) |
 | Supports multi-agent / value chain story | Rehashes financial-doc linter territory (`redline`/`comply`) |
 
 **Hard rule:** no LLM that *decides* compliance. LLMs may only help *summarize* human-readable output if clearly labeled non-authoritative. Legal claims stay rule-based.
@@ -297,7 +297,7 @@ Optional future integration (not Phase 0–2):
 **Second beat:**
 
 - Self-honesty pattern from Redline audits (if relevant) + Trace Auditor coverage renames  
-- EU AI Act timeline (Aug 2026) as urgency, not fearmongering  
+- EU AI Act timeline (Art 50 transparency: Dec 2, 2026; Annex III high-risk: Dec 2, 2027 per the Digital Omnibus) as urgency, not fearmongering  
 
 **Avoid:**
 

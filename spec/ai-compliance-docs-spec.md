@@ -10,7 +10,7 @@
 
 ## Why This Spec Exists
 
-The EU AI Act requires technical documentation (Article 11), automatic logging (Article 12), transparency information (Article 13), and processing records (GDPR Article 30) for high-risk AI systems by August 2, 2026. The regulation defines *what* must be documented but not *how to verify completeness*. No harmonised standard from CEN/CENELEC JTC 21 has been published yet.
+The EU AI Act requires technical documentation (Article 11), automatic logging (Article 12), transparency information (Article 13), and processing records (GDPR Article 30) for high-risk AI systems by December 2, 2027 (Annex III, per the mid-2026 Digital Omnibus; Article 50 transparency obligations apply from December 2, 2026). The regulation defines *what* must be documented but not *how to verify completeness*. No harmonised standard from CEN/CENELEC JTC 21 has been published yet.
 
 This specification fills the gap: a set of concrete, automatable checks that determine whether an AI system's documentation package is complete, internally consistent, and traceable to code artifacts.
 

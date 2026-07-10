@@ -4,7 +4,7 @@ AutoGen is an open-source multi-agent orchestration framework. Under Article 25(
 
 You are not. If you build a high-risk AI system using AutoGen and deploy it in the EU, the obligations land on you. This guide maps those obligations to AutoGen's architecture so you know exactly what to implement.
 
-Enforcement begins **August 2, 2026**.
+Enforcement begins **December 2, 2026** for Article 50 transparency obligations and **December 2, 2027** for high-risk (Annex III) obligations, per the Digital Omnibus adopted mid-2026.
 
 ## 1. Scope: Is Your System High-Risk?
 

@@ -8,7 +8,7 @@
 
 ## The Opportunity
 
-The EU AI Act enforcement deadline is **August 2, 2026**. Every company deploying high-risk AI systems in the EU needs compliance evidence for Articles 11 (technical documentation), 12 (record-keeping), 13 (transparency), and 25 (value chain accountability).
+EU AI Act Article 50 transparency obligations take effect **December 2, 2026**; high-risk (Annex III) obligations follow on **December 2, 2027** (per the Digital Omnibus adopted mid-2026). Every company deploying high-risk AI systems in the EU needs compliance evidence for Articles 11 (technical documentation), 12 (record-keeping), 13 (transparency), and 25 (value chain accountability) — and compliance infrastructure takes 12-18 months to build.
 
 The compliance tooling market is projected at $2.05B by 2030 (from $0.55B in 2025). Today, companies either hire consultants ($30K-$500K per engagement) or cobble together manual processes. No software product translates AI system traces into regulatory compliance evidence.
 
@@ -52,7 +52,7 @@ A production-quality Python CLI (v0.14.0) with 301 passing tests that:
 
 3. **Guide linter catches its own mistakes.** Built-in linter validates that generated compliance guides correctly distinguish Article 13 vs 50, include scope checks, and use accurate retention periods.
 
-4. **Time-to-market.** With the August 2026 deadline 4 months away, building from scratch means missing the initial compliance wave.
+4. **Time-to-market.** With Article 50 obligations landing December 2026 and high-risk obligations December 2027, building from scratch means missing the initial compliance wave.
 
 ## Competitive Landscape
 
