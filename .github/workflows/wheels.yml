@@ -31,12 +31,20 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        # `native` marks a target the runner can actually execute. Cross-built
+        # wheels are still produced and published, they just cannot be
+        # imported here for a smoke test.
+        #
+        # Intel macOS is cross-compiled from the arm64 runner rather than
+        # built on `macos-13`: those runners have been retired, and a job
+        # targeting them queues forever instead of failing, which is worse
+        # than not having the job at all.
         platform:
-          - { os: linux, runner: ubuntu-latest, target: x86_64 }
-          - { os: linux, runner: ubuntu-latest, target: aarch64 }
-          - { os: macos, runner: macos-latest, target: aarch64 }
-          - { os: macos, runner: macos-13, target: x86_64 }
-          - { os: windows, runner: windows-latest, target: x64 }
+          - { os: linux, runner: ubuntu-latest, target: x86_64, native: true }
+          - { os: linux, runner: ubuntu-latest, target: aarch64, native: false }
+          - { os: macos, runner: macos-latest, target: aarch64, native: true }
+          - { os: macos, runner: macos-latest, target: x86_64, native: false }
+          - { os: windows, runner: windows-latest, target: x64, native: true }
 
     steps:
       - uses: actions/checkout@v4
@@ -59,10 +67,10 @@ jobs:
           manylinux: ${{ matrix.platform.os == 'linux' && 'auto' || '' }}
 
       - name: Smoke test the wheel
-        # Only where the wheel can actually run: a cross-compiled aarch64
-        # Linux wheel cannot be imported on an x86_64 runner, and pretending
-        # otherwise would make this step a no-op that looks like a check.
-        if: matrix.platform.os != 'linux' || matrix.platform.target == 'x86_64'
+        # Only where the wheel can actually run. Importing a cross-compiled
+        # wheel on a foreign architecture cannot work, and a step that quietly
+        # skips is worse than no step: it looks like a passing check.
+        if: matrix.platform.native
         shell: bash
         working-directory: crates/aitrace-core
         run: |
