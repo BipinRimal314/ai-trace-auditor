@@ -298,8 +298,7 @@ pub fn scan_tree(root: &Path, options: &ScanOptions) -> Result<ScanOutcome, Stri
                             .iter()
                             .map(|s| (s.value.clone(), s.line))
                             .collect();
-                        let matches =
-                            scan_string_literals(&literals, &lines, string_patterns);
+                        let matches = scan_string_literals(&literals, &lines, string_patterns);
                         (facts, matches)
                     }
                     None => (FileFacts::default(), Vec::new()),
@@ -456,11 +455,7 @@ mod tests {
         // threads, a lost sink would show up as a short result list.
         let dir = TempDir::new().unwrap();
         for i in 0..500 {
-            fs::write(
-                dir.path().join(format!("mod_{i}.py")),
-                "import anthropic\n",
-            )
-            .unwrap();
+            fs::write(dir.path().join(format!("mod_{i}.py")), "import anthropic\n").unwrap();
         }
         let outcome = scan_tree(
             dir.path(),

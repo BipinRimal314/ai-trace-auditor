@@ -72,10 +72,7 @@ impl ScanStats {
     fn __repr__(&self) -> String {
         format!(
             "ScanStats(considered={}, parsed={}, too_large={}, unreadable={})",
-            self.files_considered,
-            self.files_parsed,
-            self.files_too_large,
-            self.files_unreadable
+            self.files_considered, self.files_parsed, self.files_too_large, self.files_unreadable
         )
     }
 }
@@ -243,10 +240,12 @@ fn extract_source(py: Python<'_>, source: &str, extension: &str) -> PyResult<Opt
 /// Languages this build can parse, so Python can fall back for the rest.
 #[pyfunction]
 fn supported_extensions() -> Vec<String> {
-    ["py", "pyi", "js", "mjs", "cjs", "jsx", "ts", "mts", "cts", "tsx"]
-        .iter()
-        .map(|s| s.to_string())
-        .collect()
+    [
+        "py", "pyi", "js", "mjs", "cjs", "jsx", "ts", "mts", "cts", "tsx",
+    ]
+    .iter()
+    .map(|s| s.to_string())
+    .collect()
 }
 
 #[pymodule]

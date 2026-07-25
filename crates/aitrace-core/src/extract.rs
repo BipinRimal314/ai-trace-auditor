@@ -518,11 +518,17 @@ mod tests {
 
     #[test]
     fn fstrings_and_templates_have_no_static_value() {
-        let py = facts("x = f\"claude-{version}\"\ny = \"claude-opus-4\"\n", Language::Python);
+        let py = facts(
+            "x = f\"claude-{version}\"\ny = \"claude-opus-4\"\n",
+            Language::Python,
+        );
         let values: Vec<_> = py.strings.iter().map(|s| s.value.as_str()).collect();
         assert_eq!(values, ["claude-opus-4"]);
 
-        let js = facts("const a = `gpt-${n}`; const b = `gpt-4o`;", Language::JavaScript);
+        let js = facts(
+            "const a = `gpt-${n}`; const b = `gpt-4o`;",
+            Language::JavaScript,
+        );
         let values: Vec<_> = js.strings.iter().map(|s| s.value.as_str()).collect();
         assert_eq!(values, ["gpt-4o"]);
     }
@@ -563,7 +569,10 @@ mod tests {
 
     #[test]
     fn package_roots() {
-        assert_eq!(package_root("@anthropic-ai/sdk/resources"), "@anthropic-ai/sdk");
+        assert_eq!(
+            package_root("@anthropic-ai/sdk/resources"),
+            "@anthropic-ai/sdk"
+        );
         assert_eq!(package_root("openai/resources/chat"), "openai");
         assert_eq!(package_root("./local/module"), "./local/module");
     }

@@ -33,6 +33,12 @@ dependencies = [
 [project.optional-dependencies]
 # Native scanning core. Purely an accelerator: without it the pure-Python
 # scanners are used and everything still works. See docs/native-core-2026-07-25.md.
+#
+# RELEASE ORDER MATTERS. `aitrace-core` is published by
+# .github/workflows/wheels.yml, triggered by an `aitrace-core-v*` tag. That tag
+# must be pushed and the wheels must land on PyPI *before* any release of this
+# package that carries this extra — otherwise `pip install ai-trace-auditor[fast]`
+# fails with "no matching distribution" for everyone who tries it.
 fast = ["aitrace-core>=0.1.0"]
 pdf = ["weasyprint>=62.0", "markdown>=3.5"]
 langfuse = ["httpx>=0.27"]

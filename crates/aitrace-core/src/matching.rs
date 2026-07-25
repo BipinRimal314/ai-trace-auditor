@@ -37,8 +37,8 @@ impl PatternGroup {
     /// Errors name the pattern rather than just the regex-syntax problem, so a
     /// bad entry in the Python tables is traceable back to its source.
     pub fn new(patterns: &[String]) -> Result<Self, String> {
-        let set = RegexSet::new(patterns)
-            .map_err(|e| format!("failed to compile pattern set: {e}"))?;
+        let set =
+            RegexSet::new(patterns).map_err(|e| format!("failed to compile pattern set: {e}"))?;
         let individual = patterns
             .iter()
             .map(|p| Regex::new(p).map_err(|e| format!("failed to compile {p:?}: {e}")))
@@ -217,6 +217,9 @@ mod tests {
     #[test]
     fn invalid_pattern_names_itself() {
         let err = PatternGroup::new(&["valid".to_string(), "((unclosed".to_string()]).unwrap_err();
-        assert!(err.contains("unclosed"), "error should name the pattern: {err}");
+        assert!(
+            err.contains("unclosed"),
+            "error should name the pattern: {err}"
+        );
     }
 }
