@@ -83,11 +83,14 @@ jobs:
       - name: Install
         run: |
           python -m pip install --upgrade pip
-          pip install -e ".[web,importers,notify,verify]" pytest maturin
+          pip install -e ".[web,importers,notify,verify]" pytest
 
       - name: Build and install the native core
-        working-directory: crates/aitrace-core
-        run: maturin develop --release
+        # `pip install <path>` rather than `maturin develop`: develop insists on
+        # an active virtualenv, which setup-python does not create. This also
+        # goes through maturin as the PEP 517 build backend, so CI exercises
+        # the same install path a user gets from a published wheel.
+        run: pip install ./crates/aitrace-core
 
       - name: Confirm the native core is present
         run: |
@@ -159,11 +162,10 @@ jobs:
       - name: Install
         run: |
           python -m pip install --upgrade pip
-          pip install -e . maturin
+          pip install -e .
 
       - name: Build the native core
-        working-directory: crates/aitrace-core
-        run: maturin develop --release
+        run: pip install ./crates/aitrace-core
 
       - name: Fetch corpora
         run: benchmarks/fetch_corpora.sh
