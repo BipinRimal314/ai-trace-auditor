@@ -1,0 +1,188 @@
+{
+  "implementation": "native",
+  "native_version": "0.1.0",
+  "platform": {
+    "machine": "arm64",
+    "python": "3.12.13",
+    "system": "Darwin"
+  },
+  "repeat": 3,
+  "results": [
+    {
+      "bytes_scanned": 87577519,
+      "corpus": "benchmarks/corpora/dify",
+      "phases": [
+        {
+          "file_count": 10519,
+          "findings": 77,
+          "fingerprints": {
+            "ai_endpoints": "cae66941d9efbd404e4d88758ea67670",
+            "ai_imports": "705285b5715ee94e6bf83e07b199002f",
+            "deployment_configs": "b3c3663200cd5184279199d287777223",
+            "eval_scripts": "492468664b472bf6b1ee3e62bb100e46",
+            "model_references": "431b4698d94dc191f5c64f251a6b76a8",
+            "training_data_refs": "d172b948d4b3485334cfbc608ef320c1",
+            "vector_dbs": "40eb1c6694274ea1b625db52f3ba4ca8"
+          },
+          "name": "scan_codebase",
+          "times_s": [
+            1.1083268750080606,
+            1.3069135840050876,
+            1.2124839589960175
+          ]
+        },
+        {
+          "file_count": 10518,
+          "findings": 5239,
+          "fingerprints": {
+            "cloud_services": "c354b979a14c3e0e820f3e63e5a9e519",
+            "data_flows": "1d23a932d5d50cd67a5ccf5e05d6f8db",
+            "databases": "300c5be9e7527cf8d9643d9985ff4960",
+            "external_services": "3af1d47287df4744f71063bea1b8c639",
+            "file_io": "113de2796b8d5d8cb3ac080f0a2eb66f",
+            "http_clients": "f826d4f4800b894882b1bb7fdc4c002d"
+          },
+          "name": "detect_flows",
+          "times_s": [
+            8.3598287920031,
+            8.391556667003897,
+            8.27948541600199
+          ]
+        }
+      ],
+      "source_files": 10552
+    },
+    {
+      "bytes_scanned": 13412551,
+      "corpus": "benchmarks/corpora/langchain",
+      "phases": [
+        {
+          "file_count": 2534,
+          "findings": 1961,
+          "fingerprints": {
+            "ai_endpoints": "cae66941d9efbd404e4d88758ea67670",
+            "ai_imports": "6d34b83d2e4be12ebdbbc6dd4329315a",
+            "deployment_configs": "cae66941d9efbd404e4d88758ea67670",
+            "eval_scripts": "047edab201418ed8e6a4afa617806d9a",
+            "model_references": "fab3b30cb4fba96a8e2d96209953a430",
+            "training_data_refs": "127caaa93dbeb0a394ba02a109429338",
+            "vector_dbs": "8f3b6e553e86e7499ec32e3ff1307abc"
+          },
+          "name": "scan_codebase",
+          "times_s": [
+            0.241205959013314,
+            0.255534791998798,
+            0.25963954100734554
+          ]
+        },
+        {
+          "file_count": 2534,
+          "findings": 733,
+          "fingerprints": {
+            "cloud_services": "225247c53556d63511528479e30492b8",
+            "data_flows": "5f1899dabf46a09c1afee2d7d8a2bee9",
+            "databases": "4503f8b461b671e5f240067eaa9f3234",
+            "external_services": "28894547a17550f5507984f46592a4df",
+            "file_io": "d3937aa45d2e2eef665b7059b7b7aa37",
+            "http_clients": "c0cfc30339e523d711312e58206499f4"
+          },
+          "name": "detect_flows",
+          "times_s": [
+            1.945577582999249,
+            1.9402585419884417,
+            1.9450197080004727
+          ]
+        }
+      ],
+      "source_files": 2538
+    },
+    {
+      "bytes_scanned": 5749766,
+      "corpus": "benchmarks/corpora/haystack",
+      "phases": [
+        {
+          "file_count": 551,
+          "findings": 38,
+          "fingerprints": {
+            "ai_endpoints": "cae66941d9efbd404e4d88758ea67670",
+            "ai_imports": "7853e4a2a7e1304a91f4b012927c8223",
+            "deployment_configs": "a63ae7c80a6424afa5c665abfecfc702",
+            "eval_scripts": "c590aea486d53f0d5f320dcae006fe5a",
+            "model_references": "4ee313839c26a2d76ff6e427d4c108b0",
+            "training_data_refs": "514f13acc448d58222869900316d3189",
+            "vector_dbs": "cae66941d9efbd404e4d88758ea67670"
+          },
+          "name": "scan_codebase",
+          "times_s": [
+            0.0931107499927748,
+            0.08882849999645259,
+            0.08803050000278745
+          ]
+        },
+        {
+          "file_count": 551,
+          "findings": 309,
+          "fingerprints": {
+            "cloud_services": "175f9402bae3553c9ddcf5d9523e2ccc",
+            "data_flows": "b76bb9f5a377781dfa32221abe8f371c",
+            "databases": "cae66941d9efbd404e4d88758ea67670",
+            "external_services": "49d16af599d057941ad999696eac499a",
+            "file_io": "d4a800ee3d21094c773e7ff0a0cbad17",
+            "http_clients": "d70e8a4b34923981b890a85e641acb1f"
+          },
+          "name": "detect_flows",
+          "times_s": [
+            1.0064701669907663,
+            1.0092341249983292,
+            0.9944738330086693
+          ]
+        }
+      ],
+      "source_files": 551
+    },
+    {
+      "bytes_scanned": 10222053,
+      "corpus": "benchmarks/corpora/crewai",
+      "phases": [
+        {
+          "file_count": 1272,
+          "findings": 778,
+          "fingerprints": {
+            "ai_endpoints": "cae66941d9efbd404e4d88758ea67670",
+            "ai_imports": "9ed9b018cef0c0edfa1de6796865a958",
+            "deployment_configs": "a63ae7c80a6424afa5c665abfecfc702",
+            "eval_scripts": "4da1ce9d36b6126cda634bdb8c5788b0",
+            "model_references": "a920e7d1c964a67cd8c65ae645a55da7",
+            "training_data_refs": "c9c56405512950ce5d5f22e663606eeb",
+            "vector_dbs": "32db9513ae7aa2b441def884232550e3"
+          },
+          "name": "scan_codebase",
+          "times_s": [
+            0.20336770800349768,
+            0.18831312499241903,
+            0.19528512499528006
+          ]
+        },
+        {
+          "file_count": 1272,
+          "findings": 1035,
+          "fingerprints": {
+            "cloud_services": "b8625184f4039f730627cc6d64024852",
+            "data_flows": "3bc22899e7b04ac3296e90c33e292803",
+            "databases": "28a1eb38b2f69fc42702e7c12cba2158",
+            "external_services": "aa2e6624c116d98c93f26cb35a9c4a0d",
+            "file_io": "907d8ea45ae97180181cd2a73d3b7f41",
+            "http_clients": "40268f1c2f715c042c8f44e4ec0268dc"
+          },
+          "name": "detect_flows",
+          "times_s": [
+            2.203904207999585,
+            2.203232832995127,
+            2.1915860419976525
+          ]
+        }
+      ],
+      "source_files": 1272
+    }
+  ]
+}
