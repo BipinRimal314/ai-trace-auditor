@@ -153,6 +153,15 @@ def audit(
         bool,
         typer.Option("--show-dag", help="Output Mermaid DAG visualization for multi-agent traces"),
     ] = False,
+    profile: Annotated[
+        Optional[str],
+        typer.Option(
+            "--profile",
+            "-p",
+            help="Scope requirements to a system shape: chatbot, agent, rag-pipeline, "
+            "high-risk, or a path to an intake profile YAML. Omit to check all requirements.",
+        ),
+    ] = None,
 ) -> None:
     """Audit LLM traces against regulatory compliance requirements."""
     if not path.exists():
@@ -194,6 +203,26 @@ def audit(
             f"{sum(t.span_count for t in multi_agent_traces)} spans"
         )
 
+    # Resolve profile: preset name or path to an intake profile YAML
+    intake_profile = None
+    profile_rationale = None
+    if profile is not None:
+        from ai_trace_auditor.profiles.presets import get_preset, preset_rationale
+
+        profile_path = Path(profile)
+        if profile_path.suffix in (".yaml", ".yml") and profile_path.is_file():
+            from ai_trace_auditor.intake.serializer import load_profile
+
+            intake_profile = load_profile(profile_path)
+            profile_rationale = f"Custom intake profile loaded from {profile}."
+        else:
+            try:
+                intake_profile = get_preset(profile)
+            except ValueError as e:
+                console.print(f"[red]Error:[/red] {e}")
+                raise typer.Exit(code=2) from e
+            profile_rationale = preset_rationale(profile)
+
     # Load requirements
     registry = RequirementRegistry()
     registry.load()
@@ -201,6 +230,12 @@ def audit(
         f"Loaded [bold]{registry.count}[/bold] requirements "
         f"from {', '.join(registry.regulations)}"
     )
+    if intake_profile is not None:
+        console.print(
+            f"Profile [bold]{intake_profile.system_name}[/bold]: "
+            f"scoping requirements to this system shape "
+            f"(run without --profile to check everything)"
+        )
 
     # Run analysis
     analyzer = ComplianceAnalyzer(registry)
@@ -209,6 +244,8 @@ def audit(
         regulations=regulation,
         risk_level=risk_level,
         trace_source=str(path),
+        profile=intake_profile,
+        profile_rationale=profile_rationale,
     )
 
     # Output report
@@ -1786,6 +1823,85 @@ def validate_requirements_cmd(
     else:
         console.print("[green]All requirements valid.[/green]")
         raise typer.Exit(code=0)
+
+
+@app.command()
+def diff(
+    old_report: Annotated[Path, typer.Argument(help="Baseline JSON report")],
+    new_report: Annotated[Path, typer.Argument(help="Newer JSON report to compare")],
+    output: Annotated[
+        Optional[Path],
+        typer.Option("--output", "-o", help="Write the Markdown diff to a file"),
+    ] = None,
+    fail_on_regression: Annotated[
+        bool,
+        typer.Option(
+            "--fail-on-regression/--no-fail-on-regression",
+            help="Exit 1 when any requirement's coverage dropped",
+        ),
+    ] = True,
+) -> None:
+    """Compare two JSON compliance reports and show progress or regressions.
+
+    Generate the inputs with:
+    aitrace audit traces.json --report-format json -o report.json
+    """
+    from ai_trace_auditor.reports.diff import diff_reports, load_report, render_diff_markdown
+
+    for p in (old_report, new_report):
+        if not p.exists():
+            console.print(f"[red]Error:[/red] {p} does not exist")
+            raise typer.Exit(code=2)
+
+    try:
+        old = load_report(old_report)
+        new = load_report(new_report)
+    except ValueError as e:
+        console.print(f"[red]Error:[/red] {e}")
+        raise typer.Exit(code=2) from e
+
+    report_diff = diff_reports(old, new)
+    md = render_diff_markdown(report_diff)
+
+    if output:
+        output.write_text(md, encoding="utf-8")
+        console.print(f"Diff written to [bold]{output}[/bold]")
+    else:
+        stdout_console.print(md)
+
+    delta_pp = report_diff.overall_delta * 100
+    console.print(
+        f"Coverage {report_diff.old_overall * 100:.1f}% → "
+        f"{report_diff.new_overall * 100:.1f}% ({delta_pp:+.1f}pp) | "
+        f"{len(report_diff.improved)} improved, "
+        f"{len(report_diff.regressed)} regressed, "
+        f"{report_diff.unchanged_count} unchanged"
+    )
+
+    if fail_on_regression and report_diff.has_regressions:
+        raise typer.Exit(code=1)
+    raise typer.Exit(code=0)
+
+
+@app.command(name="export-checks")
+def export_checks(
+    output: Annotated[
+        Path,
+        typer.Option("--output", "-o", help="Output path for the checks pack JSON"),
+    ] = Path("spec/checks-pack-v1.json"),
+) -> None:
+    """Export the full check registry as a machine-readable JSON checks pack."""
+    from ai_trace_auditor.export.checks_pack import write_checks_pack
+
+    registry = RequirementRegistry()
+    registry.load()
+
+    pack = write_checks_pack(registry, output)
+    console.print(
+        f"Wrote [bold]{pack['total_checks']}[/bold] checks "
+        f"({pack['verified_against_primary_count']} verified against primary sources) "
+        f"to [bold]{output}[/bold]"
+    )
 
 
 @app.command()

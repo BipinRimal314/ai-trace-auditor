@@ -1,7 +1,7 @@
 # AI Trace Auditor — Product Map
 
 **Goal:** Sell the product outright for $30K-$50K.
-**Deadline pressure:** EU AI Act enforcement August 2, 2026 (4 months). Product value peaks before that date.
+**Deadline pressure:** EU AI Act Article 50 transparency obligations December 2, 2026; high-risk (Annex III) obligations December 2, 2027 (Digital Omnibus, adopted mid-2026). Product value peaks during the build-up to those dates.
 **Buyer profile:** Observability companies (Langfuse, Arize, Helicone), GRC platforms (Vanta, Drata, Sprinto), AI governance startups (Credo AI, Holistic AI, ModelOp).
 
 ---
@@ -49,7 +49,7 @@
 
 ### Tier 3: Nice to Have
 
-- [x] **Landing page** — docs/index.html exists (534 lines, mentions Aug 2026 deadline). Enable GitHub Pages in repo settings -> docs/ folder
+- [x] **Landing page** — docs/index.html exists (534 lines, Dec 2026 / Dec 2027 timeline). Enable GitHub Pages in repo settings -> docs/ folder
 - [ ] **GitHub stars** — any organic growth helps credibility
 - [ ] **Demo video** — recorded walkthrough for async sharing
 
@@ -79,5 +79,5 @@ What the buyer gets:
 $30K-$50K. Justification:
 - 4-6 months senior engineer time to replicate (~$50K-$75K at $150K/year)
 - Domain expertise in EU AI Act compliance built into the requirement mappings
-- August 2026 deadline creates urgency — time-to-market value
+- Dec 2026 (Art 50) and Dec 2027 (high-risk) deadlines create urgency — time-to-market value
 - Existing OSS market positioning

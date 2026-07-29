@@ -35,7 +35,7 @@ AI Trace Auditor reads your actual code and actual traces. It knows which provid
 
 Tested on real codebases: Dify merged the compliance guide it generated. LiteLLM, n8n, Haystack, and CrewAI PRs are in review.
 
-The EU AI Act deadline is in flux (August 2026 or December 2027), but compliance infrastructure takes 12-18 months regardless. If you're shipping AI, this gives you a baseline in 60 seconds.
+The EU AI Act timeline is now settled: Article 50 transparency obligations December 2026, high-risk obligations December 2027. Compliance infrastructure takes 12-18 months regardless. If you're shipping AI, this gives you a baseline in 60 seconds.
 
 **Screenshots needed:**
 1. Terminal: `aitrace scan ./` output showing the compliance table

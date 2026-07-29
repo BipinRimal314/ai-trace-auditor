@@ -18,7 +18,7 @@
 
 Hi [NAME],
 
-EU AI Act enforcement starts August 2, 2026. Every company deploying high-risk AI in the EU needs compliance evidence from their system traces.
+EU AI Act obligations start landing December 2, 2026 (Article 50 transparency), with high-risk obligations following December 2, 2027. Every company deploying high-risk AI in the EU needs compliance evidence from their system traces — and compliance infrastructure takes 12-18 months to build.
 
 I built AI Trace Auditor, an open-source CLI that turns LLM traces (OTel, Langfuse, raw JSONL) into EU AI Act compliance reports. It covers Articles 11, 12, 13, and 25, including multi-agent DAG auditing. 301 tests, Apache 2.0, published on PyPI with 14 versions.
 
@@ -44,7 +44,7 @@ Bipin Rimal
 
 Hi [NAME],
 
-Quick question: when [COMPANY]'s customers ask about EU AI Act compliance (August 2026 deadline), what's the answer today?
+Quick question: when [COMPANY]'s customers ask about EU AI Act compliance (Art 50: December 2026, high-risk: December 2027), what's the answer today?
 
 SOC2, ISO 27001, HIPAA — [COMPANY] handles those. But the EU AI Act requires AI-specific evidence that generic GRC tools can't produce: trace-level audit reports, Annex IV technical documentation generated from code, data flow mapping with GDPR role classification, and multi-agent accountability checks.
 
@@ -83,7 +83,7 @@ What [COMPANY] gets:
 - Existing OSS traction (compliance guide merged by Dify, PRs in 4 other major frameworks)
 - 30 days of integration support
 
-I'm looking for a buyer who can take this to market faster than I can alone. The August 2026 deadline creates urgency that benefits both of us.
+I'm looking for a buyer who can take this to market faster than I can alone. The December 2026 and December 2027 EU AI Act deadlines create urgency that benefits both of us.
 
 Interested in a quick call?
 

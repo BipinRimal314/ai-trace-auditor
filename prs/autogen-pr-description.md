@@ -6,7 +6,7 @@ docs: Add EU AI Act compliance guide for AutoGen deployers
 
 ## Body
 
-AutoGen itself has no EU AI Act obligations (open-source exemption, Article 25(4)). But teams building high-risk applications with AutoGen do, and the August 2, 2026 enforcement deadline is approaching.
+AutoGen itself has no EU AI Act obligations (open-source exemption, Article 25(4)). But teams building high-risk applications with AutoGen do: Article 50 transparency obligations apply from December 2, 2026, and high-risk (Annex III) obligations from December 2, 2027.
 
 This guide helps AutoGen deployers understand which obligations apply to their multi-agent systems under the EU AI Act: scope classification (Annex III), record-keeping (Article 12), transparency (Article 13), value chain accountability (Article 25), and user disclosure (Article 50).
 

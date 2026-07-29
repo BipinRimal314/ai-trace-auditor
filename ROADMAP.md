@@ -539,7 +539,7 @@ But their **users** — the people building applications with these frameworks �
 
 ### Competitive angle
 
-The EU AI Act deadline is August 2, 2026. Teams evaluating AI frameworks will ask "which framework makes compliance easier?" The framework that ships compliance docs wins those teams. This is how AI Trace Auditor creates value for framework maintainers: not by imposing obligations on them, but by making their ecosystem more attractive to compliance-conscious deployers.
+The EU AI Act deadlines are December 2, 2026 (Article 50 transparency) and December 2, 2027 (Annex III high-risk), per the mid-2026 Digital Omnibus. Teams evaluating AI frameworks will ask "which framework makes compliance easier?" The framework that ships compliance docs wins those teams. This is how AI Trace Auditor creates value for framework maintainers: not by imposing obligations on them, but by making their ecosystem more attractive to compliance-conscious deployers.
 
 ### Apply this framing everywhere
 
@@ -555,7 +555,7 @@ The EU AI Act deadline is August 2, 2026. Teams evaluating AI frameworks will as
 ### Strategic decision: split the product
 
 The CLI currently has 12 commands serving two distinct products:
-1. **EU AI Act compliance suite** (`audit`, `docs`, `flow`, `comply`) — buyer: compliance officer, deadline: August 2, 2026
+1. **EU AI Act compliance suite** (`audit`, `docs`, `flow`, `comply`) — buyer: compliance officer, deadlines: Dec 2, 2026 (Art 50) / Dec 2, 2027 (high-risk)
 2. **Claude Code analytics** (`insights`, `workflow`, `predict`, `agents`, `health`) — buyer: developer, no deadline
 
 These serve different buyers with different urgency. The compliance suite has a hard deadline driving demand. The analytics suite is nice-to-have.
@@ -571,7 +571,7 @@ These serve different buyers with different urgency. The compliance suite has a 
 | 3 | **PDF report output** | Compliance officers email PDFs to lawyers. Markdown means nothing to them | **Shipped v0.16.1** (2026-04-25) — `/audit/pdf/{id}` route on web dashboard, weasyprint render |
 | 4 | **Email 5 OSS maintainers** | LiteLLM, n8n, Dify, Haystack, CrewAI — already PRed compliance guides. Pitch: run the tool in their CI | PRs submitted, guides merged/pending |
 | 5 | **Publish to PyPI (v0.11)** | Current v0.10.1 may not be on PyPI. Must be installable via `pip install ai-trace-auditor` | Check status |
-| 6 | **README rewrite** | Current README is developer-focused. Needs to lead with the business problem: "August 2026 deadline. Your AI system. Are your logs compliant?" | Not started |
+| 6 | **README rewrite** | Current README is developer-focused. Needs to lead with the business problem: "EU AI Act obligations start December 2026. Your AI system. Are your logs compliant?" | Not started |
 
 ### Phase 2: Revenue — SaaS tier (May-June 2026)
 
@@ -600,7 +600,7 @@ $499/month (org SaaS)           → enterprise, multi-repo, evidence packs
 $2K-$10K (consulting)           → custom compliance assessments using the tool
 ```
 
-Target: $5K MRR by August 2026 deadline (50 repos at $99 or 10 orgs at $499).
+Target: $5K MRR by the December 2026 Art 50 deadline (50 repos at $99 or 10 orgs at $499).
 
 ### Competitive moat
 

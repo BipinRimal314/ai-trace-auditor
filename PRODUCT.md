@@ -4,7 +4,7 @@ Open-source CLI that audits LLM traces against regulatory compliance requirement
 
 ## The Problem
 
-EU AI Act Article 12 requires automatic event recording and traceability for high-risk AI systems. August 2026 deadline. NIST AI RMF mandates provenance documentation. Companies have traces from their LLM observability stack but no automated way to answer: "Do our traces satisfy the regulatory requirements?"
+EU AI Act Article 12 requires automatic event recording and traceability for high-risk AI systems (Annex III deadline: December 2, 2027, per the 2026 Digital Omnibus; Article 50 transparency obligations land December 2, 2026). NIST AI RMF mandates provenance documentation. Companies have traces from their LLM observability stack but no automated way to answer: "Do our traces satisfy the regulatory requirements?"
 
 67% of AI teams discover quality regressions from user complaints despite having tracing infrastructure. The gap isn't data collection; it's interpretation.
 

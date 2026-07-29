@@ -68,3 +68,7 @@ class GapReport(BaseModel):
     # Multi-agent extensions
     agent_scores: dict[str, float] | None = None  # agent_id -> compliance score
     dag_mermaid: str | None = None  # Mermaid diagram source
+
+    # Profile scoping (set when the audit ran with --profile)
+    profile_name: str | None = None
+    profile_rationale: str | None = None

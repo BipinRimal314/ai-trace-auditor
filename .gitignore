@@ -18,3 +18,15 @@ blog-draft.txt
 ai-traceability-deep-research.txt
 .env
 .vercel
+
+# Rust build artifacts for the native core
+target/
+*.so
+*.dylib
+*.pyd
+
+# Benchmark corpora are cloned on demand by benchmarks/fetch_corpora.sh
+benchmarks/corpora/
+
+# Local session notes for Claude Code; not part of the repo
+memory.md

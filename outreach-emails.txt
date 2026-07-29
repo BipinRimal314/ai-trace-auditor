@@ -61,7 +61,8 @@ The tool that generated the guide is now a GitHub Action:
 
 It would flag when n8n's codebase adds new AI provider integrations
 that create GDPR transfer obligations, and track compliance gaps
-as the codebase evolves toward August 2026.
+as the codebase evolves toward the December 2026 (Art 50) and
+December 2027 (high-risk) EU AI Act deadlines.
 
 Open source, Apache 2.0. Would be happy to discuss integration.
 

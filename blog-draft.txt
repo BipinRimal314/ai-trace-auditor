@@ -55,7 +55,7 @@ These are genuine, durable gaps. But they're also where well-funded startups alr
 
 Here's what we actually found when we mapped the landscape against regulatory requirements.
 
-The EU AI Act, Article 12, requires "automatic recording of events (logs) over the lifetime of the system" for high-risk AI systems. The hard deadline for full compliance is August 2, 2026. Not theoretical; the prohibitions on unacceptable-risk AI practices already took effect in February 2025. GPAI model obligations hit in August 2025. The high-risk system requirements are next.
+The EU AI Act, Article 12, requires "automatic recording of events (logs) over the lifetime of the system" for high-risk AI systems. Under the Digital Omnibus adopted mid-2026, Article 50 transparency obligations apply from December 2, 2026 and high-risk (Annex III) requirements from December 2, 2027. Not theoretical; the prohibitions on unacceptable-risk AI practices already took effect in February 2025. GPAI model obligations hit in August 2025. The high-risk system requirements are next.
 
 NIST AI RMF mandates model provenance, data integrity documentation, and third-party assessment records.
 
@@ -159,7 +159,7 @@ Three things stood out from this exercise:
 
 **The detection-to-action gap is real.** A 2025 enterprise survey found that 67% of AI teams discovered significant quality regressions only after user complaints, despite having tracing infrastructure. The problem isn't data collection. It's interpretation. Having traces doesn't mean you know what the traces should contain.
 
-**Regulatory deadlines create purchasing urgency that technical elegance doesn't.** Nobody buys a compliance tool because it's architecturally beautiful. They buy it because August 2026 is coming and the fines for non-compliance with the EU AI Act are up to 35 million euros or 7% of global annual turnover. That's the kind of motivation that makes budget appear.
+**Regulatory deadlines create purchasing urgency that technical elegance doesn't.** Nobody buys a compliance tool because it's architecturally beautiful. They buy it because the December 2026 and December 2027 EU AI Act deadlines are coming and the fines for non-compliance are up to 35 million euros or 7% of global annual turnover. That's the kind of motivation that makes budget appear.
 
 **The most defensible position in the AI stack isn't a model, a framework, or an observability dashboard. It's the translation layer between technical artifacts and human requirements.** Models will improve. Frameworks will consolidate. Dashboards will be commoditized. But the gap between "what the system logged" and "what the regulation requires" is a fundamentally human problem that grows with every new regulation, framework, and model version.
 

@@ -7,6 +7,11 @@
 **Trace source:** {{ report.trace_source }}
 **Traces analyzed:** {{ report.trace_count }} | **Spans:** {{ report.span_count }}
 **Regulations checked:** {{ report.regulations_checked | join(', ') }}
+{% if report.profile_name %}
+**Profile:** {{ report.profile_name }}
+
+> **Why these requirements apply:** {{ report.profile_rationale }}
+{% endif %}
 
 ---
 

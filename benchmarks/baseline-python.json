@@ -1,0 +1,187 @@
+{
+  "implementation": "python",
+  "platform": {
+    "machine": "arm64",
+    "python": "3.12.13",
+    "system": "Darwin"
+  },
+  "repeat": 3,
+  "results": [
+    {
+      "bytes_scanned": 87577519,
+      "corpus": "benchmarks/corpora/dify",
+      "phases": [
+        {
+          "file_count": 10518,
+          "findings": 84,
+          "fingerprints": {
+            "ai_endpoints": "cae66941d9efbd404e4d88758ea67670",
+            "ai_imports": "4a6a0541ee6ff65d818280fc1a131104",
+            "deployment_configs": "b3c3663200cd5184279199d287777223",
+            "eval_scripts": "cae66941d9efbd404e4d88758ea67670",
+            "model_references": "d11bdcd9bca0ca6adf08321e6dc6e6df",
+            "training_data_refs": "d172b948d4b3485334cfbc608ef320c1",
+            "vector_dbs": "40eb1c6694274ea1b625db52f3ba4ca8"
+          },
+          "name": "scan_codebase",
+          "times_s": [
+            9.763964792000479,
+            10.074818167006015,
+            10.162163082990446
+          ]
+        },
+        {
+          "file_count": 10518,
+          "findings": 5239,
+          "fingerprints": {
+            "cloud_services": "c354b979a14c3e0e820f3e63e5a9e519",
+            "data_flows": "cc101f3a8bf7c10f412fd6b349ce0570",
+            "databases": "300c5be9e7527cf8d9643d9985ff4960",
+            "external_services": "5e6d23160d600578f9e8b03d59211abf",
+            "file_io": "113de2796b8d5d8cb3ac080f0a2eb66f",
+            "http_clients": "f826d4f4800b894882b1bb7fdc4c002d"
+          },
+          "name": "detect_flows",
+          "times_s": [
+            8.163076999990153,
+            8.207590208010515,
+            8.212133334003738
+          ]
+        }
+      ],
+      "source_files": 10552
+    },
+    {
+      "bytes_scanned": 13412551,
+      "corpus": "benchmarks/corpora/langchain",
+      "phases": [
+        {
+          "file_count": 2534,
+          "findings": 1961,
+          "fingerprints": {
+            "ai_endpoints": "cae66941d9efbd404e4d88758ea67670",
+            "ai_imports": "a8a95c01168ea716fad92adce8b2654a",
+            "deployment_configs": "cae66941d9efbd404e4d88758ea67670",
+            "eval_scripts": "047edab201418ed8e6a4afa617806d9a",
+            "model_references": "05dd67409d3b19e9a6b62ce31c95d32b",
+            "training_data_refs": "127caaa93dbeb0a394ba02a109429338",
+            "vector_dbs": "8f3b6e553e86e7499ec32e3ff1307abc"
+          },
+          "name": "scan_codebase",
+          "times_s": [
+            2.69504083400534,
+            2.701025917005609,
+            2.6897795000113547
+          ]
+        },
+        {
+          "file_count": 2534,
+          "findings": 733,
+          "fingerprints": {
+            "cloud_services": "225247c53556d63511528479e30492b8",
+            "data_flows": "5f1899dabf46a09c1afee2d7d8a2bee9",
+            "databases": "4503f8b461b671e5f240067eaa9f3234",
+            "external_services": "28894547a17550f5507984f46592a4df",
+            "file_io": "d3937aa45d2e2eef665b7059b7b7aa37",
+            "http_clients": "c0cfc30339e523d711312e58206499f4"
+          },
+          "name": "detect_flows",
+          "times_s": [
+            1.912923124997178,
+            1.9085239999985788,
+            1.9126846250001108
+          ]
+        }
+      ],
+      "source_files": 2538
+    },
+    {
+      "bytes_scanned": 5749766,
+      "corpus": "benchmarks/corpora/haystack",
+      "phases": [
+        {
+          "file_count": 551,
+          "findings": 39,
+          "fingerprints": {
+            "ai_endpoints": "cae66941d9efbd404e4d88758ea67670",
+            "ai_imports": "6f81cdd540f2f5caf0b427a526115959",
+            "deployment_configs": "a63ae7c80a6424afa5c665abfecfc702",
+            "eval_scripts": "3e43ea5abff73004f91896da98986a64",
+            "model_references": "4ee313839c26a2d76ff6e427d4c108b0",
+            "training_data_refs": "514f13acc448d58222869900316d3189",
+            "vector_dbs": "cae66941d9efbd404e4d88758ea67670"
+          },
+          "name": "scan_codebase",
+          "times_s": [
+            1.2612195419933414,
+            1.281344832998002,
+            1.2619721250084694
+          ]
+        },
+        {
+          "file_count": 551,
+          "findings": 309,
+          "fingerprints": {
+            "cloud_services": "175f9402bae3553c9ddcf5d9523e2ccc",
+            "data_flows": "b76bb9f5a377781dfa32221abe8f371c",
+            "databases": "cae66941d9efbd404e4d88758ea67670",
+            "external_services": "49d16af599d057941ad999696eac499a",
+            "file_io": "d4a800ee3d21094c773e7ff0a0cbad17",
+            "http_clients": "d70e8a4b34923981b890a85e641acb1f"
+          },
+          "name": "detect_flows",
+          "times_s": [
+            0.9933518339967122,
+            0.994122290998348,
+            0.996635375006008
+          ]
+        }
+      ],
+      "source_files": 551
+    },
+    {
+      "bytes_scanned": 10222053,
+      "corpus": "benchmarks/corpora/crewai",
+      "phases": [
+        {
+          "file_count": 1272,
+          "findings": 775,
+          "fingerprints": {
+            "ai_endpoints": "cae66941d9efbd404e4d88758ea67670",
+            "ai_imports": "4b6c34be53f30cd0fd741055e3d54279",
+            "deployment_configs": "a63ae7c80a6424afa5c665abfecfc702",
+            "eval_scripts": "4da1ce9d36b6126cda634bdb8c5788b0",
+            "model_references": "e9b611e7f145563f02ea13429cb27070",
+            "training_data_refs": "c9c56405512950ce5d5f22e663606eeb",
+            "vector_dbs": "32db9513ae7aa2b441def884232550e3"
+          },
+          "name": "scan_codebase",
+          "times_s": [
+            2.724476459014113,
+            2.737525792006636,
+            2.697627957997611
+          ]
+        },
+        {
+          "file_count": 1272,
+          "findings": 1035,
+          "fingerprints": {
+            "cloud_services": "b8625184f4039f730627cc6d64024852",
+            "data_flows": "3bc22899e7b04ac3296e90c33e292803",
+            "databases": "28a1eb38b2f69fc42702e7c12cba2158",
+            "external_services": "aa2e6624c116d98c93f26cb35a9c4a0d",
+            "file_io": "907d8ea45ae97180181cd2a73d3b7f41",
+            "http_clients": "40268f1c2f715c042c8f44e4ec0268dc"
+          },
+          "name": "detect_flows",
+          "times_s": [
+            2.2264379169937456,
+            2.1963267079991056,
+            2.2046298750065034
+          ]
+        }
+      ],
+      "source_files": 1272
+    }
+  ]
+}
