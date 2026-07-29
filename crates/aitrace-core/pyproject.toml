@@ -1,0 +1,34 @@
+[build-system]
+requires = ["maturin>=1.7,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "aitrace-core"
+description = "Native scanning core for ai-trace-auditor: parallel source walking and tree-sitter extraction"
+readme = "README.md"
+license = { text = "Apache-2.0" }
+requires-python = ">=3.11"
+authors = [
+    { name = "Bipin Rimal", email = "bipinrimal314@gmail.com" },
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Rust",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Topic :: Software Development :: Quality Assurance",
+]
+# Version is read from Cargo.toml so the crate and the wheel can never disagree.
+dynamic = ["version"]
+
+[project.urls]
+Repository = "https://github.com/BipinRimal314/ai-trace-auditor"
+
+[tool.maturin]
+# `extension-module` is a cargo feature here rather than a permanent dependency
+# feature, so `cargo test` still links against libpython while the shipped wheel
+# leaves Python symbols to be resolved by the host interpreter.
+features = ["pyo3/extension-module"]
+module-name = "aitrace_core"
+strip = true

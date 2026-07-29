@@ -1,0 +1,61 @@
+[package]
+name = "aitrace-core"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.82"
+description = "Native scanning core for ai-trace-auditor: parallel source walking and tree-sitter extraction"
+license = "Apache-2.0"
+repository = "https://github.com/BipinRimal314/ai-trace-auditor"
+
+[lib]
+name = "aitrace_core"
+# cdylib for the Python extension module; rlib so the Rust benches and unit
+# tests can link the same code without going through Python.
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+# abi3-py311 builds one wheel that works on CPython 3.11+, matching the
+# package's requires-python. Without it every minor version needs its own wheel.
+pyo3 = { version = "0.29", features = ["abi3-py311"] }
+
+# Parallel, gitignore-aware directory traversal.
+ignore = "0.4"
+
+# Memory-mapped reads: source files are read once and never mutated, so mapping
+# avoids a copy into userspace for every file.
+memmap2 = "0.9"
+
+# Pattern text is supplied by Python at call time, never compiled in. RegexSet
+# answers "which of these N patterns match this line" in a single pass instead
+# of N independent searches.
+regex = "1"
+
+# Multi-pattern literal prefilter. Most files contain none of the interesting
+# identifiers; Aho-Corasick rejects them in one pass so the parser is only run
+# on files that can possibly match.
+aho-corasick = "1.1"
+
+tree-sitter = "0.26"
+tree-sitter-python = "0.25"
+tree-sitter-javascript = "0.25"
+tree-sitter-typescript = "0.23"
+
+[features]
+# Enabled by maturin when building the wheel. Kept off by default so
+# `cargo test` and `cargo bench` can link against libpython normally — with
+# `extension-module` always on, the Python symbols are left undefined for the
+# interpreter to supply at import time and a test binary fails to link.
+extension-module = ["pyo3/extension-module"]
+
+[dev-dependencies]
+criterion = { version = "0.5", features = ["html_reports"] }
+tempfile = "3"
+
+[profile.release]
+# The extension is CPU-bound over many small files; cross-crate inlining and a
+# single codegen unit measurably help the tree-sitter and Aho-Corasick paths.
+lto = "fat"
+codegen-units = 1
+# NOTE: deliberately not `panic = "abort"`. PyO3 catches unwinding panics at the
+# FFI boundary and converts them into Python exceptions; aborting would take the
+# host interpreter down with it, turning a bad parse into a lost audit run.

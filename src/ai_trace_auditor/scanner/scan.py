@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import os
 import time
 from pathlib import Path
 
 from ai_trace_auditor.models.docs import CodeScanResult
+from ai_trace_auditor.scanner import native
 from ai_trace_auditor.scanner.deployment_scanner import scan_dependency_files, scan_deployment
 from ai_trace_auditor.scanner.js_scanner import scan_js_file
 from ai_trace_auditor.scanner.patterns import (
@@ -40,17 +42,9 @@ def scan_codebase(root_dir: Path) -> CodeScanResult:
     endpoints = []
     file_count = 0
 
-    for file_path in _walk_source_files(root_dir):
-        file_count += 1
-        ext = file_path.suffix.lower()
+    file_scans, file_count = _collect_file_scans(root_dir)
 
-        if ext in PYTHON_EXTENSIONS:
-            scan = scan_python_file(file_path)
-        elif ext in JS_EXTENSIONS:
-            scan = scan_js_file(file_path)
-        else:
-            continue
-
+    for file_path, scan in file_scans:
         is_test = _is_test_file(file_path, root_dir)
         is_config = _is_config_file(file_path)
         is_support = _is_supports_file(file_path, root_dir)
@@ -95,6 +89,44 @@ def scan_codebase(root_dir: Path) -> CodeScanResult:
         deployment_configs=deployment_configs,
         ai_endpoints=endpoints,
     )
+
+
+def _collect_file_scans(root_dir: Path) -> tuple[list[tuple[Path, dict]], int]:
+    """Scan every source file, preferring the native core when installed.
+
+    Returns `(file_path, scan_dict)` pairs in path order and the number of
+    source files considered.
+
+    Path order is not cosmetic: `_dedupe_model_refs` keeps the first occurrence
+    of each model identifier across the whole scan, so the order files are
+    visited in decides which file and line get cited. Both paths therefore sort
+    with the same `sorted()` over `Path` objects.
+    """
+    if use_native_scanner():
+        scans, file_count = native.scan_all_files(root_dir)
+        return [(path, scans[path]) for path in sorted(scans)], file_count
+
+    pairs: list[tuple[Path, dict]] = []
+    files = _walk_source_files(root_dir)
+    for file_path in files:
+        ext = file_path.suffix.lower()
+        if ext in PYTHON_EXTENSIONS:
+            pairs.append((file_path, scan_python_file(file_path)))
+        elif ext in JS_EXTENSIONS:
+            pairs.append((file_path, scan_js_file(file_path)))
+    return pairs, len(files)
+
+
+def use_native_scanner() -> bool:
+    """Whether this process will use the native core.
+
+    Set `AITRACE_NO_NATIVE=1` to force the pure-Python path. The parity tests
+    rely on this to run both implementations in one process, and it gives users
+    an escape hatch if a native build ever misbehaves.
+    """
+    if os.environ.get("AITRACE_NO_NATIVE"):
+        return False
+    return native.is_available()
 
 
 def _walk_source_files(root_dir: Path) -> list[Path]:

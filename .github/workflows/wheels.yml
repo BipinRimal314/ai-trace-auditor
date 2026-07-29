@@ -1,0 +1,135 @@
+name: Build aitrace-core wheels
+
+# The `ai-trace-auditor[fast]` extra depends on `aitrace-core`, which only
+# exists if this workflow has published it. Publishing a release of the parent
+# package before this has run leaves that extra pointing at nothing.
+#
+# Tags are namespaced (`aitrace-core-v0.1.0`) so the native core can be
+# released independently of the Python package, which has its own cadence.
+
+on:
+  push:
+    tags:
+      - "aitrace-core-v*"
+  pull_request:
+    paths:
+      - "crates/aitrace-core/**"
+      - ".github/workflows/wheels.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: wheels-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: ${{ matrix.platform.os }} ${{ matrix.platform.target }}
+    runs-on: ${{ matrix.platform.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # `native` marks a target the runner can actually execute. Cross-built
+        # wheels are still produced and published, they just cannot be
+        # imported here for a smoke test.
+        #
+        # Intel macOS is cross-compiled from the arm64 runner rather than
+        # built on `macos-13`: those runners have been retired, and a job
+        # targeting them queues forever instead of failing, which is worse
+        # than not having the job at all.
+        platform:
+          - { os: linux, runner: ubuntu-latest, target: x86_64, native: true }
+          - { os: linux, runner: ubuntu-latest, target: aarch64, native: false }
+          - { os: macos, runner: macos-latest, target: aarch64, native: true }
+          - { os: macos, runner: macos-latest, target: x86_64, native: false }
+          - { os: windows, runner: windows-latest, target: x64, native: true }
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build wheel
+        uses: PyO3/maturin-action@v1
+        with:
+          working-directory: crates/aitrace-core
+          target: ${{ matrix.platform.target }}
+          # abi3-py311 means one wheel per platform covers 3.11 and every
+          # later version, so there is no Python-version axis in this matrix.
+          args: --release --out dist
+          sccache: "true"
+          # Cross-compiling aarch64 Linux needs the manylinux container; it is
+          # harmless on the native targets.
+          manylinux: ${{ matrix.platform.os == 'linux' && 'auto' || '' }}
+
+      - name: Smoke test the wheel
+        # Only where the wheel can actually run. Importing a cross-compiled
+        # wheel on a foreign architecture cannot work, and a step that quietly
+        # skips is worse than no step: it looks like a passing check.
+        if: matrix.platform.native
+        shell: bash
+        working-directory: crates/aitrace-core
+        run: |
+          python -m pip install --upgrade pip
+          pip install --no-index --find-links dist aitrace-core
+          python - <<'PY'
+          import aitrace_core as c
+          print("version:", c.__version__)
+          facts = c.extract_source("import anthropic\nM = 'claude-opus-4'\n", "py")
+          assert facts.imports[0][0] == "anthropic", facts.imports
+          assert facts.strings[0][0] == "claude-opus-4", facts.strings
+          exts = c.supported_extensions()
+          assert "py" in exts and "tsx" in exts, exts
+          print("wheel smoke test passed")
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-${{ matrix.platform.os }}-${{ matrix.platform.target }}
+          path: crates/aitrace-core/dist
+
+  sdist:
+    name: sdist
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build sdist
+        uses: PyO3/maturin-action@v1
+        with:
+          working-directory: crates/aitrace-core
+          command: sdist
+          args: --out dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-sdist
+          path: crates/aitrace-core/dist
+
+  publish:
+    name: publish to PyPI
+    if: startsWith(github.ref, 'refs/tags/aitrace-core-v')
+    needs: [build, sdist]
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      # Trusted publishing, matching publish.yml — no long-lived API token to
+      # leak. The parent package's PyPI token has already been exposed once
+      # (see CLAUDE.md); this avoids adding a second one to rotate.
+      id-token: write
+
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: wheels-*
+          merge-multiple: true
+          path: dist
+
+      - name: List artifacts
+        run: ls -la dist
+
+      - uses: pypa/gh-action-pypi-publish@release/v1
