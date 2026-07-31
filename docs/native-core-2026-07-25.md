@@ -65,7 +65,7 @@ match. Absolute imports are unaffected, which the test suite pins explicitly.
 data and eval metrics but has **no import detection at all**. A file that
 failed to parse therefore reported zero imports, with no warning.
 
-CrewAI ships Jinja-templated `.py` files (`class {{crew_name}}():`) that are
+CrewAI ships Jinja-templated `.py` files ({% raw %}`class {{crew_name}}():`{% endraw %}) that are
 not valid Python. Three of them import `crewai` on line 1 and were entirely
 invisible to the scanner.
 

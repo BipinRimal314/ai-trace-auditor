@@ -1,0 +1,12 @@
+# GitHub Pages build config. Source is ./docs (set in repo Pages settings).
+
+# Match the theme GitHub Pages applied implicitly before this file existed,
+# so adding a config does not change how the published pages render.
+theme: jekyll-theme-primer
+
+# Internal implementation plans. Not meant to be published, and they embed
+# Jinja2 template snippets ({% raw %}{% extends %}{% endraw %}, etc.) that
+# Jekyll's Liquid parser chokes on — Liquid runs over the raw file before
+# markdown, so fenced code blocks do not protect them.
+exclude:
+  - superpowers/
