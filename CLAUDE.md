@@ -1,6 +1,6 @@
 # AI Trace Auditor
 
-Compliance auditor for AI systems. Audits LLM traces against EU AI Act, NIST AI RMF, ISO 42001, and SOC 2. Every requirement verified against primary legal text with exact clause citations. v0.16.0 on PyPI.
+Compliance auditor for AI systems. Audits LLM traces against EU AI Act, NIST AI RMF, ISO 42001, and SOC 2. Every requirement verified against primary legal text with exact clause citations. Published on PyPI; the version lives in `pyproject.toml`.
 
 ## Critical Rules
 
@@ -55,8 +55,7 @@ requirements/
 ## Development
 
 ```bash
-cd Projects/ai-trace-auditor
-.venv/bin/python -m pytest tests/ -x -q   # 301 tests
+.venv/bin/python -m pytest tests/ -x -q
 .venv/bin/python -m build                  # Build wheel
 source .env && .venv/bin/python -m twine upload dist/*  # Publish
 ```
